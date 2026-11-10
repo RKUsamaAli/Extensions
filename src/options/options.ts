@@ -24,6 +24,9 @@ const LOG_SHOWN = 200;
 let profiles: ProxyProfile[] = [];
 let stats: Record<string, ProxyStats> = {};
 let activeId: string | null = null;
+/** True only while RelaySwitch is on and connected through the selected proxy. */
+let connected = false;
+let enabled = false;
 let editingId: string | null = null;
 let testing = false;
 
@@ -47,6 +50,8 @@ async function run(msg: Message): Promise<boolean> {
   $("pageError").hidden = true;
   profiles = reply.profiles;
   activeId = reply.state.activeProfileId;
+  enabled = reply.state.enabled;
+  connected = reply.state.enabled && reply.state.status === "connected";
   $<HTMLInputElement>("fabToggle").checked = reply.settings.floatingButton;
   await loadStats();
   renderList();
@@ -116,12 +121,24 @@ function scoreBadge(s: Score): HTMLElement {
 function row(p: ProxyProfile): HTMLLIElement {
   const s = scoreFor(p.id);
   const li = el("li");
-  if (p.id === activeId) li.classList.add("active");
+  const isSelected = p.id === activeId;
+  if (isSelected && enabled) li.classList.add(connected ? "connected" : "connecting");
 
   const main = el("div", "main");
   const title = el("div", "title");
   title.append(el("strong", "", displayName(p)));
-  if (p.id === activeId) title.append(el("span", "badge", "Active"));
+  if (isSelected) {
+    // "Connected" only while traffic really goes through it; otherwise it is
+    // just the proxy that will be used when RelaySwitch is turned on.
+    const [cls, text, tip] = !enabled
+      ? ["badge idle", "Selected", "Used when you turn RelaySwitch on"]
+      : connected
+        ? ["badge", "Connected", "Your traffic goes through this proxy now"]
+        : ["badge warn", "Connecting…", "Turning on or checking the connection"];
+    const b = el("span", cls, text);
+    b.title = tip;
+    title.append(b);
+  }
   main.append(title, el("div", "mono muted addr", `${p.scheme}://${p.host}:${p.port}`));
 
   const meta = el("div", "meta muted");
@@ -476,6 +493,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
       renderList();
       void renderLogs();
     }, 250);
+  }
+  if ((area === "local" && (changes.enabled || changes.activeProfileId)) || (area === "session" && changes.status)) {
+    void run({ type: "getState" });
   }
   if (area === "session" && changes.testRun) renderTestRun((changes.testRun.newValue as TestRun | null) ?? null);
 });
