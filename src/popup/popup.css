@@ -1,0 +1,13 @@
+body { width: 300px; padding: 12px; }
+header { margin-bottom: 12px; }
+section { display: grid; gap: 8px; }
+select[size] { padding: 4px; }
+.status { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+#statusText { font-weight: 600; }
+.actions button { flex: 1; }
+.setting { margin-top: 12px; color: var(--text); font-size: 13px; cursor: pointer; }
+.switch.small { width: 32px; height: 18px; }
+.switch.small span::before { width: 12px; height: 12px; }
+.switch.small input:checked + span::before { transform: translateX(14px); }
+footer { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+a { color: var(--accent); text-decoration: none; }
