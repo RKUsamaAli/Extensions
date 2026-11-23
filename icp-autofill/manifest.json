@@ -33,6 +33,7 @@
       ],
       "js": [
         "lib/site-config.js",
+        "lib/snapshot.js",
         "content.js"
       ],
       "run_at": "document_idle"

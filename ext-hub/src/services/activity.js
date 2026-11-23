@@ -9,8 +9,35 @@ const { str, clampInt, parseJson } = require('../lib/util');
 const { scopeSql } = require('./ownership');
 
 const MAX_POST = 500;
+const MAX_CONTEXT = 32 * 1024;
 
 function createActivity({ db, clock }) {
+    /**
+     * Page snapshot of a failed step, stored as JSON (max 32 KB). Too big: the long lists
+     * (fields, buttons, options) are shortened first, so the summary always survives.
+     */
+    function contextJson(ctx) {
+        if (!ctx || typeof ctx !== 'object' || Array.isArray(ctx)) return null;
+        let json = JSON.stringify(ctx);
+        if (json.length <= MAX_CONTEXT) return json;
+        const slim = { ...ctx, truncated: true };
+        for (const key of ['fields', 'buttons', 'forms', 'tried']) {
+            if (Array.isArray(slim[key])) slim[key] = slim[key].slice(0, 15).map((f) => (f && typeof f === 'object' && Array.isArray(f.options) ? { ...f, options: f.options.slice(0, 5) } : f));
+            json = JSON.stringify(slim);
+            if (json.length <= MAX_CONTEXT) return json;
+        }
+        const keep = {};
+        for (const [k, v] of Object.entries(slim)) if (v === null || typeof v !== 'object') keep[k] = typeof v === 'string' ? v.slice(0, 1000) : v;
+        return JSON.stringify({ ...keep, truncated: true }).slice(0, MAX_CONTEXT);
+    }
+    function parseContext(json) {
+        try {
+            return JSON.parse(json);
+        } catch (_) {
+            return null;
+        }
+    }
+
     function checkItems(items) {
         if (!Array.isArray(items)) throw E.badRequest('items must be an array');
         if (items.length > MAX_POST) throw E.badRequest(`At most ${MAX_POST} items per request.`);
@@ -24,8 +51,8 @@ function createActivity({ db, clock }) {
     function addLogs(actor, items) {
         checkItems(items);
         const ins = db.prepare(
-            `INSERT OR IGNORE INTO cm_logs (id, owner_id, client_id, t, page, url, kind, entry, entry_id, action, status, detail, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT OR IGNORE INTO cm_logs (id, owner_id, client_id, t, page, url, kind, entry, entry_id, action, status, detail, context, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         );
         const now = clock.now();
         let saved = 0;
@@ -46,6 +73,7 @@ function createActivity({ db, clock }) {
                     str(it.action, 100),
                     str(it.status, 20),
                     str(it.detail, 2000),
+                    contextJson(it.context),
                     now
                 ).changes;
             }
@@ -53,7 +81,7 @@ function createActivity({ db, clock }) {
         return saved;
     }
 
-    function listLogs(scope, { entryId, limit } = {}) {
+    function listLogs(scope, { entryId, limit, context = false } = {}) {
         const n = clampInt(limit, 1, 5000, 1000);
         const s = scopeSql(scope, 'l');
         let where = s.where;
@@ -76,6 +104,7 @@ function createActivity({ db, clock }) {
             action: r.action,
             status: r.status,
             detail: r.detail,
+            ...(context && r.context ? { context: parseContext(r.context) } : {}),
             ownerId: r.owner_id,
             ownerName: r.owner_name
         }));

@@ -170,12 +170,25 @@
   }
 
   // ---------- server outbox (logs + office sightings) ----------
-  // Queued here and handed to the service worker in batches (every FLUSH_MS and when the page
-  // is hidden/unloaded, e.g. right after a Next press). The worker posts them and retries.
+  // Handed to the service worker as soon as they are made (see scheduleFlush); the worker
+  // stores them, posts them in batches and retries.
   const outbox = { logs: [], sightings: [] };
   let flushTimer = 0;
-  function scheduleFlush() {
-    if (!flushTimer) flushTimer = setTimeout(flush, FLUSH_MS);
+  // Hand records to the worker right away (records made in the same moment go together):
+  // the worker keeps them in storage and retries, so a Next press that navigates away, or a
+  // closed tab, can't lose them. FLUSH_MS is only the retry delay when the worker is away.
+  let flushQueued = false;
+  function scheduleFlush(retry) {
+    if (retry) {
+      if (!flushTimer) flushTimer = setTimeout(flush, FLUSH_MS);
+      return;
+    }
+    if (flushQueued) return;
+    flushQueued = true;
+    queueMicrotask(() => {
+      flushQueued = false;
+      flush();
+    });
   }
   function flush() {
     clearTimeout(flushTimer);
@@ -185,7 +198,10 @@
       const items = outbox[kind].splice(0, 500);
       send(type, { items }).catch((err) => {
         // Worker unreachable (extension reloading): keep them for the next try.
-        if (err && err.code === "extension") outbox[kind].unshift(...items);
+        if (err && err.code === "extension") {
+          outbox[kind].unshift(...items);
+          scheduleFlush(true);
+        }
       });
       if (outbox[kind].length) scheduleFlush();
     }
@@ -196,14 +212,24 @@
 
   // ---------- logging ----------
   function addLog(rec) {
+    const { fill, ...fields } = rec;
     const item = {
       id: newId(),
       t: Date.now(),
       page: rec.page || pageType(),
       url: location.pathname + location.search,
       kind: ui.mode === "check" || ui.mode === "checkDone" ? "check" : "booking",
-      ...rec,
+      ...fields,
     };
+    // Failed / stuck steps carry a snapshot of the page (fields, buttons, selectors tried,
+    // site message – never typed values) so the panel can export them to fix the site config.
+    if ((item.status === "fail" || item.status === "stuck") && window.CM_SNAPSHOT) {
+      try {
+        item.context = window.CM_SNAPSHOT.take({ C, page: item.page, message: siteMessage().text, alert: lastAlert, fill });
+      } catch (_) {
+        /* never let a snapshot problem stop the log */
+      }
+    }
     // Link the record to the entry by id so reports survive label changes.
     if (!item.entryId && item.entry) {
       const hit = entries.find((x) => x.label === item.entry);
@@ -270,9 +296,15 @@
       track("Trámite", !!target && setSelect(target, e.tramite, e.tramiteText), true);
     }
 
-    // Office page
+    // Office list – on the office page, and on some provinces' trámite page too. The site
+    // won't continue without a real office, so "Any office" picks the first one listed.
     const office = q(C.selectors.office);
     if (office && e.office) track("Office", setSelect(office, e.office, e.officeText), true);
+    else if (office && office.getClientRects().length && !realOfficeSelected(office) && ui.mode !== "check" && ui.mode !== "checkDone") {
+      const first = (readOffices() || [])[0];
+      if (first && setSelect(office, first.value, first.text)) done.push("Office (any → " + first.text.split(",")[0].trim() + ")");
+      else missing.push("Office");
+    }
 
     // Contact page
     if (C.selectors.phone.map((s) => setInput(firstVisible([s]), e.phone)).some(Boolean)) done.push("Phone");
@@ -323,7 +355,7 @@
     const r = fillEntry(e);
     const msg = describe(r);
     const stop = (status, why) => {
-      addLog({ entry: e.label, action: actionName, status, detail: msg + " " + why });
+      addLog({ entry: e.label, action: actionName, status, detail: msg + " " + why, fill: r });
       show(status, e.label + ": " + msg + " " + why);
     };
     const from = pageType();
@@ -377,6 +409,13 @@
         return v && !C.officeExcludeValues.includes(v) && !C.patterns.officePlaceholder.test(t);
       })
       .map((o) => ({ value: o.value, text: String(o.text || "").replace(/\s+/g, " ").trim() }));
+  }
+
+  function realOfficeSelected(sel) {
+    const o = sel.options && sel.options[sel.selectedIndex];
+    if (!o) return false;
+    const v = String(o.value || "").trim();
+    return !!v && !C.officeExcludeValues.includes(v) && !C.patterns.officePlaceholder.test(norm(o.text));
   }
 
   function beep() {

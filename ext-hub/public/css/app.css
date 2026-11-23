@@ -359,3 +359,6 @@ td .ellipsis { max-width: 14rem; overflow: hidden; text-overflow: ellipsis; }
 .list-foot { margin-top: 0.5rem; }
 #main:focus { outline: none; } /* focused after navigation for screen readers; no visible ring */
 .jv-regex { overflow-wrap: anywhere; }
+.snap-summary { display: grid; gap: 0.25rem 1rem; grid-template-columns: max-content 1fr; }
+.snap-kv { display: contents; }
+.snap-kv > span:last-child { overflow-wrap: anywhere; }

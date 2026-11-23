@@ -42,7 +42,8 @@ function dataRoutes(services) {
         profiles.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });
-    cm.get('/logs', (req, res) => res.json({ items: activity.listLogs(scopeOf(req), { entryId: req.query.entryId, limit: req.query.limit }) }));
+    // ?context=1 adds the page snapshots of failed steps (panel); the extension leaves them out.
+    cm.get('/logs', (req, res) => res.json({ items: activity.listLogs(scopeOf(req), { entryId: req.query.entryId, limit: req.query.limit, context: req.query.context === '1' }) }));
     cm.post('/logs', (req, res) => res.json({ saved: activity.addLogs(req.actor, items(req)) }));
     cm.delete('/logs', (req, res) => res.json({ removed: activity.clearLogs(req.actor) }));
     cm.get('/office-sightings', (req, res) => res.json({ items: activity.listSightings(scopeOf(req), { limit: req.query.limit }) }));

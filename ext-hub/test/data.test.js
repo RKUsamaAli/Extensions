@@ -316,3 +316,21 @@ test('score formula matches RelaySwitch', () => {
     assert.equal(scoreOf([{ t: 1, ok: true, ms: 3000 }]).value, 70);
     assert.equal(scoreOf(Array.from({ length: 30 }, (_, i) => ({ t: i, ok: i >= 10, ms: 300 }))).value, 100, 'only the last 20 count');
 });
+
+test('citamate logs keep the page snapshot of a failed step (opt-in on read, size-capped)', () => {
+    const { s, ali } = setup();
+    const ctx = { page: 'Personal data', url: '/icpplus/acEntrada', missing: ['Name'], tried: [{ field: 'Name', selectors: ['#txtDesCitado'] }], fields: [{ tag: 'input', id: 'txtNombre' }] };
+    s.activity.addLogs(ali, [
+        { id: 'a', t: 1, status: 'fail', detail: 'Not found: Name', context: ctx },
+        { id: 'b', t: 2, status: 'ok', detail: 'fine', context: 'not an object' },
+        { id: 'c', t: 3, status: 'fail', context: { page: 'x', fields: Array.from({ length: 400 }, (_, i) => ({ tag: 'select', id: 'f' + i, options: Array.from({ length: 40 }, (_, j) => 'option text ' + j) })) } }
+    ]);
+    const scope = scopeFor(ali);
+    assert.equal(s.activity.listLogs(scope)[0].context, undefined, 'left out unless asked for');
+    const [a, b, c] = s.activity.listLogs(scope, { context: true });
+    assert.deepEqual(a.context, ctx);
+    assert.equal(b.context, undefined);
+    assert.equal(c.context.truncated, true, 'big snapshots are shortened, not dropped');
+    assert.equal(c.context.page, 'x');
+    assert.ok(JSON.stringify(c.context).length <= 32 * 1024);
+});
