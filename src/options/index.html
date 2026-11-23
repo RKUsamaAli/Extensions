@@ -11,9 +11,23 @@
   <main>
     <header class="row wrap">
       <h1 class="grow">RelaySwitch · Proxies</h1>
-      <button id="bulkBtn">Bulk add</button>
-      <button id="newBtn" class="primary">Add proxy</button>
+      <button id="bulkBtn" data-testid="bulk-add">Bulk add</button>
+      <button id="newBtn" class="primary" data-testid="add-proxy">Add proxy</button>
     </header>
+
+    <section class="card" id="signinCard" hidden></section>
+    <div class="card row account" id="account" data-testid="account" hidden></div>
+    <p id="serverError" class="error card" data-testid="server-error" hidden></p>
+
+    <section class="card" id="migrate" data-testid="migrate-card" hidden>
+      <h2>Upload my local data</h2>
+      <p id="migrateText" class="muted"></p>
+      <div class="row">
+        <button id="migrateBtn" class="primary" data-testid="migrate-button"><span id="migrateSpin" class="spinner" hidden></span> <span id="migrateLabel">Upload my local data</span></button>
+      </div>
+    </section>
+
+    <div id="appContent" hidden>
 
     <p id="unsupported" class="error card" hidden></p>
     <p id="limited" class="warn card" hidden></p>
@@ -48,7 +62,7 @@
       <p id="bulkSummary" class="muted"></p>
       <ul id="bulkErrors" class="mono errors"></ul>
       <div class="row">
-        <button id="bulkAddBtn" class="primary" disabled><span id="bulkSpin" class="spinner" hidden></span> <span id="bulkAddText">Add proxies</span></button>
+        <button id="bulkAddBtn" class="primary" disabled data-testid="bulk-submit"><span id="bulkSpin" class="spinner" hidden></span> <span id="bulkAddText">Add proxies</span></button>
         <button id="bulkCancel" type="button">Cancel</button>
       </div>
     </section>
@@ -92,10 +106,10 @@
         <p id="socksWarn" class="warn" hidden>Chrome can't send a username/password to SOCKS proxies. Use HTTP, or allow-list your IP at the provider.</p>
         <p id="formError" class="error" hidden></p>
         <div class="row">
-          <button type="submit" id="saveBtn" class="primary"><span id="saveSpin" class="spinner" hidden></span> <span id="saveText">Save</span></button>
+          <button type="submit" id="saveBtn" class="primary" data-testid="save-proxy"><span id="saveSpin" class="spinner" hidden></span> <span id="saveText">Save</span></button>
           <button type="button" id="cancelBtn">Cancel</button>
           <span class="grow"></span>
-          <button type="button" id="deleteBtn" class="danger" hidden>Delete</button>
+          <button type="button" id="deleteBtn" class="danger" hidden data-testid="delete-proxy">Delete</button>
         </div>
       </form>
     </section>
@@ -111,7 +125,7 @@
           <option value="name">Name</option>
           <option value="added">Order added</option>
         </select>
-        <button id="testAllBtn">Test all</button>
+        <button id="testAllBtn" data-testid="test-all">Test all</button>
       </div>
       <div id="testProgress" class="progress" hidden>
         <div class="row"><span class="spinner"></span><span id="testText" class="grow">Testing…</span><button id="testCancel">Cancel</button></div>
@@ -121,7 +135,7 @@
       <p id="loadingList" class="row muted"><span class="spinner"></span>Loading proxies…</p>
       <p id="noProfiles" class="muted" hidden>No proxies yet. Use Add proxy or Bulk add.</p>
       <p id="noMatch" class="muted" hidden>No matching proxies</p>
-      <ul id="list"></ul>
+      <ul id="list" data-testid="proxy-list"></ul>
       <p class="muted legend">Score out of 100 from the last 20 checks: 70 for how often it works, 30 for speed (0.3 s or faster = full, 3 s or slower = none), minus 15 if the latest check failed.</p>
     </section>
 
@@ -159,6 +173,7 @@
       <p id="noLogs" class="muted" hidden>No activity yet.</p>
       <ol id="logs" class="mono"></ol>
     </section>
+    </div>
   </main>
   <script type="module" src="options.js"></script>
 </body>

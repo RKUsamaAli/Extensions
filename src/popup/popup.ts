@@ -2,7 +2,8 @@ import type { ProxyProfile, RuntimeState } from "../core/types";
 import { formatAgo, formatDuration } from "../core/format";
 import { displayName } from "../core/profile";
 import { renderUsername, usesSession } from "../core/username";
-import { send, type Message } from "../shared/messages";
+import { send, type AuthInfo, type Message } from "../shared/messages";
+import { renderAccount, renderSignIn } from "../shared/signin";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -16,6 +17,26 @@ let lastProfiles: ProxyProfile[] = [];
 let lastState: RuntimeState | null = null;
 let lastScores: Record<string, number | null> = {};
 let unsupported = false;
+let signedIn = false;
+
+/** Signed out: only the sign-in form. Signed in: the normal popup plus the account line. */
+function renderAuth(auth: AuthInfo): void {
+  signedIn = auth.signedIn;
+  $("signin").hidden = signedIn;
+  $("account").hidden = !signedIn;
+  $("fabRow").hidden = !signedIn;
+  $("footer").hidden = !signedIn;
+  $("serverError").hidden = !(signedIn && auth.error);
+  $("serverError").textContent = signedIn ? (auth.error ?? "") : "";
+  if (!signedIn) {
+    $("main").hidden = true;
+    $("empty").hidden = true;
+    $("unsupported").hidden = true;
+    renderSignIn($("signin"), auth, () => void run({ type: "getState" }));
+  } else {
+    renderAccount($("account"), auth, () => void run({ type: "getState" }));
+  }
+}
 
 const LABELS: Record<RuntimeState["status"], string> = {
   off: "Off",
@@ -50,15 +71,19 @@ async function run(msg: Message): Promise<void> {
         : `This browser can't run RelaySwitch: it has no ${reply.support.missing.join(" or ") || "proxy support"}. Use Chrome, Edge, Brave, Opera or Arc.`;
     $("deviceHelp").hidden = !(unsupported && reply.profiles.length > 0);
     render(reply.state, reply.profiles);
+    renderAuth(reply.auth);
   } catch (err) {
     errorEl.textContent = err instanceof Error ? err.message : String(err);
     errorEl.hidden = false;
     const fresh = await send({ type: "getState" });
-    if (fresh.ok) render(fresh.state, fresh.profiles);
+    if (fresh.ok) {
+      render(fresh.state, fresh.profiles);
+      renderAuth(fresh.auth);
+    }
   } finally {
     setBusy(false);
-    // Nothing to switch on in a browser without proxy support.
-    toggle.disabled = unsupported;
+    // Nothing to switch on in a browser without proxy support, or while signed out.
+    toggle.disabled = unsupported || !signedIn;
     for (const id of ["check", "newSession"]) $<HTMLButtonElement>(id).disabled = unsupported;
   }
 }
@@ -66,7 +91,7 @@ async function run(msg: Message): Promise<void> {
 function setBusy(busy: boolean, text?: string): void {
   $("spinner").hidden = !busy;
   if (busy && text) $("statusText").textContent = text;
-  for (const el of document.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>("button, input, select")) {
+  for (const el of document.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>("header input, #main button, #main input, #main select, #fabRow input, #empty button, #copyDetails")) {
     el.disabled = busy;
   }
 }
@@ -74,8 +99,8 @@ function setBusy(busy: boolean, text?: string): void {
 function render(state: RuntimeState, profiles: ProxyProfile[]): void {
   lastProfiles = profiles;
   lastState = state;
-  $("empty").hidden = profiles.length > 0;
-  $("main").hidden = profiles.length === 0;
+  $("empty").hidden = profiles.length > 0 || !signedIn;
+  $("main").hidden = profiles.length === 0 || !signedIn;
   toggle.checked = state.enabled;
 
   search.hidden = profiles.length <= SEARCH_MIN;

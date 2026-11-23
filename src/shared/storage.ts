@@ -1,19 +1,25 @@
 import type { CheckResult, LogEntry, ProxyProfile, ProxyStats, RuntimeState } from "../core/types";
+import { newClientId, type ServerCheck } from "../core/hubdata";
 import { displayName } from "../core/profile";
 import { callApi } from "./api";
-import { LOG_LIMIT } from "./config";
+import { DEFAULT_API_BASE, LOG_LIMIT } from "./config";
+import type { AuthInfo } from "./messages";
 
-// local: survives restarts. session: cleared when the browser closes.
+// local: survives restarts. Only settings and the sign-in live here.
+// Proxies, scores and logs belong to the server; they are cached in session
+// storage (cleared when the browser closes, never readable by content scripts).
 interface LocalData {
-  profiles: ProxyProfile[];
   enabled: boolean;
   activeProfileId: string | null;
-  logs: LogEntry[];
   floatingButton: boolean;
   /** On-page button position: which edge, and distance from the top in %. */
   fabPos: { side: "left" | "right"; top: number };
-  /** Check history per proxy id, used for the score. */
-  stats: Record<string, ProxyStats>;
+  /** ext-hub server address. */
+  apiBase: string;
+  /** Random id of this install, sent as X-Device-Id. */
+  deviceId: string;
+  /** Long-lived token used only to get access tokens. Null = signed out. */
+  refreshToken: string | null;
 }
 
 interface SessionData {
@@ -31,6 +37,23 @@ interface SessionData {
   /** The browser has proxy.settings but it never answers (e.g. Orion on iOS).
    * Remembered until the browser restarts so we don't wait again each time. */
   proxyUnresponsive: boolean;
+
+  // ---- server sign-in and cached server data ----
+  accessToken: string | null;
+  accessExpiresAt: number | null;
+  /** Signed-in user and access, from the last bootstrap. */
+  auth: AuthInfo | null;
+  /** Why the last sign-in ended or failed, shown on the sign-in form. */
+  authError: string | null;
+  profiles: ProxyProfile[];
+  /** Check history per proxy id, used for the score. */
+  stats: Record<string, ProxyStats>;
+  logs: LogEntry[];
+  /** When profiles/stats/logs were last loaded from the server. */
+  loadedAt: number | null;
+  /** Not yet sent to the server. */
+  pendingChecks: ServerCheck[];
+  pendingLogs: LogEntry[];
 }
 
 export interface TestRun {
@@ -43,13 +66,13 @@ export interface TestRun {
 }
 
 const LOCAL_DEFAULTS: LocalData = {
-  profiles: [],
   enabled: false,
   activeProfileId: null,
-  logs: [],
   floatingButton: false,
   fabPos: { side: "right", top: 70 },
-  stats: {},
+  apiBase: DEFAULT_API_BASE,
+  deviceId: "",
+  refreshToken: null,
 };
 
 const SESSION_DEFAULTS: SessionData = {
@@ -63,7 +86,20 @@ const SESSION_DEFAULTS: SessionData = {
   testRun: null,
   testAuthTries: 0,
   proxyUnresponsive: false,
+  accessToken: null,
+  accessExpiresAt: null,
+  auth: null,
+  authError: null,
+  profiles: [],
+  stats: {},
+  logs: [],
+  loadedAt: null,
+  pendingChecks: [],
+  pendingLogs: [],
 };
+
+/** Keys older versions kept in storage.local; read once for the upload. */
+export const LEGACY_KEYS = ["profiles", "logs", "stats"] as const;
 
 export async function getLocal(): Promise<LocalData> {
   const data = await callApi<Record<string, unknown>>("storage.local.get", (cb) => chrome.storage.local.get(LOCAL_DEFAULTS as unknown as Record<string, unknown>, cb));
@@ -72,6 +108,30 @@ export async function getLocal(): Promise<LocalData> {
 
 export async function setLocal(patch: Partial<LocalData>): Promise<void> {
   await callApi("storage.local.set", (cb) => chrome.storage.local.set(patch, () => cb()));
+}
+
+/** The id of this install; created once. */
+export async function deviceId(): Promise<string> {
+  const { deviceId: id } = await getLocal();
+  if (id) return id;
+  const fresh = crypto.randomUUID();
+  await setLocal({ deviceId: fresh });
+  return fresh;
+}
+
+export interface LegacyData {
+  profiles?: ProxyProfile[];
+  logs?: LogEntry[];
+  stats?: Record<string, ProxyStats>;
+}
+
+export async function getLegacy(): Promise<LegacyData> {
+  const data = await callApi<Record<string, unknown>>("storage.local.get", (cb) => chrome.storage.local.get([...LEGACY_KEYS], cb));
+  return (data ?? {}) as LegacyData;
+}
+
+export async function removeLegacy(): Promise<void> {
+  await callApi("storage.local.remove", (cb) => chrome.storage.local.remove([...LEGACY_KEYS], () => cb()));
 }
 
 // Some browsers have no storage.session; fall back to memory there.
@@ -100,9 +160,29 @@ export async function setSession(patch: Partial<SessionData>): Promise<void> {
   await callApi("storage.session.set", (cb) => chrome.storage.session.set(patch, () => cb()));
 }
 
+/** Forget every piece of server data held by this browser. */
+export async function clearServerData(): Promise<void> {
+  await setSession({
+    accessToken: null,
+    accessExpiresAt: null,
+    auth: null,
+    profiles: [],
+    stats: {},
+    logs: [],
+    loadedAt: null,
+    pendingChecks: [],
+    pendingLogs: [],
+  });
+}
+
+export async function profiles(): Promise<ProxyProfile[]> {
+  return (await getSession()).profiles;
+}
+
 export async function activeProfile(): Promise<ProxyProfile | null> {
-  const { profiles, activeProfileId } = await getLocal();
-  return profiles.find((p) => p.id === activeProfileId) ?? profiles[0] ?? null;
+  const { activeProfileId } = await getLocal();
+  const list = await profiles();
+  return list.find((p) => p.id === activeProfileId) ?? list[0] ?? null;
 }
 
 /** Log fields that tie an entry to a proxy. */
@@ -115,39 +195,74 @@ const KEEP_RESULTS = 50;
 // Log and stats updates are read-modify-write; run them one at a time so
 // concurrent events (e.g. during Test all) don't overwrite each other.
 let queue: Promise<unknown> = Promise.resolve();
-function serial<T>(fn: () => Promise<T>): Promise<T> {
+export function serial<T>(fn: () => Promise<T>): Promise<T> {
   const next = queue.then(fn, fn);
   queue = next.catch(() => {});
   return next;
 }
 
+/** Called after something was queued for the server (the worker schedules a flush). */
+let queued: () => void = () => {};
+export function onQueued(fn: () => void): void {
+  queued = fn;
+}
+
+/** Signed in = there is a refresh token. Nothing is recorded while signed out. */
+async function signedIn(): Promise<boolean> {
+  return !!(await getLocal()).refreshToken;
+}
+
 export function recordResult(profileId: string, result: CheckResult): Promise<void> {
   return serial(async () => {
-  const { stats } = await getLocal();
-  const entry = stats[profileId] ?? { results: [] };
-  entry.results = [...entry.results, result].slice(-KEEP_RESULTS);
-  stats[profileId] = entry;
-  await setLocal({ stats });
+    if (!(await signedIn())) return;
+    const { stats, pendingChecks } = await getSession();
+    const entry = stats[profileId] ?? { results: [] };
+    entry.results = [...entry.results, result].slice(-KEEP_RESULTS);
+    stats[profileId] = entry;
+    await setSession({ stats, pendingChecks: [...pendingChecks, { ...result, proxyId: profileId, id: newClientId() }] });
+    queued();
   });
 }
 
 export function dropStats(profileId: string): Promise<void> {
   return serial(async () => {
-    const { stats } = await getLocal();
+    const { stats, pendingChecks } = await getSession();
     delete stats[profileId];
-    await setLocal({ stats });
+    await setSession({ stats, pendingChecks: pendingChecks.filter((c) => c.proxyId !== profileId) });
   });
 }
 
-export function clearLogs(): Promise<void> {
-  return serial(() => setLocal({ logs: [] }));
+export function clearLogsLocal(): Promise<void> {
+  return serial(() => setSession({ logs: [], pendingLogs: [] }));
 }
 
 export function log(entry: Omit<LogEntry, "t">): Promise<void> {
   return serial(async () => {
-    const { logs } = await getLocal();
-    logs.push({ t: Date.now(), ...entry });
-    await setLocal({ logs: logs.slice(-LOG_LIMIT) });
+    if (!(await signedIn())) return;
+    const { logs, pendingLogs } = await getSession();
+    const item: LogEntry = { id: newClientId(), t: Date.now(), ...entry };
+    logs.push(item);
+    await setSession({ logs: logs.slice(-LOG_LIMIT), pendingLogs: [...pendingLogs, item].slice(-LOG_LIMIT) });
+    queued();
+  });
+}
+
+/** Takes what is waiting to be sent; put it back with requeue() if sending fails. */
+export function takePending(): Promise<{ checks: ServerCheck[]; logs: LogEntry[] }> {
+  return serial(async () => {
+    const { pendingChecks, pendingLogs } = await getSession();
+    if (pendingChecks.length || pendingLogs.length) await setSession({ pendingChecks: [], pendingLogs: [] });
+    return { checks: pendingChecks, logs: pendingLogs };
+  });
+}
+
+export function requeue(checks: ServerCheck[], logs: LogEntry[]): Promise<void> {
+  return serial(async () => {
+    const s = await getSession();
+    await setSession({
+      pendingChecks: [...checks, ...s.pendingChecks].slice(-LOG_LIMIT),
+      pendingLogs: [...logs, ...s.pendingLogs].slice(-LOG_LIMIT),
+    });
   });
 }
 

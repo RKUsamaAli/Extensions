@@ -1,6 +1,8 @@
 import type { ProxyProfile } from "../core/types";
 import { BYPASS_LIST } from "../shared/config";
 import { callApi } from "../shared/api";
+import { apiHost } from "../core/hubdata";
+import { getLocal } from "../shared/storage";
 
 type ProxyValue = chrome.proxy.ProxyConfig;
 
@@ -43,6 +45,12 @@ export async function forgetProxyLogin(profile: ProxyProfile): Promise<void> {
   );
 }
 
+/** Hosts that must never go through the user's proxy (the ext-hub server). */
+export async function directHosts(): Promise<string[]> {
+  const host = apiHost((await getLocal()).apiBase);
+  return host ? [host] : [];
+}
+
 export async function applyProxy(profile: ProxyProfile): Promise<void> {
   await clearProxySettings();
   await forgetProxyLogin(profile);
@@ -50,7 +58,7 @@ export async function applyProxy(profile: ProxyProfile): Promise<void> {
     mode: "fixed_servers",
     rules: {
       singleProxy: { scheme: profile.scheme, host: profile.host, port: profile.port },
-      bypassList: BYPASS_LIST,
+      bypassList: [...BYPASS_LIST, ...(await directHosts())],
     },
   });
 }

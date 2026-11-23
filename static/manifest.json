@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RelaySwitch",
-  "version": "0.1.0",
-  "description": "Switch between your own proxies from any provider, with login, sessions and an exit-IP check.",
+  "version": "0.2.0",
+  "description": "Switch between the proxies in your RelaySwitch account, with login, sessions and an exit-IP check. Requires an account.",
   "minimum_chrome_version": "120",
   "icons": {
     "16": "icons/icon16.png",

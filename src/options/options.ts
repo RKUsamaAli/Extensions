@@ -5,7 +5,8 @@ import { displayName } from "../core/profile";
 import { scoreBand, scoreOf, type Score } from "../core/score";
 import type { LogEntry, ProxyProfile, ProxyStats, Scheme } from "../core/types";
 import { renderUsername, templateTokens, usesSession } from "../core/username";
-import { send, type Message } from "../shared/messages";
+import { send, type AuthInfo, type LegacyInfo, type Message, type Reply } from "../shared/messages";
+import { renderAccount, renderSignIn } from "../shared/signin";
 import type { TestRun } from "../shared/storage";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -29,6 +30,61 @@ let connected = false;
 let enabled = false;
 let editingId: string | null = null;
 let testing = false;
+let signedIn = false;
+let lastReply: Extract<Reply, { ok: true }> | null = null;
+
+// ---------- sign-in ----------
+
+function renderAuth(auth: AuthInfo, legacy: LegacyInfo | null): void {
+  const changed = signedIn !== auth.signedIn;
+  signedIn = auth.signedIn;
+  $("appContent").hidden = !signedIn;
+  $("bulkBtn").hidden = !signedIn;
+  $("newBtn").hidden = !signedIn;
+  $("account").hidden = !signedIn;
+  $("signinCard").hidden = signedIn;
+  $("serverError").hidden = !(signedIn && auth.error);
+  $("serverError").textContent = signedIn ? (auth.error ?? "") : "";
+  if (!signedIn) {
+    $("migrate").hidden = true;
+    $("editor").hidden = true;
+    $("bulk").hidden = true;
+    // Don't wipe what the user is typing when the page refreshes itself.
+    if (changed || !$("signinCard").childElementCount) {
+      renderSignIn($("signinCard"), auth, () => void run({ type: "listProfiles" }));
+    }
+    return;
+  }
+  renderAccount($("account"), auth, () => void run({ type: "getState" }));
+  renderMigrate(legacy);
+}
+
+function renderMigrate(legacy: LegacyInfo | null): void {
+  $("migrate").hidden = !legacy;
+  if (!legacy) return;
+  const parts = [
+    legacy.profiles ? `${legacy.profiles} prox${legacy.profiles === 1 ? "y" : "ies"}` : "",
+    legacy.checks ? `${legacy.checks} test result${legacy.checks === 1 ? "" : "s"}` : "",
+    legacy.logs ? `${legacy.logs} activity entr${legacy.logs === 1 ? "y" : "ies"}` : "",
+  ].filter(Boolean);
+  $("migrateText").textContent =
+    `This browser still has ${parts.join(", ")} saved by an older RelaySwitch version. ` +
+    "Upload them to your account to keep them; they are then removed from this browser.";
+}
+
+$("migrateBtn").addEventListener("click", () => {
+  const btn = $<HTMLButtonElement>("migrateBtn");
+  btn.disabled = true;
+  $("migrateSpin").hidden = false;
+  $("migrateLabel").textContent = "Uploading…";
+  void run({ type: "migrateLocal" }).then((ok) => {
+    btn.disabled = false;
+    $("migrateSpin").hidden = true;
+    $("migrateLabel").textContent = "Upload my local data";
+    const m = lastReply?.migrated;
+    if (ok && m) alert(`Uploaded ${m.profiles} proxies, ${m.checks} test results and ${m.logs} activity entries.`);
+  });
+});
 
 // ---------- talking to the worker ----------
 
@@ -48,6 +104,14 @@ async function run(msg: Message): Promise<boolean> {
     return false;
   }
   $("pageError").hidden = true;
+  lastReply = reply;
+  renderAuth(reply.auth, reply.legacy);
+  if (!reply.auth.signedIn) {
+    $("loadingList").hidden = true;
+    profiles = [];
+    stats = {};
+    return true;
+  }
   const { canProxy, missing, limited } = reply.support;
   $("unsupported").hidden = canProxy;
   $("unsupported").textContent = canProxy
@@ -76,7 +140,8 @@ function showPageError(text: string): void {
 }
 
 async function loadStats(): Promise<void> {
-  const data = (await chrome.storage.local.get("stats")) as { stats?: Record<string, ProxyStats> };
+  // Scores come from the server; the worker caches them in session storage.
+  const data = (await chrome.storage.session.get("stats")) as { stats?: Record<string, ProxyStats> };
   stats = data.stats ?? {};
 }
 
@@ -131,6 +196,8 @@ function scoreBadge(s: Score): HTMLElement {
 function row(p: ProxyProfile): HTMLLIElement {
   const s = scoreFor(p.id);
   const li = el("li");
+  li.dataset.testid = "proxy-row";
+  li.dataset.proxyId = p.id;
   const isSelected = p.id === activeId;
   if (isSelected && enabled) li.classList.add(connected ? "connected" : "connecting");
 
@@ -231,7 +298,8 @@ function showLogsFor(id: string): void {
 }
 
 async function renderLogs(): Promise<void> {
-  const { logs = [] } = (await chrome.storage.local.get("logs")) as { logs?: LogEntry[] };
+  if (!signedIn) return;
+  const { logs = [] } = (await chrome.storage.session.get("logs")) as { logs?: LogEntry[] };
   const id = val("logFilter");
   const p = profiles.find((x) => x.id === id);
   // Older entries have no profileId; match them by name.
@@ -419,8 +487,9 @@ async function addBulk(): Promise<void> {
   if (ok) {
     setVal("bulkText", "");
     $("bulk").hidden = true;
-    if (confirm(`Added ${list.length} proxies. Test them now to get their scores?`)) {
-      void startTest(list.map((p) => p.id));
+    const ids = lastReply?.addedIds ?? [];
+    if (ids.length && confirm(`Added ${ids.length} proxies. Test them now to get their scores?`)) {
+      void startTest(ids);
     }
   } else {
     previewBulk();
@@ -523,8 +592,8 @@ $("clearLogs").addEventListener("click", () => {
 // Live updates: logs, scores and test progress change while the page is open.
 let statsTimer: number | undefined;
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes.logs) void renderLogs();
-  if (area === "local" && changes.stats) {
+  if (area === "session" && changes.logs) void renderLogs();
+  if (area === "session" && changes.stats) {
     // Test all writes often; redraw at most a few times a second.
     clearTimeout(statsTimer);
     statsTimer = window.setTimeout(() => {
@@ -533,7 +602,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
       void renderLogs();
     }, 250);
   }
-  if ((area === "local" && (changes.enabled || changes.activeProfileId)) || (area === "session" && changes.status)) {
+  if (
+    (area === "local" && (changes.enabled || changes.activeProfileId || changes.refreshToken)) ||
+    (area === "session" && (changes.status || changes.profiles || changes.authError))
+  ) {
     void run({ type: "getState" });
   }
   if (area === "session" && changes.testRun) renderTestRun((changes.testRun.newValue as TestRun | null) ?? null);

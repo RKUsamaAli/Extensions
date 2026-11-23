@@ -13,13 +13,17 @@ export const TEST_MARK = "rs_test=";
  * that proxy only (no DIRECT fallback, so a dead proxy really fails). All other
  * traffic keeps using `fallback` (the active proxy, or DIRECT when off).
  * Chrome passes the full URL to PAC for http:// requests, which is why the
- * test URL is plain http.
+ * test URL is plain http. Hosts in `direct` (the ext-hub server) always go
+ * DIRECT so signing in and saving keep working during a test.
  */
-export function buildTestPac(profiles: ProxyProfile[], fallback: string): string {
+export function buildTestPac(profiles: ProxyProfile[], fallback: string, direct: string[] = []): string {
   const map: Record<string, string> = {};
   for (const p of profiles) map[p.id] = pacTarget(p);
+  const directMap: Record<string, true> = {};
+  for (const h of direct) directMap[h.toLowerCase()] = true;
   return `var MAP = ${JSON.stringify(map)};
 var FALLBACK = ${JSON.stringify(fallback)};
+var DIRECT_HOSTS = ${JSON.stringify(directMap)};
 function FindProxyForURL(url, host) {
   var i = url.indexOf(${JSON.stringify(TEST_MARK)});
   if (i >= 0) {
@@ -27,6 +31,7 @@ function FindProxyForURL(url, host) {
     if (Object.prototype.hasOwnProperty.call(MAP, id)) return MAP[id];
     return "DIRECT";
   }
+  if (Object.prototype.hasOwnProperty.call(DIRECT_HOSTS, String(host).toLowerCase())) return "DIRECT";
   if (isPlainHostName(host) || host === "localhost" || shExpMatch(host, "127.*") ||
       isInNet(host, "10.0.0.0", "255.0.0.0") || isInNet(host, "172.16.0.0", "255.240.0.0") ||
       isInNet(host, "192.168.0.0", "255.255.0.0")) {

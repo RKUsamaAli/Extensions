@@ -2,8 +2,8 @@ import { buildTestPac, pacTarget, TEST_MARK } from "../core/pac";
 import { formatDuration } from "../core/format";
 import type { ProxyProfile } from "../core/types";
 import { IP_CHECK_TIMEOUT_MS, TEST_URL } from "../shared/config";
-import { activeProfile, getLocal, getSession, log, recordResult, setSession, who } from "../shared/storage";
-import { applyProxy, clearProxy, forgetProxyLogin, setProxySettings } from "./proxy";
+import { activeProfile, getLocal, getSession, log, profiles as loadProfiles, recordResult, setSession, who } from "../shared/storage";
+import { applyProxy, clearProxy, directHosts, forgetProxyLogin, setProxySettings } from "./proxy";
 
 /**
  * Tests proxies one at a time without changing what the user browses through.
@@ -16,7 +16,8 @@ export async function runTests(ids: string[] | undefined): Promise<void> {
   const current = await getSession();
   if (current.testRun?.running) throw new Error("A test is already running");
 
-  const { profiles, enabled } = await getLocal();
+  const { enabled } = await getLocal();
+  const profiles = await loadProfiles();
   const targets = ids?.length ? profiles.filter((p) => ids.includes(p.id)) : profiles;
   if (!targets.length) throw new Error("No proxies to test");
 
@@ -29,7 +30,7 @@ export async function runTests(ids: string[] | undefined): Promise<void> {
   await log({ level: "info", event: "test_start", detail: `${targets.length} prox${targets.length === 1 ? "y" : "ies"}` });
 
   try {
-    await setProxySettings({ mode: "pac_script", pacScript: { data: buildTestPac(profiles, fallback), mandatory: true } });
+    await setProxySettings({ mode: "pac_script", pacScript: { data: buildTestPac(profiles, fallback, await directHosts()), mandatory: true } });
 
     for (let i = 0; i < targets.length; i++) {
       const p = targets[i]!;

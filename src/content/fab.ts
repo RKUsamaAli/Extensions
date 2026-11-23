@@ -103,6 +103,21 @@ function mount(): void {
       });
       rows.push(b);
     };
+    if (!m.signedIn) {
+      // Signed out: no proxies to offer, only a way to sign in.
+      fab.title = "RelaySwitch: sign in";
+      ipEl.textContent = "";
+      row("Sign in to RelaySwitch", false, () => {
+        void call({ type: "menuSignIn" });
+        close();
+      });
+      rows[0]!.dataset.testid = "fab-signin";
+      search.hidden = true;
+      search.value = "";
+      items.replaceChildren(...rows);
+      applyFilter();
+      return;
+    }
     row("Off (direct)", !m.enabled, () => void act({ type: "menuOff" }));
     for (const item of m.items) {
       row(item.name, m.enabled && item.id === m.activeId, () => void act({ type: "menuConnect", id: item.id }), item.score);

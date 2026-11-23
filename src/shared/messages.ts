@@ -1,7 +1,28 @@
 import type { ProxyProfile, RuntimeState } from "../core/types";
+import type { HubEntitlement, HubUser } from "./hub";
+
+/** Sign-in state shown by the popup, options page and on-page button. */
+export interface AuthInfo {
+  signedIn: boolean;
+  /** Server address (prefills the sign-in form). */
+  apiBase: string;
+  user?: HubUser;
+  entitlement?: HubEntitlement | null;
+  /** Why the user is signed out, or a server problem while signed in. */
+  error?: string;
+}
+
+/** Counts of data saved by older versions in this browser, waiting to be uploaded. */
+export interface LegacyInfo {
+  profiles: number;
+  logs: number;
+  checks: number;
+}
 
 /** What the on-page button may see: names and status only, never credentials. */
 export interface MenuState {
+  /** False = the menu only offers "Sign in to RelaySwitch". */
+  signedIn: boolean;
   enabled: boolean;
   activeId: string | null;
   status: RuntimeState["status"];
@@ -43,14 +64,19 @@ export type Message =
   | { type: "bulkAdd"; profiles: ProxyProfile[] }
   | { type: "testProxies"; ids?: string[] }
   | { type: "cancelTests" }
-  | { type: "browserCheck" };
+  | { type: "browserCheck" }
+  | { type: "getAuth" }
+  | { type: "login"; username: string; password: string; apiBase: string }
+  | { type: "logout" }
+  | { type: "migrateLocal" };
 
 /** The only messages accepted from the on-page button (a content script). */
 export type PageMessage =
   | { type: "menu" }
   | { type: "menuConnect"; id: string }
   | { type: "menuOff" }
-  | { type: "menuMove"; pos: FabPos };
+  | { type: "menuMove"; pos: FabPos }
+  | { type: "menuSignIn" };
 
 export type Reply =
   | {
@@ -62,6 +88,14 @@ export type Reply =
       scores: Record<string, number | null>;
       /** Set when bulkAdd ran. */
       added?: number;
+      /** Server ids of the proxies bulkAdd created. */
+      addedIds?: string[];
+      /** Sign-in state; when signedIn is false, profiles is empty. */
+      auth: AuthInfo;
+      /** Old local data waiting for "Upload my local data"; null = none. */
+      legacy: LegacyInfo | null;
+      /** Set when migrateLocal ran. */
+      migrated?: LegacyInfo;
       /** What this browser supports; canProxy false = RelaySwitch can't work here. */
       support: SupportInfo;
       /** Set when browserCheck ran. */
@@ -84,7 +118,7 @@ export async function send(msg: Message): Promise<Reply> {
           error:
             "RelaySwitch's background didn't answer. Reload the extension. If it keeps happening, this browser may not support RelaySwitch.",
         }),
-      msg.type === "getState" || msg.type === "listProfiles" ? 8_000 : REPLY_TIMEOUT_MS,
+      msg.type === "getAuth" ? 8_000 : msg.type === "migrateLocal" ? 120_000 : REPLY_TIMEOUT_MS,
     );
   });
   try {

@@ -35,6 +35,8 @@ export interface RuntimeState {
 }
 
 export interface LogEntry {
+  /** Set when queued for the server, which ignores a repeated id (safe resends). */
+  id?: string;
   t: number;
   level: "info" | "warn" | "error";
   event: string;

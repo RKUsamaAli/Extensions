@@ -11,10 +11,13 @@
     <span id="dot" class="dot"></span>
     <h1 class="grow">RelaySwitch</h1>
     <label class="switch" title="Proxy on/off">
-      <input id="toggle" type="checkbox" aria-label="Proxy on/off">
+      <input id="toggle" type="checkbox" aria-label="Proxy on/off" data-testid="proxy-toggle">
       <span></span>
     </label>
   </header>
+
+  <section id="signin" hidden></section>
+  <p id="serverError" class="error" data-testid="server-error" hidden></p>
 
   <div id="unsupported" class="notice" hidden>
     <p id="unsupportedText"></p>
@@ -32,7 +35,7 @@
   <section id="main" hidden>
     <label for="profile">Proxy</label>
     <input id="search" type="search" placeholder="Search proxies" aria-label="Search proxies" hidden>
-    <select id="profile"></select>
+    <select id="profile" data-testid="proxy-select"></select>
     <p id="noMatch" class="muted" hidden>No matching proxies</p>
 
     <div class="status">
@@ -49,14 +52,15 @@
 
   <p id="error" class="error" hidden></p>
 
-  <label class="row setting" for="fabToggle">
+  <label class="row setting" for="fabToggle" id="fabRow">
     <span class="grow">Floating button on pages</span>
     <span class="switch small"><input id="fabToggle" type="checkbox" aria-label="Floating button on pages"><span></span></span>
   </label>
 
-  <footer class="row">
+  <footer class="row" id="footer">
     <a href="#" id="options" class="grow">Manage proxies</a>
   </footer>
+  <div id="account" class="row account" data-testid="account" hidden></div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

@@ -60,3 +60,15 @@ label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 3px
 .switch input:checked + span { background: var(--ok); }
 .switch input:checked + span::before { transform: translateX(16px); }
 .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Sign-in form and account line (popup and options). */
+.signin { display: grid; gap: 10px; }
+.signin h2 { margin: 0; }
+.signin p { margin: 0; }
+.signin .field { display: grid; gap: 4px; }
+.signin .field label { font-size: 12px; color: var(--muted); }
+.signin details.server summary { cursor: pointer; font-size: 12px; }
+.signin details.server .field { margin-top: 6px; }
+.signin button.primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.account { gap: 8px; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.account .account-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
