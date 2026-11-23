@@ -1,11 +1,25 @@
 import { get, qs } from "../api.js";
 import { el, entitlementBadge, table } from "../ui.js";
 import { state, EXTS, extName, ownerParam, ownerSelect, pageHead, isAdmin } from "../state.js";
+import { EXTENSIONS, latestOf } from "../extensions.js";
+
+/** Small "Get the extensions" strip: icon, name, version, download. */
+function downloadStrip(dl) {
+  return el("div", { class: "card", testid: "dashboard-downloads" },
+    el("div", { class: "row space" }, el("h2", null, "Get the extensions"), el("a", { href: "#downloads", class: "btn small" }, "Install guide")),
+    el("div", { class: "dl-strip" }, EXTENSIONS.map((x) => {
+      const pkg = latestOf(dl.items, x.id);
+      return el("div", { class: "dl-item" },
+        el("img", { src: x.icon, alt: "", width: "36", height: "36" }),
+        el("div", { class: "dl-text" }, el("strong", null, x.name), el("span", { class: "hint" }, pkg ? "Version " + pkg.version : "Not built yet")),
+        pkg ? el("a", { class: "btn primary small", href: pkg.url, download: pkg.file, testid: "dashboard-download-" + x.id }, "Download") : null);
+    })));
+}
 
 export default async function dashboard() {
   const root = el("div");
   async function load() {
-    const d = await get("/dashboard" + qs({ owner: ownerParam() }));
+    const [d, dl] = await Promise.all([get("/dashboard" + qs({ owner: ownerParam() })), get("/downloads").catch(() => ({ items: [] }))]);
     const c = d.counts || {};
     const stats = [
       ["CitaMate entries", c.profiles, "#entries"],
@@ -26,6 +40,7 @@ export default async function dashboard() {
           el("a", { class: "card stat", href, testid: "stat" }, el("b", null, String(n ?? 0)), el("span", null, label)),
         ),
       ),
+      downloadStrip(dl),
       el(
         "div",
         { class: "card" },

@@ -30,6 +30,11 @@ server {
     location ^~ /.well-known/acme-challenge/ {
         root /var/www/letsencrypt;
     }
+    # The download page itself comes from the app; the zips and files below from disk.
+    location = /downloads/ {
+        include /etc/nginx/snippets/ext-hub-proxy.conf;
+        proxy_pass http://exthub_app;
+    }
     # Extension zips built by exthub-deploy, with this server's address set as default.
     location /downloads/ {
         alias {{BASE_DIR}}/current/downloads/;

@@ -50,6 +50,11 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
         next();
     };
     api.use('/auth', anonLimit, authRoutes(services));
+    // The download page is public (the zips are too): list the packages of this release.
+    api.get('/public/downloads', anonLimit, (_req, res) => {
+        res.setHeader('Cache-Control', 'no-cache');
+        res.json({ publicUrl: config.publicUrl, items: listDownloads(config.downloadsDir) });
+    });
 
     const limit = mw.userRateLimit(config);
     // Extension packages of this release (any signed-in user; the zips themselves are public).
@@ -82,7 +87,11 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
     };
     app.get('/', (_req, res) => res.redirect(302, '/app'));
     // People type /downloads or /download: send them to the folder nginx serves (with the slash).
-    app.get(['/downloads', '/download', '/download/'], (_req, res) => res.redirect(301, '/downloads/'));
+    // Express matches /downloads and /downloads/ alike, so look at the real path (no redirect loop).
+    app.get(['/downloads', '/download', '/download/'], (req, res, next) => {
+        if (req.originalUrl.split('?')[0] === '/downloads/') return page('downloads.html')(req, res, next);
+        res.redirect(301, '/downloads/');
+    });
     app.use('/downloads', express.static(config.downloadsDir, { index: false, maxAge: 0 }));
     app.get('/login', page('login.html'));
     app.get('/register', page('register.html'));

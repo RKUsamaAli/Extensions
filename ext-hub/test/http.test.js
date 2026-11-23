@@ -345,6 +345,13 @@ test('errors, limits, headers, pages', () =>
         assert.deepEqual(dl.json.items.map((i) => i.file), ['citamate-1.6.0.zip', 'relayswitch-0.10.0.zip', 'relayswitch-0.9.1.zip']);
         assert.equal(dl.json.items[0].url, '/downloads/citamate-1.6.0.zip');
         assert.equal((await call('GET', '/downloads/citamate-1.6.0.zip')).status, 200);
+        const pub = await call('GET', '/api/v1/public/downloads');
+        assert.equal(pub.status, 200, 'the download list is public');
+        assert.equal(pub.json.items.length, 3);
+        const page = await call('GET', '/downloads/');
+        assert.equal(page.status, 200);
+        assert.match(page.text, /Get the extensions/);
+        assert.match(page.text, /modulepreload" href="\/v\/[^"]+\/js\/extensions\.js"/);
         const root = await call('GET', '/');
         assert.equal(root.status, 302);
         assert.equal(root.headers.get('location'), '/app');
