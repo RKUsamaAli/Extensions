@@ -70,15 +70,16 @@ async function run(msg: Message): Promise<void> {
         ? "This browser's proxy setting for extensions doesn't respond (this happens in Orion on iPhone/iPad), so RelaySwitch can't switch proxies here."
         : `This browser can't run RelaySwitch: it has no ${reply.support.missing.join(" or ") || "proxy support"}. Use Chrome, Edge, Brave, Opera or Arc.`;
     $("deviceHelp").hidden = !(unsupported && reply.profiles.length > 0);
-    render(reply.state, reply.profiles);
+    // Auth first: render() reads `signedIn` to decide whether the proxy list is shown.
     renderAuth(reply.auth);
+    render(reply.state, reply.profiles);
   } catch (err) {
     errorEl.textContent = err instanceof Error ? err.message : String(err);
     errorEl.hidden = false;
     const fresh = await send({ type: "getState" });
     if (fresh.ok) {
-      render(fresh.state, fresh.profiles);
       renderAuth(fresh.auth);
+      render(fresh.state, fresh.profiles);
     }
   } finally {
     setBusy(false);
