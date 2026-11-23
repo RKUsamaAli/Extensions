@@ -103,21 +103,21 @@ extract() {
     fi
 }
 
-# npm_ci_cached <dir> <dev|prod>   npm ci, reusing node_modules cached per package-lock + Node version.
+# npm_ci_cached <dir> <name> <dev|prod>   npm ci, reusing node_modules cached per package-lock + Node version.
 npm_ci_cached() {
-    local dir="$1" kind="$2" key cache
+    local dir="$1" name="$2" kind="$3" key cache
     key="$(cat "$dir/package-lock.json" <(node -v) <(echo "$kind") | sha256sum | cut -c1-16)"
-    cache="$SHARED_DIR/cache/node_modules-$(basename "$dir")-$key"
+    cache="$SHARED_DIR/cache/node_modules-$name-$key"
     if [[ -d "$cache" ]]; then
         as_app cp -a "$cache" "$dir/node_modules"
-        ok "$(basename "$dir"): package-lock.json unchanged - reused cached node_modules"
+        ok "$name: package-lock.json unchanged - reused cached node_modules"
     else
         local flags=(--no-audit --no-fund --loglevel=error)
         [[ "$kind" == "prod" ]] && flags+=(--omit=dev)
         (cd "$dir" && as_app npm ci "${flags[@]}")
-        rm -rf "$SHARED_DIR"/cache/node_modules-"$(basename "$dir")"-*
+        rm -rf "$SHARED_DIR/cache/node_modules-$name-"*
         as_app cp -a "$dir/node_modules" "$cache"
-        ok "$(basename "$dir"): npm ci done"
+        ok "$name: npm ci done"
     fi
 }
 
@@ -159,7 +159,7 @@ ok "Release $NEW_RELEASE ($REF @ $SHORT)"
 
 # ---------------------------------------------------- 2. dependencies ---
 step "2/9 Installing dependencies"
-npm_ci_cached "$RELEASE_DIR" prod
+npm_ci_cached "$RELEASE_DIR" ext-hub prod
 if [[ "$BUILD_EXTENSIONS" == "true" || "$RUN_TESTS" == "true" ]]; then
     BUILD_DIR="$SHARED_DIR/cache/build-$NEW_RELEASE"
     # Same layout as the repository: the extensions' tests read ../ext-hub/seeds.
@@ -167,7 +167,7 @@ if [[ "$BUILD_EXTENSIONS" == "true" || "$RUN_TESTS" == "true" ]]; then
     extract "$RELAYSWITCH_SUBDIR" "$BUILD_DIR/$RELAYSWITCH_SUBDIR"
     as_app mkdir -p "$(dirname "$BUILD_DIR/$APP_SUBDIR")"
     as_app ln -sfn "$RELEASE_DIR" "$BUILD_DIR/$APP_SUBDIR"
-    npm_ci_cached "$BUILD_DIR/$RELAYSWITCH_SUBDIR" dev
+    npm_ci_cached "$BUILD_DIR/$RELAYSWITCH_SUBDIR" relayswitch dev
 fi
 
 # ------------------------------------------------------------ 3. test ---
