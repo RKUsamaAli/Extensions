@@ -334,3 +334,29 @@ test('citamate logs keep the page snapshot of a failed step (opt-in on read, siz
     assert.equal(c.context.page, 'x');
     assert.ok(JSON.stringify(c.context).length <= 32 * 1024);
 });
+
+test('admin creates entries and proxies for a user, sees what they created, and can reassign them', () => {
+    const s = makeServices();
+    const boss = addUser(s, 'boss', { role: 'admin' });
+    const ali = addUser(s, 'ali');
+    const sara = addUser(s, 'sara');
+    const e = s.profiles.create(boss, { ...entry('For Ali'), ownerId: ali.id });
+    assert.equal(e.ownerName, 'ali');
+    assert.equal(e.createdByName, 'boss', 'the creator is kept');
+    assert.deepEqual(s.profiles.list(scopeFor(ali)).map((x) => x.label), ['For Ali'], 'the user sees it when they sign in');
+    s.profiles.create(ali, entry('Ali own'));
+    assert.deepEqual(s.profiles.list(scopeFor(boss, 'created')).map((x) => x.label), ['For Ali'], '"created" = what the admin added, for anyone');
+
+    const p = s.proxies.create(boss, { host: 'h', port: 80, ownerId: ali.id });
+    s.proxies.addChecks(boss, [{ proxyId: p.id, ok: true, ms: 100 }]);
+    assert.equal(s.proxies.stats(scopeFor(ali))[p.id].results.length, 1);
+    const moved = s.proxies.update(boss, p.id, { host: 'h', port: 80, ownerId: sara.id });
+    assert.equal(moved.ownerName, 'sara');
+    assert.equal(s.proxies.list(scopeFor(ali)).length, 0);
+    assert.equal(s.proxies.stats(scopeFor(sara))[p.id].results.length, 1, 'check history moves with the proxy');
+    assert.equal(s.proxies.page(scopeFor(boss, 'created'), { limit: 10 }).total, 1);
+
+    assert.equal(s.profiles.update(boss, e.id, { ...entry('For Sara'), ownerId: sara.id }).ownerName, 'sara');
+    assert.throws(() => s.profiles.update(sara, e.id, { ...entry('x'), ownerId: ali.id }), /admin/);
+    assert.throws(() => s.profiles.update(boss, e.id, { ...entry('x'), ownerId: 'nobody' }), (err) => err.code === 'validation_error');
+});

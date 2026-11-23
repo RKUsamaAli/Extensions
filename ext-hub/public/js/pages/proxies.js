@@ -2,7 +2,7 @@
 import { get, post, put, del, qs } from "../api.js";
 import { el, table, scrollTable, skeletonTiles, drawer, confirmDialog, toast, toastError, field, input, select, formValues, fmtTime, badge, ago } from "../ui.js";
 import { scoreOf, scoreBand, SCORE_WINDOW } from "../proxyScore.js";
-import { ownerParam, ownerSelect, pageHead, showOwner } from "../state.js";
+import { ownerParam, ownerSelect, pageHead, showOwner, ownerField, ownerCell, defaultOwnerId, isAdmin } from "../state.js";
 import { parseProxyList } from "../proxyParse.js";
 
 const SCHEMES = [
@@ -29,6 +29,7 @@ function openEditor(p, onDone) {
   const body = el(
     "div",
     { class: "form-grid" },
+    ownerField(p && p.ownerId, "proxy"),
     field("Name", input("name", x.name, { placeholder: "Defaults to host:port", testid: "proxy-name" }), { wide: true }),
     field("Type", select("scheme", SCHEMES, x.scheme || "http", { testid: "proxy-scheme" })),
     field("Host *", input("host", x.host, { required: true, autocapitalize: "none", spellcheck: "false", testid: "proxy-host" })),
@@ -60,6 +61,7 @@ function openEditor(p, onDone) {
         city: v.city.trim(),
         sessionStart: Number(v.sessionStart) || 0,
         sessionEnd: Number(v.sessionEnd) || 0,
+        ...(v.ownerId ? { ownerId: v.ownerId } : {}),
       };
       if (!data.host || !(data.port >= 1 && data.port <= 65535)) {
         const err = new Error("Host and a port between 1 and 65535 are required.");
@@ -93,6 +95,7 @@ function openBulk(onDone) {
       "div",
       { class: "stack" },
       el("p", { class: "hint" }, "One proxy per line: host:port, host:port:user:pass, user:pass@host:port or scheme://user:pass@host:port. Lines starting with # are skipped."),
+      ownerField(null, "proxies"),
       field("Type for lines without a scheme", scheme),
       field("Proxies", area),
       preview,
@@ -101,7 +104,8 @@ function openBulk(onDone) {
       const { items, errors } = parseProxyList(area.value, scheme.value);
       if (!items.length) throw new Error(errors.length ? `No line could be read (line ${errors[0].line}: ${errors[0].message}).` : "Paste at least one proxy.");
       if (items.length > 1000) throw new Error("At most 1000 proxies at once.");
-      const r = await post("/relayswitch/proxies/bulk", { items });
+      const ownerSel = document.querySelector('[data-testid=proxy-bulk-drawer] select[name=ownerId]');
+      const r = await post("/relayswitch/proxies/bulk", { items, ...(isAdmin() ? { ownerId: ownerSel ? ownerSel.value : defaultOwnerId() } : {}) });
       toast(`Added ${(r.items || []).length} proxies.` + (errors.length ? ` ${errors.length} lines skipped.` : ""), "ok");
       onDone();
     },
@@ -238,7 +242,7 @@ export default async function proxiesPage() {
         },
       },
     ];
-    if (showOwner()) cols.push({ label: "Owner", render: (r) => r.ownerName });
+    if (showOwner()) cols.push({ label: "Owner", render: ownerCell });
     cols.push({
       label: "",
       class: "actions",
@@ -293,7 +297,7 @@ export default async function proxiesPage() {
   root.append(
     pageHead(
       "RelaySwitch proxies",
-      ownerSelect(load),
+      ownerSelect(load, { created: true }),
       el("button", { type: "button", class: "btn", testid: "proxy-refresh", onclick: () => load() }, "Refresh"),
       el("button", { type: "button", class: "btn", testid: "proxy-bulk", onclick: () => openBulk(load) }, "Bulk add"),
       el("button", { type: "button", class: "btn primary", testid: "proxy-add", onclick: () => openEditor(null, load) }, "Add proxy"),

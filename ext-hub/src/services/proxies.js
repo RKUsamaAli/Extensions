@@ -6,7 +6,7 @@
 const { newId, isId } = require('../lib/ids');
 const { E } = require('../lib/errors');
 const { str, clampInt } = require('../lib/util');
-const { scopeSql, assertCanTouch, ownerForCreate } = require('./ownership');
+const { scopeSql, createdSql, assertCanTouch, ownerForCreate, ownerForUpdate } = require('./ownership');
 const { scoreOf, scoreBand, SCORE_WINDOW } = require('../lib/score');
 
 const SCHEMES = ['http', 'https', 'socks4', 'socks5'];
@@ -42,7 +42,7 @@ function normalizeProxy(raw) {
 }
 
 function createProxies({ db, clock, cipher, users }) {
-    const sel = 'SELECT x.*, u.username AS owner_name FROM proxies x JOIN users u ON u.id = x.owner_id';
+    const sel = 'SELECT x.*, u.username AS owner_name, cb.username AS created_by_name FROM proxies x JOIN users u ON u.id = x.owner_id LEFT JOIN users cb ON cb.id = x.created_by';
 
     function shape(r) {
         return {
@@ -59,6 +59,8 @@ function createProxies({ db, clock, cipher, users }) {
             sessionEnd: r.session_end,
             ownerId: r.owner_id,
             ownerName: r.owner_name ?? null,
+            createdBy: r.created_by ?? null,
+            createdByName: r.created_by_name ?? null,
             createdAt: r.created_at,
             updatedAt: r.updated_at
         };
@@ -68,7 +70,8 @@ function createProxies({ db, clock, cipher, users }) {
 
     function list(scope) {
         const s = scopeSql(scope, 'x');
-        return db.prepare(`${sel} WHERE ${s.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params).map(shape);
+        const c = createdSql(scope, 'x');
+        return db.prepare(`${sel} WHERE ${s.where}${c.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params, ...c.params).map(shape);
     }
 
     function insert(ownerId, v, actor) {
@@ -108,12 +111,17 @@ function createProxies({ db, clock, cipher, users }) {
         assertCanTouch(actor, row, 'Proxy');
         const { value: v, fields } = normalizeProxy(body);
         if (Object.keys(fields).length) throw E.validation(fields);
+        const newOwner = ownerForUpdate(actor, row, body && body.ownerId, users);
         const t = clock.now();
         const pw = v.password === undefined ? row.password_enc : cipher.encrypt(v.password);
-        db.prepare(
-            `UPDATE proxies SET name = ?, scheme = ?, host = ?, port = ?, username_template = ?, password_enc = ?, country = ?, city = ?,
-                 session_start = ?, session_end = ?, updated_at = ?, updated_by = ? WHERE id = ?`
-        ).run(v.name, v.scheme, v.host, v.port, v.usernameTemplate, pw, v.country, v.city, v.sessionStart, v.sessionEnd, t, actor.id, id);
+        db.transaction(() => {
+            db.prepare(
+                `UPDATE proxies SET name = ?, scheme = ?, host = ?, port = ?, username_template = ?, password_enc = ?, country = ?, city = ?,
+                     session_start = ?, session_end = ?, owner_id = COALESCE(?, owner_id), updated_at = ?, updated_by = ? WHERE id = ?`
+            ).run(v.name, v.scheme, v.host, v.port, v.usernameTemplate, pw, v.country, v.city, v.sessionStart, v.sessionEnd, newOwner, t, actor.id, id);
+            // The check history follows the proxy to its new owner.
+            if (newOwner) db.prepare('UPDATE proxy_checks SET owner_id = ? WHERE proxy_id = ?').run(newOwner, id);
+        })();
         return shape(get(id));
     }
 
@@ -206,7 +214,8 @@ function createProxies({ db, clock, cipher, users }) {
         const n = clampInt(limit, 1, 200, 50);
         const start = clampInt(offset, 0, 1e9, 0);
         const s = scopeSql(scope, 'x');
-        const rows = db.prepare(`${sel} WHERE ${s.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params);
+        const c = createdSql(scope, 'x');
+        const rows = db.prepare(`${sel} WHERE ${s.where}${c.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params, ...c.params);
         const checks = stats(scope, { perProxy: SCORE_WINDOW });
         const all = rows.map((r) => {
             const recent = (checks[r.id] && checks[r.id].results) || [];

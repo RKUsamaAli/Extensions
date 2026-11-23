@@ -7,7 +7,7 @@
 const { newId, isId } = require('../lib/ids');
 const { E } = require('../lib/errors');
 const { str } = require('../lib/util');
-const { scopeSql, assertCanTouch, ownerForCreate } = require('./ownership');
+const { scopeSql, createdSql, assertCanTouch, ownerForCreate, ownerForUpdate } = require('./ownership');
 
 const TEXT_FIELDS = ['docType', 'docNumber', 'fullName', 'birthYear', 'phone', 'email', 'notes'];
 const SELECT_FIELDS = ['nationality', 'province', 'tramite', 'office'];
@@ -41,22 +41,27 @@ function createProfiles({ db, clock, cipher, users }) {
         for (const f of DATA_FIELDS) out[f] = data[f] ?? '';
         out.ownerId = row.owner_id;
         out.ownerName = ownerName ?? row.owner_name ?? null;
+        out.createdBy = row.created_by ?? null;
+        out.createdByName = row.created_by_name ?? null;
         out.createdAt = row.created_at;
         out.updatedAt = row.updated_at;
         return out;
     }
 
+    const SEL = 'SELECT p.*, u.username AS owner_name, cb.username AS created_by_name FROM profiles p JOIN users u ON u.id = p.owner_id LEFT JOIN users cb ON cb.id = p.created_by';
+
     function list(scope) {
         const s = scopeSql(scope, 'p');
+        const c = createdSql(scope, 'p');
         return db
-            .prepare(`SELECT p.*, u.username AS owner_name FROM profiles p JOIN users u ON u.id = p.owner_id WHERE ${s.where} ORDER BY p.label COLLATE NOCASE, p.id`)
-            .all(...s.params)
+            .prepare(`${SEL} WHERE ${s.where}${c.where} ORDER BY p.label COLLATE NOCASE, p.id`)
+            .all(...s.params, ...c.params)
             .map((r) => shape(r));
     }
 
     function get(id) {
         if (!isId(id)) return null;
-        return db.prepare('SELECT p.*, u.username AS owner_name FROM profiles p JOIN users u ON u.id = p.owner_id WHERE p.id = ?').get(id) || null;
+        return db.prepare(`${SEL} WHERE p.id = ?`).get(id) || null;
     }
 
     function encode(v) {
@@ -108,8 +113,9 @@ function createProfiles({ db, clock, cipher, users }) {
         assertCanTouch(actor, row, 'Entry');
         const { value, fields } = normalizeProfile(body);
         if (Object.keys(fields).length) throw E.validation(fields);
+        const newOwner = ownerForUpdate(actor, row, body && body.ownerId, users);
         const t = clock.now();
-        db.prepare('UPDATE profiles SET label = ?, data_enc = ?, updated_at = ?, updated_by = ? WHERE id = ?').run(value.label, encode(value), t, actor.id, id);
+        db.prepare('UPDATE profiles SET label = ?, data_enc = ?, owner_id = COALESCE(?, owner_id), updated_at = ?, updated_by = ? WHERE id = ?').run(value.label, encode(value), newOwner, t, actor.id, id);
         return shape(get(id));
     }
 

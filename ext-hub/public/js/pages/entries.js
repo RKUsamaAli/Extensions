@@ -1,7 +1,7 @@
 // CitaMate entries (profiles).
 import { get, post, put, del, qs } from "../api.js";
 import { el, table, drawer, confirmDialog, toast, toastError, field, input, select, formValues, fmtTime, downloadJson, pickFile } from "../ui.js";
-import { ownerParam, ownerSelect, pageHead, showOwner } from "../state.js";
+import { ownerParam, ownerSelect, pageHead, showOwner, ownerField, ownerCell, defaultOwnerId, isAdmin } from "../state.js";
 
 const DOC_TYPES = [{ value: "NIE", text: "NIE" }, { value: "DNI", text: "DNI" }, { value: "PASAPORTE", text: "Passport" }];
 const TEXT_FIELDS = ["label", "docType", "docNumber", "fullName", "birthYear", "phone", "email", "notes"];
@@ -64,6 +64,7 @@ async function openEditor(entry, onDone) {
   const body = el(
     "div",
     { class: "form-grid" },
+    ownerField(entry && entry.ownerId, "entry"),
     field("Label (shown in the CitaMate menu) *", input("label", e.label, { required: true, maxlength: 500, testid: "entry-label" }), { wide: true }),
     field("Document type", select("docType", DOC_TYPES, e.docType || "NIE", { testid: "entry-docType" })),
     field("Document number *", input("docNumber", e.docNumber, { required: true, autocapitalize: "characters", testid: "entry-docNumber" })),
@@ -96,6 +97,7 @@ async function openEditor(entry, onDone) {
         throw err;
       }
       const data = pick(v);
+      if (v.ownerId) data.ownerId = v.ownerId;
       if (entry) await put("/citamate/profiles/" + encodeURIComponent(entry.id), data);
       else await post("/citamate/profiles", data);
       toast(entry ? "Entry saved." : "Entry added.", "ok");
@@ -122,7 +124,7 @@ export default async function entriesPage() {
       { label: "Province", render: (r) => r.provinceText },
       { label: "Trámite", render: (r) => r.tramiteText, class: "wrap" },
     ];
-    if (showOwner()) cols.push({ label: "Owner", render: (r) => r.ownerName });
+    if (showOwner()) cols.push({ label: "Owner", render: ownerCell });
     cols.push({ label: "Updated", render: (r) => fmtTime(r.updatedAt) });
     cols.push({
       label: "",
@@ -179,7 +181,7 @@ export default async function entriesPage() {
     if (!list.length) return toast("The file is empty.", "error");
     if (list.length > 1000) return toast("At most 1000 entries per import.", "error");
     try {
-      const r = await post("/citamate/profiles/bulk", { items: list.map(pick) });
+      const r = await post("/citamate/profiles/bulk", { items: list.map(pick), ...(isAdmin() ? { ownerId: defaultOwnerId() } : {}) });
       toast(`Imported ${(r.items || []).length} entries.`, "ok");
       load();
     } catch (e) { toastError(e); }
@@ -189,7 +191,7 @@ export default async function entriesPage() {
   root.append(
     pageHead(
       "CitaMate entries",
-      ownerSelect(load),
+      ownerSelect(load, { created: true }),
       el("button", { type: "button", class: "btn", testid: "entries-import", onclick: importFile }, "Import JSON"),
       el("button", { type: "button", class: "btn", testid: "entries-export", onclick: () => downloadJson("citamate-entries.json", items.map((r) => ({ ...pick(r), id: r.id }))) }, "Export"),
       el("button", { type: "button", class: "btn primary", testid: "entry-add", onclick: () => openEditor(null, load) }, "Add entry"),
