@@ -1,0 +1,75 @@
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.wrap { flex-wrap: wrap; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 12px; margin-bottom: 10px; }
+.span2 { grid-column: span 2; }
+.field { margin-bottom: 10px; }
+.grid .field { margin: 0; }
+select.auto { width: auto; }
+label.inline { margin: 0; }
+.setting { display: flex; gap: 16px; align-items: center; color: var(--text); font-size: 13px; cursor: pointer; margin: 0; }
+#search { margin: 10px 0; }
+#saveBtn, #bulkAddBtn { display: inline-flex; align-items: center; gap: 6px; }
+#saveBtn .spinner, #bulkAddBtn .spinner { border-top-color: var(--accent-text); }
+
+/* proxy list */
+#list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+#list li {
+  display: flex; gap: 12px; align-items: center; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+}
+#list li.connected { border-color: var(--ok); }
+#list li.connecting { border-color: var(--warn); }
+#list .main { flex: 1; min-width: 0; }
+#list .title { display: flex; gap: 8px; align-items: center; }
+#list .title strong, #list .addr, #list .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#list .addr, #list .meta { font-size: 12px; }
+#list .actions { display: flex; gap: 6px; flex: none; }
+#list .actions button { padding: 4px 8px; font-size: 12px; }
+.badge { font-size: 11px; color: var(--ok); border: 1px solid var(--ok); border-radius: 5px; padding: 0 5px; white-space: nowrap; }
+.badge.idle { color: var(--muted); border-color: var(--border); }
+.badge.warn { color: var(--warn); border-color: var(--warn); }
+.check-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+#checkBtn { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.check-list { list-style: none; margin: 12px 0 10px; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.check-list li { display: grid; grid-template-columns: 18px 210px 1fr auto; gap: 8px; align-items: baseline; }
+.check-list .ok { color: var(--ok); } .check-list .bad { color: var(--bad); }
+.check-list .detail { overflow-wrap: anywhere; }
+@media (max-width: 640px) { .check-list li { grid-template-columns: 18px 1fr; } .check-list .detail, .check-list .ms { grid-column: 2; } }
+.legend { font-size: 12px; margin: 10px 0 0; }
+
+/* score */
+.score {
+  flex: none; min-width: 38px; text-align: center; font-weight: 700; font-size: 14px;
+  padding: 6px 4px; border-radius: 8px; background: var(--border); color: var(--muted);
+}
+.score.good { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.score.fair { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); }
+.score.poor { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+
+/* test progress */
+.progress { margin-top: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.bar { height: 4px; background: var(--border); border-radius: 4px; margin-top: 8px; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+/* bulk */
+#bulkText { min-height: 140px; resize: vertical; margin: 6px 0 10px; }
+.bulk-grid { grid-template-columns: repeat(3, 1fr); }
+.errors { margin: 0 0 10px; padding-left: 18px; font-size: 12px; max-height: 160px; overflow: auto; }
+
+/* activity */
+.summary {
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 10px 0;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+}
+.summary div { display: grid; font-size: 12px; }
+#logs { margin: 10px 0 0; padding-left: 0; list-style: none; max-height: 420px; overflow: auto; font-size: 12px; }
+#logs li { padding: 2px 0; }
+#logs .warn, .warn { color: var(--warn); }
+#logs .error { color: var(--bad); }
+
+@media (max-width: 640px) {
+  .grid, .bulk-grid { grid-template-columns: 1fr 1fr; }
+  #list li { flex-wrap: wrap; }
+  #list .actions { width: 100%; justify-content: flex-end; }
+}

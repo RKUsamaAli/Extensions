@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RelaySwitch</title>
+  <link rel="stylesheet" href="../shared/ui.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="row">
+    <span id="dot" class="dot"></span>
+    <h1 class="grow">RelaySwitch</h1>
+    <label class="switch" title="Proxy on/off">
+      <input id="toggle" type="checkbox" aria-label="Proxy on/off" data-testid="proxy-toggle">
+      <span></span>
+    </label>
+  </header>
+
+  <section id="signin" hidden></section>
+  <p id="serverError" class="error" data-testid="server-error" hidden></p>
+
+  <div id="unsupported" class="notice" hidden>
+    <p id="unsupportedText"></p>
+    <div id="deviceHelp" hidden>
+      <p class="help">On iPhone/iPad: Settings › Wi-Fi › ⓘ next to your network › Configure Proxy › Manual. Enter the server, port and login below. Works on that Wi-Fi only, not mobile data.</p>
+      <button id="copyDetails" type="button">Copy proxy details</button>
+    </div>
+  </div>
+
+  <section id="empty" hidden>
+    <p class="muted">No proxy yet. Add one to get started.</p>
+    <button id="addFirst" class="primary">Add a proxy</button>
+  </section>
+
+  <section id="main" hidden>
+    <label for="profile">Proxy</label>
+    <input id="search" type="search" placeholder="Search proxies" aria-label="Search proxies" hidden>
+    <select id="profile" data-testid="proxy-select"></select>
+    <p id="noMatch" class="muted" hidden>No matching proxies</p>
+
+    <div class="status">
+      <div class="row"><span id="spinner" class="spinner" hidden></span><span id="statusText">Off</span></div>
+      <div id="ipLine" class="mono"></div>
+      <div id="detail" class="muted"></div>
+    </div>
+
+    <div class="row actions">
+      <button id="check">Check IP</button>
+      <button id="newSession" hidden>New session</button>
+    </div>
+  </section>
+
+  <p id="error" class="error" hidden></p>
+
+  <label class="row setting" for="fabToggle" id="fabRow">
+    <span class="grow">Floating button on pages</span>
+    <span class="switch small"><input id="fabToggle" type="checkbox" aria-label="Floating button on pages"><span></span></span>
+  </label>
+
+  <footer class="row" id="footer">
+    <a href="#" id="options" class="grow">Manage proxies</a>
+  </footer>
+  <div id="account" class="row account" data-testid="account" hidden></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
