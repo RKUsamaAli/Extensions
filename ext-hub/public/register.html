@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account · ext-hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script type="module" src="/js/register.js"></script>
+</head>
+<body>
+  <div data-theme-switch></div>
+  <main class="auth">
+    <div class="card">
+      <div class="brand"><span class="logo" aria-hidden="true">EH</span> ext-hub</div>
+      <h1 data-testid="page-title">Create account</h1>
+      <p class="hint">An admin approves new accounts and decides which extensions you can use.</p>
+      <div id="done" class="notice ok" data-testid="register-done" hidden>Account created. Wait for an admin to approve it, then sign in.</div>
+      <form id="registerForm" novalidate>
+        <div id="error" class="form-error" role="alert" data-testid="register-error" hidden></div>
+        <label>Username
+          <input type="text" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="40" data-testid="register-username">
+          <span class="hint">3–40 characters: letters, digits, . _ -</span>
+        </label>
+        <label>Email <span class="hint">(optional)</span>
+          <input type="email" name="email" autocomplete="email" data-testid="register-email">
+        </label>
+        <label>Password
+          <input type="password" name="password" autocomplete="new-password" required minlength="8" data-testid="register-password">
+          <span class="hint">At least 8 characters.</span>
+        </label>
+        <label>Repeat password
+          <input type="password" name="password2" autocomplete="new-password" required data-testid="register-password2">
+        </label>
+        <button type="submit" class="btn primary" data-testid="register-submit">Create account</button>
+      </form>
+      <p class="alt"><a href="/login" data-testid="login-link">Back to sign in</a></p>
+    </div>
+  </main>
+</body>
+</html>

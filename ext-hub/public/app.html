@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ext-hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Main">
+      <div class="brand"><span class="logo" aria-hidden="true">EH</span> ext-hub</div>
+      <nav class="nav" id="nav">
+        <a href="#dashboard" data-route="dashboard" data-testid="nav-dashboard">Dashboard</a>
+        <div class="nav-group">CitaMate</div>
+        <a href="#entries" data-route="entries" data-testid="nav-entries">Entries</a>
+        <div class="nav-group">RelaySwitch</div>
+        <a href="#proxies" data-route="proxies" data-testid="nav-proxies">Proxies</a>
+        <div class="nav-group">Account</div>
+        <a href="#activity" data-route="activity" data-testid="nav-activity">Activity</a>
+        <a href="#devices" data-route="devices" data-testid="nav-devices">Devices</a>
+        <a href="#account" data-route="account" data-testid="nav-account">My account</a>
+        <div class="nav-group admin-only" hidden>Admin</div>
+        <a href="#users" data-route="users" class="admin-only" hidden data-testid="nav-users">Users</a>
+        <a href="#settings" data-route="settings" class="admin-only" hidden data-testid="nav-settings">Settings</a>
+        <a href="#config" data-route="config" class="admin-only" hidden data-testid="nav-config">Catalog &amp; config</a>
+        <a href="#audit" data-route="audit" class="admin-only" hidden data-testid="nav-audit">Audit log</a>
+      </nav>
+      <div class="foot">
+        <div class="whoami" id="whoami" data-testid="whoami"></div>
+        <div data-theme-switch></div>
+        <button type="button" class="btn" id="signOut" data-testid="sign-out">Sign out</button>
+      </div>
+    </aside>
+    <div>
+      <div class="topbar">
+        <button type="button" class="btn small" id="menuBtn" aria-controls="sidebar" aria-expanded="false" data-testid="menu-toggle">☰ Menu</button>
+        <strong>ext-hub</strong>
+      </div>
+      <main class="main" id="main" tabindex="-1">
+        <div class="loading">Loading…</div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

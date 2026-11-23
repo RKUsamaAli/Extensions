@@ -1,0 +1,6076 @@
+{
+  "provinces": [
+    {
+      "text": "A Coruña",
+      "value": "/icpplus/citar?p=15&locale=es"
+    },
+    {
+      "text": "Albacete",
+      "value": "/icpplus/citar?p=2&locale=es"
+    },
+    {
+      "text": "Alicante",
+      "value": "/icpco/citar?p=3&locale=es"
+    },
+    {
+      "text": "Almería",
+      "value": "/icpplus/citar?p=4&locale=es"
+    },
+    {
+      "text": "Araba",
+      "value": "/icpplus/citar?p=1&locale=es"
+    },
+    {
+      "text": "Asturias",
+      "value": "/icpplus/citar?p=33&locale=es"
+    },
+    {
+      "text": "Ávila",
+      "value": "/icpplus/citar?p=5&locale=es"
+    },
+    {
+      "text": "Badajoz",
+      "value": "/icpplus/citar?p=6&locale=es"
+    },
+    {
+      "text": "Barcelona",
+      "value": "/icpplustieb/citar?p=8&locale=es"
+    },
+    {
+      "text": "Bizkaia",
+      "value": "/icpplus/citar?p=48&locale=es"
+    },
+    {
+      "text": "Burgos",
+      "value": "/icpplus/citar?p=9&locale=es"
+    },
+    {
+      "text": "Cáceres",
+      "value": "/icpplus/citar?p=10&locale=es"
+    },
+    {
+      "text": "Cádiz",
+      "value": "/icpplus/citar?p=11&locale=es"
+    },
+    {
+      "text": "Cantabria",
+      "value": "/icpplus/citar?p=39&locale=es"
+    },
+    {
+      "text": "Castellón",
+      "value": "/icpplus/citar?p=12&locale=es"
+    },
+    {
+      "text": "Ceuta",
+      "value": "/icpplus/citar?p=51&locale=es"
+    },
+    {
+      "text": "Ciudad Real",
+      "value": "/icpplus/citar?p=13&locale=es"
+    },
+    {
+      "text": "Córdoba",
+      "value": "/icpplus/citar?p=14&locale=es"
+    },
+    {
+      "text": "Cuenca",
+      "value": "/icpplus/citar?p=16&locale=es"
+    },
+    {
+      "text": "Gipuzkoa",
+      "value": "/icpplus/citar?p=20&locale=es"
+    },
+    {
+      "text": "Girona",
+      "value": "/icpplus/citar?p=17&locale=es"
+    },
+    {
+      "text": "Granada",
+      "value": "/icpplus/citar?p=18&locale=es"
+    },
+    {
+      "text": "Guadalajara",
+      "value": "/icpplus/citar?p=19&locale=es"
+    },
+    {
+      "text": "Huelva",
+      "value": "/icpplus/citar?p=21&locale=es"
+    },
+    {
+      "text": "Huesca",
+      "value": "/icpplus/citar?p=22&locale=es"
+    },
+    {
+      "text": "Illes Balears",
+      "value": "/icpplustie/citar?p=7&locale=es"
+    },
+    {
+      "text": "Jaén",
+      "value": "/icpplus/citar?p=23&locale=es"
+    },
+    {
+      "text": "La Rioja",
+      "value": "/icpplus/citar?p=26&locale=es"
+    },
+    {
+      "text": "Las Palmas",
+      "value": "/icpplustie/citar?p=35&locale=es"
+    },
+    {
+      "text": "León",
+      "value": "/icpplus/citar?p=24&locale=es"
+    },
+    {
+      "text": "Lleida",
+      "value": "/icpplus/citar?p=25&locale=es"
+    },
+    {
+      "text": "Lugo",
+      "value": "/icpplus/citar?p=27&locale=es"
+    },
+    {
+      "text": "Madrid",
+      "value": "/icpplustiem/citar?p=28&locale=es"
+    },
+    {
+      "text": "Málaga",
+      "value": "/icpplustie/citar?p=29&locale=es"
+    },
+    {
+      "text": "Melilla",
+      "value": "/icpplus/citar?p=52&locale=es"
+    },
+    {
+      "text": "Murcia",
+      "value": "/icpplus/citar?p=30&locale=es"
+    },
+    {
+      "text": "Navarra",
+      "value": "/icpplus/citar?p=31&locale=es"
+    },
+    {
+      "text": "Ourense",
+      "value": "/icpplus/citar?p=32&locale=es"
+    },
+    {
+      "text": "Palencia",
+      "value": "/icpplus/citar?p=34&locale=es"
+    },
+    {
+      "text": "Pontevedra",
+      "value": "/icpplus/citar?p=36&locale=es"
+    },
+    {
+      "text": "Salamanca",
+      "value": "/icpplus/citar?p=37&locale=es"
+    },
+    {
+      "text": "S.Cruz Tenerife",
+      "value": "/icpco/citar?p=38&locale=es"
+    },
+    {
+      "text": "Segovia",
+      "value": "/icpplus/citar?p=40&locale=es"
+    },
+    {
+      "text": "Sevilla",
+      "value": "/icpplus/citar?p=41&locale=es"
+    },
+    {
+      "text": "Soria",
+      "value": "/icpplus/citar?p=42&locale=es"
+    },
+    {
+      "text": "Tarragona",
+      "value": "/icpplus/citar?p=43&locale=es"
+    },
+    {
+      "text": "Teruel",
+      "value": "/icpplus/citar?p=44&locale=es"
+    },
+    {
+      "text": "Toledo",
+      "value": "/icpplus/citar?p=45&locale=es"
+    },
+    {
+      "text": "Valencia",
+      "value": "/icpplus/citar?p=46&locale=es"
+    },
+    {
+      "text": "Valladolid",
+      "value": "/icpplus/citar?p=47&locale=es"
+    },
+    {
+      "text": "Zamora",
+      "value": "/icpplus/citar?p=49&locale=es"
+    },
+    {
+      "text": "Zaragoza",
+      "value": "/icpplus/citar?p=50&locale=es"
+    }
+  ],
+  "paises": [
+    {
+      "text": "AFGANISTAN",
+      "value": "401"
+    },
+    {
+      "text": "ALBANIA",
+      "value": "102"
+    },
+    {
+      "text": "ALEMANIA",
+      "value": "103"
+    },
+    {
+      "text": "ANDORRA",
+      "value": "133"
+    },
+    {
+      "text": "ANGOLA",
+      "value": "301"
+    },
+    {
+      "text": "ANGUILLA",
+      "value": "258"
+    },
+    {
+      "text": "ANTIGUA Y BARBUDA",
+      "value": "255"
+    },
+    {
+      "text": "ANTILLAS NL.",
+      "value": "200"
+    },
+    {
+      "text": "APATRIDA",
+      "value": "600"
+    },
+    {
+      "text": "ARABIA SAUDI",
+      "value": "403"
+    },
+    {
+      "text": "ARGELIA",
+      "value": "304"
+    },
+    {
+      "text": "ARGENTINA",
+      "value": "202"
+    },
+    {
+      "text": "ARMENIA",
+      "value": "142"
+    },
+    {
+      "text": "ARUBA",
+      "value": "257"
+    },
+    {
+      "text": "AUSTRALIA",
+      "value": "500"
+    },
+    {
+      "text": "AUSTRIA",
+      "value": "104"
+    },
+    {
+      "text": "AZERBAYAN",
+      "value": "143"
+    },
+    {
+      "text": "BAHAMAS",
+      "value": "203"
+    },
+    {
+      "text": "BAHREIN",
+      "value": "405"
+    },
+    {
+      "text": "BANGLADESH",
+      "value": "432"
+    },
+    {
+      "text": "BARBADOS",
+      "value": "205"
+    },
+    {
+      "text": "BELGICA",
+      "value": "105"
+    },
+    {
+      "text": "BELICE",
+      "value": "207"
+    },
+    {
+      "text": "BENIN",
+      "value": "302"
+    },
+    {
+      "text": "BHUTAN",
+      "value": "407"
+    },
+    {
+      "text": "BIELORRUSIA O BELARUS",
+      "value": "144"
+    },
+    {
+      "text": "BOLIVIA",
+      "value": "204"
+    },
+    {
+      "text": "BOSNIA-HERZEGOVINA",
+      "value": "156"
+    },
+    {
+      "text": "BOTSWANA",
+      "value": "305"
+    },
+    {
+      "text": "BRASIL",
+      "value": "206"
+    },
+    {
+      "text": "BRUNEI DARUSSALAM",
+      "value": "409"
+    },
+    {
+      "text": "BULGARIA",
+      "value": "134"
+    },
+    {
+      "text": "BURKINA FASO",
+      "value": "303"
+    },
+    {
+      "text": "BURUNDI",
+      "value": "321"
+    },
+    {
+      "text": "CABO VERDE",
+      "value": "315"
+    },
+    {
+      "text": "CAMBOYA",
+      "value": "402"
+    },
+    {
+      "text": "CAMERUN",
+      "value": "308"
+    },
+    {
+      "text": "CANADA",
+      "value": "208"
+    },
+    {
+      "text": "CENTROAFRICA REPUBLICA",
+      "value": "310"
+    },
+    {
+      "text": "CHAD",
+      "value": "372"
+    },
+    {
+      "text": "CHILE",
+      "value": "210"
+    },
+    {
+      "text": "CHINA",
+      "value": "406"
+    },
+    {
+      "text": "CHIPRE",
+      "value": "107"
+    },
+    {
+      "text": "COLOMBIA",
+      "value": "212"
+    },
+    {
+      "text": "COMORES",
+      "value": "311"
+    },
+    {
+      "text": "CONGO BRAZZAVILLE",
+      "value": "312"
+    },
+    {
+      "text": "COREA, REP. POP. DEMOC.",
+      "value": "460"
+    },
+    {
+      "text": "COREA, REPUBLICA",
+      "value": "410"
+    },
+    {
+      "text": "COSTA DE MARFIL",
+      "value": "314"
+    },
+    {
+      "text": "COSTA RICA",
+      "value": "214"
+    },
+    {
+      "text": "CROACIA",
+      "value": "140"
+    },
+    {
+      "text": "CUBA",
+      "value": "216"
+    },
+    {
+      "text": "DINAMARCA",
+      "value": "108"
+    },
+    {
+      "text": "DJIBOUTI",
+      "value": "317"
+    },
+    {
+      "text": "DOMINICA",
+      "value": "217"
+    },
+    {
+      "text": "DOMINICANA REPUBLICA",
+      "value": "218"
+    },
+    {
+      "text": "ECUADOR",
+      "value": "222"
+    },
+    {
+      "text": "EEUU",
+      "value": "224"
+    },
+    {
+      "text": "EGIPTO",
+      "value": "300"
+    },
+    {
+      "text": "EL SALVADOR",
+      "value": "220"
+    },
+    {
+      "text": "EL VATICANO",
+      "value": "136"
+    },
+    {
+      "text": "EMIRATOS ARABES UNIDOS",
+      "value": "429"
+    },
+    {
+      "text": "ERITREA",
+      "value": "384"
+    },
+    {
+      "text": "ESLOVAQUIA",
+      "value": "158"
+    },
+    {
+      "text": "ESLOVENIA",
+      "value": "141"
+    },
+    {
+      "text": "ESPAÑA",
+      "value": "109"
+    },
+    {
+      "text": "ESTONIA",
+      "value": "137"
+    },
+    {
+      "text": "ETIOPIA",
+      "value": "318"
+    },
+    {
+      "text": "FIDJI",
+      "value": "550"
+    },
+    {
+      "text": "FILIPINAS",
+      "value": "411"
+    },
+    {
+      "text": "FINLANDIA",
+      "value": "110"
+    },
+    {
+      "text": "FRANCIA",
+      "value": "111"
+    },
+    {
+      "text": "GABON",
+      "value": "320"
+    },
+    {
+      "text": "GAMBIA",
+      "value": "323"
+    },
+    {
+      "text": "GEORGIA",
+      "value": "145"
+    },
+    {
+      "text": "GHANA",
+      "value": "322"
+    },
+    {
+      "text": "GRANADA REPUBLICA",
+      "value": "229"
+    },
+    {
+      "text": "GRECIA",
+      "value": "113"
+    },
+    {
+      "text": "GUATEMALA",
+      "value": "228"
+    },
+    {
+      "text": "GUAYANA",
+      "value": "225"
+    },
+    {
+      "text": "GUINEA ECUATORIAL",
+      "value": "324"
+    },
+    {
+      "text": "GUINEA REPUBLICA",
+      "value": "325"
+    },
+    {
+      "text": "GUINEA-BISSAU",
+      "value": "328"
+    },
+    {
+      "text": "HAITI",
+      "value": "230"
+    },
+    {
+      "text": "HOLANDA",
+      "value": "123"
+    },
+    {
+      "text": "HONDURAS",
+      "value": "232"
+    },
+    {
+      "text": "HUNGRIA",
+      "value": "114"
+    },
+    {
+      "text": "INDIA",
+      "value": "412"
+    },
+    {
+      "text": "INDONESIA",
+      "value": "414"
+    },
+    {
+      "text": "IRAK",
+      "value": "413"
+    },
+    {
+      "text": "IRAN",
+      "value": "415"
+    },
+    {
+      "text": "IRLANDA",
+      "value": "115"
+    },
+    {
+      "text": "ISLANDIA",
+      "value": "116"
+    },
+    {
+      "text": "ISLAS MARSCHALL",
+      "value": "520"
+    },
+    {
+      "text": "ISRAEL",
+      "value": "417"
+    },
+    {
+      "text": "ITALIA",
+      "value": "117"
+    },
+    {
+      "text": "JAMAICA",
+      "value": "233"
+    },
+    {
+      "text": "JAPON",
+      "value": "416"
+    },
+    {
+      "text": "JORDANIA",
+      "value": "419"
+    },
+    {
+      "text": "KAZAJSTAN",
+      "value": "146"
+    },
+    {
+      "text": "KENIA",
+      "value": "336"
+    },
+    {
+      "text": "KIRGUISTAN",
+      "value": "147"
+    },
+    {
+      "text": "KIRIBATI",
+      "value": "501"
+    },
+    {
+      "text": "KUWAIT",
+      "value": "421"
+    },
+    {
+      "text": "LAOS",
+      "value": "418"
+    },
+    {
+      "text": "LAS MALDIVAS",
+      "value": "436"
+    },
+    {
+      "text": "LESOTHO",
+      "value": "337"
+    },
+    {
+      "text": "LETONIA",
+      "value": "138"
+    },
+    {
+      "text": "LIBANO",
+      "value": "423"
+    },
+    {
+      "text": "LIBERIA",
+      "value": "342"
+    },
+    {
+      "text": "LIBIA",
+      "value": "344"
+    },
+    {
+      "text": "LIECHTENSTEIN",
+      "value": "118"
+    },
+    {
+      "text": "LITUANIA",
+      "value": "139"
+    },
+    {
+      "text": "LUXEMBURGO",
+      "value": "119"
+    },
+    {
+      "text": "MACAO",
+      "value": "463"
+    },
+    {
+      "text": "MACEDONIA",
+      "value": "159"
+    },
+    {
+      "text": "MADAGASCAR",
+      "value": "354"
+    },
+    {
+      "text": "MALASIA",
+      "value": "425"
+    },
+    {
+      "text": "MALASIA - GRAN BRETAÑA",
+      "value": "900"
+    },
+    {
+      "text": "MALAWI",
+      "value": "346"
+    },
+    {
+      "text": "MALI",
+      "value": "347"
+    },
+    {
+      "text": "MALTA",
+      "value": "120"
+    },
+    {
+      "text": "MARRUECOS",
+      "value": "348"
+    },
+    {
+      "text": "MAURICIO",
+      "value": "349"
+    },
+    {
+      "text": "MAURITANIA",
+      "value": "350"
+    },
+    {
+      "text": "MEJICO",
+      "value": "234"
+    },
+    {
+      "text": "MICRONESIA",
+      "value": "525"
+    },
+    {
+      "text": "MOLDAVIA",
+      "value": "148"
+    },
+    {
+      "text": "MONACO",
+      "value": "121"
+    },
+    {
+      "text": "MONGOLIA",
+      "value": "427"
+    },
+    {
+      "text": "MONTENEGRO",
+      "value": "160"
+    },
+    {
+      "text": "MOZAMBIQUE",
+      "value": "351"
+    },
+    {
+      "text": "MYANMAR",
+      "value": "400"
+    },
+    {
+      "text": "NAMIBIA",
+      "value": "353"
+    },
+    {
+      "text": "NAURU",
+      "value": "541"
+    },
+    {
+      "text": "NEPAL",
+      "value": "420"
+    },
+    {
+      "text": "NICARAGUA",
+      "value": "236"
+    },
+    {
+      "text": "NIGER",
+      "value": "360"
+    },
+    {
+      "text": "NIGERIA",
+      "value": "352"
+    },
+    {
+      "text": "NORUEGA",
+      "value": "122"
+    },
+    {
+      "text": "NUEVA ZELANDA",
+      "value": "540"
+    },
+    {
+      "text": "OMAN",
+      "value": "444"
+    },
+    {
+      "text": "PAKISTAN",
+      "value": "424"
+    },
+    {
+      "text": "PALAOS",
+      "value": "920"
+    },
+    {
+      "text": "PALESTINA",
+      "value": "910"
+    },
+    {
+      "text": "PANAMA",
+      "value": "238"
+    },
+    {
+      "text": "PAPUA NUEVA GUINEA",
+      "value": "542"
+    },
+    {
+      "text": "PARAGUAY",
+      "value": "240"
+    },
+    {
+      "text": "PERU",
+      "value": "242"
+    },
+    {
+      "text": "POLONIA",
+      "value": "124"
+    },
+    {
+      "text": "PORTUGAL",
+      "value": "125"
+    },
+    {
+      "text": "PUERTO RICO",
+      "value": "244"
+    },
+    {
+      "text": "QATAR",
+      "value": "431"
+    },
+    {
+      "text": "REINO UNIDO",
+      "value": "112"
+    },
+    {
+      "text": "REP. DEMOCRATICA DEL CONGO (EX-ZAIRE)",
+      "value": "380"
+    },
+    {
+      "text": "REPUBLICA CHECA",
+      "value": "157"
+    },
+    {
+      "text": "REUNION-COMO",
+      "value": "355"
+    },
+    {
+      "text": "RUANDA",
+      "value": "306"
+    },
+    {
+      "text": "RUMANIA",
+      "value": "127"
+    },
+    {
+      "text": "RUSIA",
+      "value": "149"
+    },
+    {
+      "text": "SALOMON",
+      "value": "551"
+    },
+    {
+      "text": "SAMOA OCCIDENTAL",
+      "value": "552"
+    },
+    {
+      "text": "SAN CRISTOBAL Y NEVIS",
+      "value": "256"
+    },
+    {
+      "text": "SAN MARINO",
+      "value": "135"
+    },
+    {
+      "text": "SAN VICENTE",
+      "value": "254"
+    },
+    {
+      "text": "SANTA LUCIA",
+      "value": "253"
+    },
+    {
+      "text": "SANTO TOME Y PRINCIPE",
+      "value": "361"
+    },
+    {
+      "text": "SEICHELLES",
+      "value": "363"
+    },
+    {
+      "text": "SENEGAL",
+      "value": "362"
+    },
+    {
+      "text": "SENEGAMBIA",
+      "value": "366"
+    },
+    {
+      "text": "SERBIA",
+      "value": "155"
+    },
+    {
+      "text": "SIERRA LEONA",
+      "value": "364"
+    },
+    {
+      "text": "SINGAPUR",
+      "value": "426"
+    },
+    {
+      "text": "SIRIA",
+      "value": "433"
+    },
+    {
+      "text": "SOMALIA",
+      "value": "365"
+    },
+    {
+      "text": "SRI LANKA",
+      "value": "404"
+    },
+    {
+      "text": "SUDAFRICA",
+      "value": "367"
+    },
+    {
+      "text": "SUDAN",
+      "value": "368"
+    },
+    {
+      "text": "SUECIA",
+      "value": "128"
+    },
+    {
+      "text": "SUIZA",
+      "value": "129"
+    },
+    {
+      "text": "SURINAM",
+      "value": "250"
+    },
+    {
+      "text": "SWAZILANDIA",
+      "value": "371"
+    },
+    {
+      "text": "TADJIKISTAN",
+      "value": "154"
+    },
+    {
+      "text": "TAIWAN",
+      "value": "408"
+    },
+    {
+      "text": "TANZANIA",
+      "value": "370"
+    },
+    {
+      "text": "THAILANDIA",
+      "value": "428"
+    },
+    {
+      "text": "TIMOR ORIENTAL",
+      "value": "465"
+    },
+    {
+      "text": "TOGO",
+      "value": "374"
+    },
+    {
+      "text": "TONGA",
+      "value": "554"
+    },
+    {
+      "text": "TRINIDAD Y TOBAGO",
+      "value": "245"
+    },
+    {
+      "text": "TUNEZ",
+      "value": "378"
+    },
+    {
+      "text": "TURKMENIA",
+      "value": "151"
+    },
+    {
+      "text": "TURQUIA",
+      "value": "130"
+    },
+    {
+      "text": "TUVALU",
+      "value": "560"
+    },
+    {
+      "text": "UCRANIA",
+      "value": "152"
+    },
+    {
+      "text": "UGANDA",
+      "value": "358"
+    },
+    {
+      "text": "URUGUAY",
+      "value": "246"
+    },
+    {
+      "text": "UZBEKISTAN",
+      "value": "153"
+    },
+    {
+      "text": "VANUATU",
+      "value": "565"
+    },
+    {
+      "text": "VENEZUELA",
+      "value": "248"
+    },
+    {
+      "text": "VIETNAM",
+      "value": "430"
+    },
+    {
+      "text": "YEMEN",
+      "value": "434"
+    },
+    {
+      "text": "ZAMBIA",
+      "value": "382"
+    },
+    {
+      "text": "ZIMBABWE",
+      "value": "357"
+    }
+  ],
+  "tramites": {
+    "/icpplus/citar?p=15&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=28&locale=es": [
+      {
+        "text": "Scroll down to see available procedures in this province",
+        "value": "-1"
+      },
+      {
+        "text": "POLICE - COLLECTION OF FOREIGNER IDENTITY CARD (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICE- TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      }
+    ],
+    "/icpplustiem/citar?p=28&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplustie/citar?p=29&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=2&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpco/citar?p=3&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=4&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=1&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=33&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=5&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=6&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplustieb/citar?p=8&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=48&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=9&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=10&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=11&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=39&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=12&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=51&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=13&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=14&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=16&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=20&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=17&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=18&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=19&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=21&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=22&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplustie/citar?p=7&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=23&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=26&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplustie/citar?p=35&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=24&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=25&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=27&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=52&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=30&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=31&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=32&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=34&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=36&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=37&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpco/citar?p=38&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=40&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=41&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=42&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=43&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=44&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=45&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=46&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=47&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=49&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ],
+    "/icpplus/citar?p=50&locale=es": [
+      {
+        "text": "POLICÍA - TOMA DE HUELLAS (EXPEDICIÓN DE TARJETA)",
+        "value": "4010"
+      },
+      {
+        "text": "POLICIA - RECOGIDA DE TARJETA (TIE)",
+        "value": "4036"
+      },
+      {
+        "text": "POLICIA - EXPEDICIÓN/RENOVACIÓN ASILO",
+        "value": "4067"
+      },
+      {
+        "text": "POLICIA - SOLICITUD ASILO",
+        "value": "4078"
+      },
+      {
+        "text": "POLICIA - ASIGNACIÓN DE NIE",
+        "value": "4031"
+      },
+      {
+        "text": "POLICIA - CERTIFICADO DE REGISTRO U.E.",
+        "value": "4038"
+      },
+      {
+        "text": "POLICIA - CARTA DE INVITACIÓN",
+        "value": "4037"
+      },
+      {
+        "text": "POLICIA - AUTORIZACIÓN DE REGRESO",
+        "value": "20"
+      },
+      {
+        "text": "POLICIA - CERTIFICADOS",
+        "value": "4049"
+      },
+      {
+        "text": "POLICÍA - TARJETA CONFLICTO UCRANIA",
+        "value": "4112"
+      },
+      {
+        "text": "SOLICITUD DE AUTORIZACIONES (EXTRANJERIA)",
+        "value": "4"
+      },
+      {
+        "text": "ARRAIGO Y CIRCUNSTANCIAS EXCEPCIONALES",
+        "value": "10"
+      },
+      {
+        "text": "REAGRUPACIÓN FAMILIAR",
+        "value": "3"
+      },
+      {
+        "text": "ESTANCIA POR ESTUDIOS",
+        "value": "4016"
+      },
+      {
+        "text": "RENOVACIONES DE RESIDENCIA",
+        "value": "4059"
+      },
+      {
+        "text": "ASILO - PRIMERA CITA (MADRID)",
+        "value": "4104"
+      }
+    ]
+  },
+  "offices": {
+    "/icpplus/citar?p=15&locale=es": [
+      {
+        "text": "Any office",
+        "value": "99"
+      },
+      {
+        "text": "CNP SANTIAGO COMPOSTELA EXTRANJEROS, C/ Feliciano Barrera Fernández, 9, SANTIAGO DE COMPOSTELA",
+        "value": "4"
+      },
+      {
+        "text": "CNP COMISARIA A CORUÑA - LONZAS, C\\ Médico Devesa Núñez, 4, A Coruña",
+        "value": "2"
+      },
+      {
+        "text": "CNP FERROL, AVENIDA DE SAN AMARO, S/N, FERROL",
+        "value": "5"
+      },
+      {
+        "text": "CNP Santa Uxía de Ribeira, Av/ Das Airos , 21, Ribeira",
+        "value": "3"
+      },
+      {
+        "text": "Immigration Office in A Coruña, C/ Real, 53, A CORUÑA",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=2&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP ALBACETE BPEF",
+        "value": "5"
+      }
+    ],
+    "/icpco/citar?p=3&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP Alcoy, Placeta Les Xiques, S/N, Alcoy",
+        "value": "12"
+      },
+      {
+        "text": "CNP Alicante NIE, Ebanistería, 4-6, Alicante",
+        "value": "15"
+      },
+      {
+        "text": "CNP Alicante TIE, Campo de Mirra, 6, Alicante",
+        "value": "3"
+      },
+      {
+        "text": "CNP Benidorm, Apolo XI, 36, Benidorm",
+        "value": "10"
+      },
+      {
+        "text": "CNP Benidorm TIE, Callosa D`Ensarria, 2, Benidorm",
+        "value": "4"
+      },
+      {
+        "text": "CNP Comisaría Provincial, C/ Isabel la Católica, 25, Alicante",
+        "value": "13"
+      },
+      {
+        "text": "CNP Denia, Avda Marquesado, 53, Denia",
+        "value": "11"
+      },
+      {
+        "text": "CNP Elche, El Abeto, 1, Elche",
+        "value": "5"
+      },
+      {
+        "text": "CNP Elda, Lamberto Amat, 26, Elda",
+        "value": "9"
+      },
+      {
+        "text": "CNP Orihuela, Sol, 34, Orihuela",
+        "value": "7"
+      },
+      {
+        "text": "CNP Orihuela Costa, C/ Flores (Centro de Emergencias), 5, Orihuela Costa",
+        "value": "14"
+      },
+      {
+        "text": "CNP Torrevieja, Arquitecto Larramendi, 3, Torrevieja",
+        "value": "6"
+      },
+      {
+        "text": "OEX ALICANTE, EBANISTERIA, 4-6, ALICANTE",
+        "value": "1"
+      },
+      {
+        "text": "OEX ALTEA, SAN ISIDRO LABRADOR, 1, ALTEA",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=4&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "Almería OUE, C/ Marruecos, 1, Almeri­a",
+        "value": "1"
+      },
+      {
+        "text": "CNP ALMERIA, AVENIDA DEL MEDITERRANEO, 201, ALMERIA",
+        "value": "3"
+      },
+      {
+        "text": "CNP EL EJIDO, Avenida del bulevar, 117, El Ejido",
+        "value": "4"
+      },
+      {
+        "text": "CNP ROQUETAS DE MARDGP UEYD , Avda. Curro Romero, 46, Roquetas de Mar",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=1&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP Comisaría Oficina de tramitación, Olaguibel (excepto manifiestos y entrevistas de asilo que siguen en C/ Oñate), 15, Vitoria-Gasteiz",
+        "value": "2"
+      },
+      {
+        "text": "Subdelegación del Gobierno en Alava, Olaguibel, 1, Vitoria-Gasteiz",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=33&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP AVILES, Río San Martín, 2, AVILES",
+        "value": "5"
+      },
+      {
+        "text": "CNP GIJÓN, Plaza Máximo Gonzalez, s/n, Gijón",
+        "value": "2"
+      },
+      {
+        "text": "CNP LUARCA, OLAVARRIETA, 25, LUARCA",
+        "value": "4"
+      },
+      {
+        "text": "CNP OVIEDO - EXPEDICION TIE, Plaza de España, 3, Planta Baja (POLICÍA), 3, Oviedo",
+        "value": "3"
+      },
+      {
+        "text": "CNP OVIEDO - OTROS DOCUMENTOS, PLAZA DE ESPAÑA, 3 , PLANTA BAJA (OVIEDO), 3, OVIEDO",
+        "value": "6"
+      },
+      {
+        "text": "Oficina de Extranjería en Oviedo, Plaza de España, 3, Oviedo",
+        "value": "1"
+      },
+      {
+        "text": "SOLICITUD INICIAL ASILO, OFICINA DE EXTRANJEROS (PLAZA DE ESPAÑA 3, POSTERIOR), 3, OVIEDO",
+        "value": "7"
+      }
+    ],
+    "/icpplus/citar?p=5&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP ÁVILA, PASEO SAN ROQUE, 34, ÁVILA",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de Extranjería en Ávila, Hornos Caleros, 1, Ávila",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=6&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "BRIGADA PROVINCIAL EXTRANJERÍA Y FRONTERAS BADAJOZ CNP, AVD. RAMÓN Y CAJAL , S/N, BADAJOZ",
+        "value": "9"
+      },
+      {
+        "text": "CNP ALMENDRALEJO, Benito Pérez Galdós, S/N, ALMENDRALEJO",
+        "value": "4"
+      },
+      {
+        "text": "CNP BADAJOZ, Avenida Ramón y Cajal, s/n, BADAJOZ",
+        "value": "7"
+      },
+      {
+        "text": "CNP BADAJOZ CITA PREVIA POLICÍA TARJETAS, LA BOMBA, 9, BADAJOZ",
+        "value": "2"
+      },
+      {
+        "text": "CNP DON BENITO, AVENIDA DE CORDOBA , S/N, DON BENITO",
+        "value": "5"
+      },
+      {
+        "text": "CNP MÉRIDA BRIGADA, AVENIDA VALHONDO , 8, MERIDA-BADAJOZ",
+        "value": "3"
+      },
+      {
+        "text": "CNP MÉRIDA TARJETAS, AVENIDA VALHONDO, 8, MÉRIDA-BADAJOZ",
+        "value": "8"
+      },
+      {
+        "text": "CNP ZAFRA, PLAZA DEL PILAR REDONDO S/N EDIFICIO AYUNTAMIENTO, S/N, ZAFRA",
+        "value": "6"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERÍA, CALLE LA BOMBA, 9, BADAJOZ",
+        "value": "1"
+      }
+    ],
+    "/icpplustieb/citar?p=8&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP COMISARIA BADALONA, AVDA. DELS VENTS, 9, BADALONA",
+        "value": "18"
+      },
+      {
+        "text": "CNP COMISARIA CASTELLDEFELS, PLAÇA DE L`ESPERANTO, 4, CASTELLDEFELS",
+        "value": "19"
+      },
+      {
+        "text": "CNP COMISARIA CERDANYOLA DEL VALLES, VERGE DE LES FEIXES, 4, CERDANYOLA DEL VALLES",
+        "value": "20"
+      },
+      {
+        "text": "CNP COMISARIA CORNELLA DE LLOBREGAT, AV. SANT ILDEFONS, S/N, CORNELLA DE LLOBREGAT",
+        "value": "21"
+      },
+      {
+        "text": "CNP COMISARIA EL PRAT DE LLOBREGAT, CENTRE, 4, EL PRAT DE LLOBREGAT",
+        "value": "23"
+      },
+      {
+        "text": "CNP COMISARIA GRANOLLERS, RICOMA, 65, GRANOLLERS",
+        "value": "28"
+      },
+      {
+        "text": "CNP COMISARIA IGUALADA, PRAT DE LA RIBA, 13, IGUALADA",
+        "value": "26"
+      },
+      {
+        "text": "CNP COMISARIA LHOSPITALET DE LLOBREGAT, Rbla. Just Oliveres, 43, L`HOSPITALET DE LLOBREGAT",
+        "value": "17"
+      },
+      {
+        "text": "CNP COMISARIA MANRESA, SOLER I MARCH, 5, MANRESA",
+        "value": "38"
+      },
+      {
+        "text": "CNP COMISARIA MATARO, AV. GATASSA, 15, MATARO",
+        "value": "27"
+      },
+      {
+        "text": "CNP COMISARIA MONTCADA I REIXAC, MAJOR, 38, MONTCADA I REIXAC",
+        "value": "31"
+      },
+      {
+        "text": "CNP COMISARIA RIPOLLET, TAMARIT, 78, RIPOLLET",
+        "value": "32"
+      },
+      {
+        "text": "CNP COMISARIA RUBI, TERRASSA, 16, RUBI",
+        "value": "29"
+      },
+      {
+        "text": "CNP COMISARIA SABADELL, BATLLEVELL, 115, SABADELL",
+        "value": "30"
+      },
+      {
+        "text": "CNP COMISARIA SANT ADRIA DEL BESOS, AV. JOAN XXIII, 2, SANT ADRIA DEL BESOS",
+        "value": "33"
+      },
+      {
+        "text": "CNP COMISARIA SANT BOI DE LLOBREGAT, RIERA BASTÉ, 43, SANT BOI DE LLOBREGAT",
+        "value": "24"
+      },
+      {
+        "text": "CNP COMISARIA SANT CUGAT DEL VALLES, VALLES, 1, SANT CUGAT DEL VALLES",
+        "value": "34"
+      },
+      {
+        "text": "CNP COMISARIA SANT FELIU DE LLOBREGAT, CARRERETES, 9, SANT FELIU DE LLOBREGAT",
+        "value": "22"
+      },
+      {
+        "text": "CNP COMISARIA SANTA COLOMA DE GRAMENET, IRLANDA, 67, SANTA COLOMA DE GRAMENET",
+        "value": "35"
+      },
+      {
+        "text": "CNP COMISARIA TERRASSA, BALDRICH, 13, TERRASSA",
+        "value": "36"
+      },
+      {
+        "text": "CNP COMISARIA VIC, BISBE MORGADES, 4, VIC",
+        "value": "37"
+      },
+      {
+        "text": "CNP COMISARIA VILADECANS, AVDA. BALLESTER, 2, VILADECANS",
+        "value": "25"
+      },
+      {
+        "text": "CNP COMISARIA VILAFRANCA DEL PENEDES, Avinguda Ronda del Mar, 109, VILAFRANCA DEL PENEDES",
+        "value": "46"
+      },
+      {
+        "text": "CNP COMISARIA VILANOVA I LA GELTRU, CARRER D`OLÉRDOLA, 47, Vilanova i la Geltrú",
+        "value": "49"
+      },
+      {
+        "text": "CNP GUADALAJARA, Guadalajara, 1, Barcelona",
+        "value": "47"
+      },
+      {
+        "text": "CNP MALLORCA GRANADOS, MALLORCA, 213, BARCELONA",
+        "value": "14"
+      },
+      {
+        "text": "CNP PSJ PLANTA BAJA, PASSEIG SANT JOAN, 189, BARCELONA",
+        "value": "43"
+      },
+      {
+        "text": "CNP RAMBLA GUIPUSCOA 74, RAMBLA GUIPUSCOA, 74, BARCELONA",
+        "value": "16"
+      }
+    ],
+    "/icpplus/citar?p=48&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP BILBAO JSP del País Vasco, Gordóniz, 8, Bilbao",
+        "value": "2"
+      },
+      {
+        "text": "Oficina Extranjería Bizkaia, Barroeta Aldamar , 1, Bilbao",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=9&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP ARANDA DE DUERO, SAN FRANCISCO, 92, ARANDA DE DUERO",
+        "value": "3"
+      },
+      {
+        "text": "CNP COMISARIA BURGOS, Avenida Castilla y León, 3, BURGOS",
+        "value": "4"
+      },
+      {
+        "text": "CNP COMISARIA POLICÍA UD. DOCUMENTACIÓN, Avenida Castilla y León, 3, BURGOS",
+        "value": "5"
+      },
+      {
+        "text": "CNP MIRANDA DE EBRO, ANTONIO CABEZON, 14, MIRANDA DE EBRO",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de Extranjeria en Burgos, Vitoria, 34, Burgos",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=21&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP AYAMONTE, AVENIDA NARCISO MARTIN NAVARRO, 20, AYAMONTE",
+        "value": "4"
+      },
+      {
+        "text": "CNP HUELVA, Avenida de la Glorieta, s/n, HUELVA",
+        "value": "3"
+      },
+      {
+        "text": "Oficina de Extranjería, c/ Fernando el Católico, 36, Huelva",
+        "value": "1"
+      },
+      {
+        "text": "Oficina de Extranjería Policía, Fernando el Católico, 36, Huelva",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=10&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CACERES BPEF, Avenida Pierre de Coubertin, 13, Cáceres",
+        "value": "3"
+      },
+      {
+        "text": "CNP PLASENCIA, CUEVA DE LA SERRANA, S/N, PLASENCIA",
+        "value": "2"
+      },
+      {
+        "text": "CNP VALENCIA DE ALCANTARA, Canalejas, 5, VALENCIA DE ALCANTARA",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERIA EN CACERES, C/Catedrático Antonio Silva, 7, CACERES",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=11&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "ALGECIRAS TR OFICINA EXRANJERÍA , P. Juan de Lima, 5, Algeciras",
+        "value": "5"
+      },
+      {
+        "text": "CÁDIZ COMISARÍA CUERPO N. DE POLICÍA, Avenida de Andalucía, 28, Cádiz",
+        "value": "1"
+      },
+      {
+        "text": "CÁDIZ OFICINA DE EXTRANJERÍA, Acacias, 2, Cádiz",
+        "value": "3"
+      },
+      {
+        "text": "CNP ALGECIRAS, AV. FUERZAS ARMADAS, 6, ALGECIRAS",
+        "value": "6"
+      },
+      {
+        "text": "CNP CHICLANA DE LA FRONTERA, LA FUENTE, 7, CHICLANA DE LA FRONTERA",
+        "value": "4"
+      },
+      {
+        "text": "CNP JEREZ DE LA FRONTERA, Avenida de la Universidad, 10, JEREZ DE LA FRONTERA",
+        "value": "9"
+      },
+      {
+        "text": "CNP LA LINEA CONCEPCIÓN, AVENIDA MENENDEZ PELAYO, S/N, LA LÍNEA DE LA CONCEPCIÓN",
+        "value": "8"
+      },
+      {
+        "text": "CNP PUERTO SANTA MARIA PUERTO REAL, Carpintero de rivera, s/n, Puerto Real",
+        "value": "7"
+      },
+      {
+        "text": "CNP ROTA, AVENIDA PRINCIPES DE ESPAÑA, 113, ROTA",
+        "value": "10"
+      },
+      {
+        "text": "CNP SAN FERNANDO, Avenida Contitución de 1978, S/N, SAN FERNANDO",
+        "value": "12"
+      }
+    ],
+    "/icpplus/citar?p=39&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP SANTANDER ASILO Y REFUGIO, Jose Ramón López Dóriga, 4, SANTANDER",
+        "value": "6"
+      },
+      {
+        "text": "CNP SANTANDER TRAMITES EXTRANJERIA, *** C/ LOPEZ DORIGA, 6, Santander",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA EXTRANJERIA, Luis Hoyos Sáinz, 4, SANTANDER",
+        "value": "1"
+      },
+      {
+        "text": "POLICIA CASTRO URDIALES, CAYETANO TUEROS, 8, CASTRO URDIALES",
+        "value": "3"
+      },
+      {
+        "text": "POLICIA SANTANDER /TOMA DE HUELLA - TIES, JOSÉ RAMÓN LÓPEZ DÓRIGA, 6, SANTANDER",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=12&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP COMISARIA, PLAZA TEODORO IZQUIERDO, 6, CASTELLÓN DE LA PLANA",
+        "value": "4"
+      },
+      {
+        "text": "CNP PUERTO Comercial, Puerto Comercial de Castellon. Entrada por mercancías, S/N, Castellón",
+        "value": "6"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERIA, ESCULTOR VICIANO - OFICINA DE EXTRANJERÍA, 2, CASTELLÓN DE LA PLANA",
+        "value": "3"
+      }
+    ],
+    "/icpplus/citar?p=51&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CEUTA TARAJAL, Frontera del Tarajal, s/n, ceuta",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de Extranjeros, Avenida de Otero (Edif. Mutua), s/n, Ceuta",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=13&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP ALCÁZAR DE SAN JUAN, AVENIDA ÁLVAREZ GUERRA, 10, ALCÁZAR DE SAN JUAN",
+        "value": "10"
+      },
+      {
+        "text": "CNP CIUDAD REAL, RONDA DE TOLEDO, 27, CIUDAD REAL",
+        "value": "6"
+      },
+      {
+        "text": "CNP PUERTOLLANO, AV. OCHO DE MARZO, S/N, PUERTOLLANO",
+        "value": "9"
+      },
+      {
+        "text": "CNP TOMELLOSO, ELADIO CABAÑERO, S/N, TOMELLOSO",
+        "value": "7"
+      },
+      {
+        "text": "CNP VALDEPEÑAS, AMAPOLA, 12, VALDEPEÑAS",
+        "value": "8"
+      },
+      {
+        "text": "CNP-O.U.E. (COMISARÍA), Carretera de Porzuna, 1, CIUDAD REAL",
+        "value": "3"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERÍA, Carretera Porzuna, 1, Ciudad Real",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=14&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP COMISARIA CORDOBA BPEF, Avenida del Mediterraneo, s/n, Córdoba",
+        "value": "3"
+      },
+      {
+        "text": "CNP CÓRDOBA TIE, Av. de los Mozárabes, Local (Entrada por Av. América), 19, Córdoba",
+        "value": "4"
+      },
+      {
+        "text": "CNP LUCENA-CABRA, Avenida Miguel Cruz Cuenca, 5, LUCENA-CABRA",
+        "value": "5"
+      },
+      {
+        "text": "CNP NEGOCIADO EXTRANJEROS POLICIA, Plaza de la Constitucion, s/n, Córdoba",
+        "value": "2"
+      },
+      {
+        "text": "OFICINA EXTRANJEROS, PLAZA DE LA CONSTITUCION, SN, CORDOBA",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=16&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CUENCA, Hervás y Panduro, 4, Cuenca",
+        "value": "3"
+      },
+      {
+        "text": "POLICIA CUENCA BRIGADA EXTRANJERIA, Ronda San José, 6-8, Cuenca",
+        "value": "4"
+      },
+      {
+        "text": "16002 CUENCA, Hervás y Panduro, 4, CUENCA",
+        "value": "1"
+      },
+      {
+        "text": "16400 TARANCON, Tras Plaza Ayuntamiento, 1, TARANCON",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=20&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP IRUN, Plaza Ensanche, 1, IRUN",
+        "value": "4"
+      },
+      {
+        "text": "CNP SAN SEBASTIAN, PASEO URUMEA, 17, SAN SEBASTIAN",
+        "value": "3"
+      },
+      {
+        "text": "Oficina de extranjería, Javier Barkaiztegui, s/n, Donostia-San Sebastian",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=17&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CAMPRODON, CRTA C38 KM, 11,5, CAMPRODON",
+        "value": "6"
+      },
+      {
+        "text": "CNP FIGUERES, C/ PEP VENTURA , 8, FIGUERES",
+        "value": "3"
+      },
+      {
+        "text": "CNP GIRONA, Carrer Sant Pau, 2, Girona",
+        "value": "8"
+      },
+      {
+        "text": "CNP GIRONA BPEF, Avenida Jaume I, 17, Girona",
+        "value": "9"
+      },
+      {
+        "text": "CNP LLORET DE MAR, VIRGEN DE LORETO, 51, LLORET DE MAR",
+        "value": "4"
+      },
+      {
+        "text": "CNP PORTBOU TIE, CLAUDI PLANAS, S/N, PORTBOU",
+        "value": "10"
+      },
+      {
+        "text": "CNP PUIGCERDÀ, AVDA. FRANCIA , 2, PUIGCERDÀ",
+        "value": "7"
+      },
+      {
+        "text": "CNP SANT FELIU DE GUIXOLS, ORTIZ DE LA VEGA, 6-8, SANT FELIU DE GUIXOLS",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA DE EXTRANJEROS, GRAN VIA DE JAUME I, 17, 17, GIRONA",
+        "value": "1"
+      },
+      {
+        "text": "OFICINA EXPEDICION TIE, Cristóbal Grober , 12, GIRONA",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=18&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP GRANADA BPEF, La Palmita, s/n, Granada",
+        "value": "4"
+      },
+      {
+        "text": "Comisaría de Baza, Alhóndiga, 18, Baza",
+        "value": "3"
+      },
+      {
+        "text": "Comisaría de Motril, Aguas del Hospital, S/N, Motril",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de Extranjería en Granada, San Agapito, 2, Granada",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=19&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP GUADALAJARA, AVENIDA DEL EJERCITO, 12, GUADALAJARA",
+        "value": "2"
+      },
+      {
+        "text": "OFICINA DE EXTRANJEROS DE GUADALAJARA, Avenida de Francia , 18, GUADALAJARA",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=22&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "Oficina de Extranjería de Huesca, PLAZA CERVANTES, 1, HUESCA",
+        "value": "1"
+      },
+      {
+        "text": "Policía Nacional FRAGA, PLAZA DE ESPAÑA , 1, FRAGA",
+        "value": "3"
+      },
+      {
+        "text": "Policía Nacional HUESCA, Plaza Luis Buñuel , 3, HUESCA",
+        "value": "2"
+      },
+      {
+        "text": "Policía Nacional JACA, Avda. Zaragoza, 14 , JACA",
+        "value": "4"
+      },
+      {
+        "text": "Policía Nacional MONZÓN, PLAZA MAYOR, 4, MONZON",
+        "value": "6"
+      }
+    ],
+    "/icpplustie/citar?p=7&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CIUTADELLA MENORCA, REPÚBLICA ARGENTINA , 4, CIUTADELLA MENORCA",
+        "value": "8"
+      },
+      {
+        "text": "CNP MAHON EXTRANJERIA, MENORCA-MAHON, C/SAN SEBASTIAN, 2, MAHON",
+        "value": "6"
+      },
+      {
+        "text": "CNP MAHÓN EXTRANJERIA 2, CONCEPCIÓN , 1, MAHÓN",
+        "value": "11"
+      },
+      {
+        "text": "CNP MANACOR, Rambla Rei En Jaume, 8, Manacor",
+        "value": "10"
+      },
+      {
+        "text": "IBIZA CNP Policía Documentación, Avenida de la Paz, S/N, Ibiza",
+        "value": "5"
+      },
+      {
+        "text": "MALLORCA Policia Nacional BPEF, Simó Ballester, 8, Palma de Mallorca",
+        "value": "9"
+      },
+      {
+        "text": "MALLORCA CNP Policía Documentación, Felicià Fuster (p. lateral), 7, Palma de Mallorca",
+        "value": "4"
+      },
+      {
+        "text": "MALLORCA PN Residente UE y NIE, Calle Feliciá Fuster , 7, Palma de Mallorca",
+        "value": "7"
+      },
+      {
+        "text": "Oficina de Extranjería de Palma, Felicià Fuster, 7, PALMA DE MALLORCA",
+        "value": "1"
+      },
+      {
+        "text": "Oficina de Extranjeros de Ibiza, Paseo Juan Carlos I, S/N, Ibiza",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=23&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP JAEN, Arquitecto Berges, 11, JAEN",
+        "value": "2"
+      },
+      {
+        "text": "CNP LINARES, Hernán Cortés, 16, LINARES",
+        "value": "5"
+      },
+      {
+        "text": "CNP UBEDA, Plaza Vázquez de Molina , s/n, Ubeda",
+        "value": "6"
+      },
+      {
+        "text": "Oficina Extranjería y TIE Jaén, Plaza de las Batallas, 2, JAEN",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=26&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CALAHORRA, Julio Longinos, 2, Calahorra",
+        "value": "2"
+      },
+      {
+        "text": "CNP LOGROÑO JEFATURA, SERRADERO, 26, LOGROÑO",
+        "value": "4"
+      },
+      {
+        "text": "LOGROÑO, AVDA. DE LA SOLIDARIDAD, 72, LOGROÑO",
+        "value": "1"
+      }
+    ],
+    "/icpplustie/citar?p=35&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP LAS PALMAS DE GRAN CANARIA, C/Luis Doreste Silva, 68, Las Palmas de Gran Canaria",
+        "value": "10"
+      },
+      {
+        "text": "CNP MASPALOMAS, Avenida de Moya, 4, Maspalomas",
+        "value": "4"
+      },
+      {
+        "text": "CNP PUERTO ROSARIO, HERBANIA, 28, PUERTO ROSARIO",
+        "value": "8"
+      },
+      {
+        "text": "CNP SANTA LUCIA DE TIRAJANA, DOCTOR NEGRIN, 10, VECINDARIO",
+        "value": "9"
+      },
+      {
+        "text": "CNP TELDE, Eduardo Chillida, 1, Telde",
+        "value": "11"
+      },
+      {
+        "text": "CNP TUINEJE, PACO HIERRO, S/N, TUINEJE",
+        "value": "7"
+      },
+      {
+        "text": "COMISARIA CNP ARRECIFE, MASTELERO, S/N, ARRECIFE",
+        "value": "6"
+      },
+      {
+        "text": "Fuerteventura, Primero de Mayo, 64, Puerto del Rosario",
+        "value": "3"
+      },
+      {
+        "text": "Lanzarote, C/ Blas Cabrera Felipe, 6, Arrecife",
+        "value": "2"
+      },
+      {
+        "text": "Las Palmas de Gran Canaria, PLAZA DE LA CONCORDIA, 5, Las Palmas de Gran Canaria",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=24&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP ASTORGA, PLAZA LOS MARQUESES, S/N, ASTORGA",
+        "value": "5"
+      },
+      {
+        "text": "CNP LEON BPEF, Villa Benavente, 6, LEON",
+        "value": "6"
+      },
+      {
+        "text": "CNP PONFERRADA, Río Oza, s/n, PONFERRADA",
+        "value": "2"
+      },
+      {
+        "text": "CNP SAN ANDRES DEL RABANEDO, GLORIETA DONANTES DE SANGRE , S/N, SAN ANDRES DEL RABANEDO",
+        "value": "4"
+      },
+      {
+        "text": "Dependencia de Trabajo e Inmigración, Av. Asturias , 4, León",
+        "value": "1"
+      },
+      {
+        "text": "Extranjería Expedición LEÓN, C/ de la GUARDIA CIVIL, 6, LEÓN",
+        "value": "3"
+      }
+    ],
+    "/icpplus/citar?p=25&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP LES, SAN JAIME, 58, -",
+        "value": "3"
+      },
+      {
+        "text": "CNP LLEIDA, DE L`ENSENYANÇA, 2, LLEIDA",
+        "value": "2"
+      },
+      {
+        "text": "CNP SEO DE URGELL, Avenida Saloria, 100, Seo de Urgell",
+        "value": "4"
+      }
+    ],
+    "/icpplus/citar?p=27&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP COMISARÍA LOCAL MONFORTE DE LEMOS, MIGUEL DE CERVANTES, 1, MONFORTE DE LEMOS",
+        "value": "4"
+      },
+      {
+        "text": "CNP COMISARÍA LOCAL VIVEIRO, AVDA. RAMÓN CANOSA, S/N, VIVEIRO",
+        "value": "3"
+      },
+      {
+        "text": "CNP COMíSARIA LUGO C/ CHANTADA, CHANTADA , SN, LUGO",
+        "value": "5"
+      },
+      {
+        "text": "CNP COMISARÍA PROVINCIAL LUGO, RÚA RAMÓN FERREIRO, 16, Lugo",
+        "value": "1"
+      },
+      {
+        "text": "Oficina de Extranjería en Lugo, Armanyá, 10, Lugo",
+        "value": "2"
+      }
+    ],
+    "/icpplustiem/citar?p=28&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP AVDA POBLADOS, Avda. de los Poblados, S/N, MADRID",
+        "value": "7"
+      },
+      {
+        "text": "CNP COLMENAR VIEJO, Carlos Aragón Cancela, 5, Colmenar Viejo",
+        "value": "59"
+      },
+      {
+        "text": "CNP Comisaría de Alcalá de Henares, Avda. de Meco, s/n, ALCALÁ DE HENARES (Madrid)",
+        "value": "15"
+      },
+      {
+        "text": "CNP Comisaría de Alcobendas, Avda. de España, 52, ALCOBENDAS (Madrid)",
+        "value": "16"
+      },
+      {
+        "text": "CNP Comisaría de Alcorcón, Alfredo Nobel, 10, ALCORCÓN (Madrid)",
+        "value": "17"
+      },
+      {
+        "text": "CNP Comisaría de Aranjuez, Avda. Príncipe, 40, ARANJUEZ (Madrid)",
+        "value": "18"
+      },
+      {
+        "text": "CNP Comisaría de Arganda del Rey, Av.Mediterraneo(PoliciaLocal), 7, ARGANDA DEL REY (Madrid)",
+        "value": "27"
+      },
+      {
+        "text": "CNP Comisaría de Collado Villalba, SAN FERNANDO, 27, COLLADO VILLALBA (Madrid)",
+        "value": "28"
+      },
+      {
+        "text": "CNP Comisaría de Coslada, Guadalquivir, 16, COSLADA (Madrid)",
+        "value": "19"
+      },
+      {
+        "text": "CNP Comisaría de Fuenlabrada, Calle de los Ángeles, 9, FUENLABRADA (Madrid)",
+        "value": "20"
+      },
+      {
+        "text": "CNP Comisaría de Getafe, Churruca, 6, GETAFE (Madrid)",
+        "value": "21"
+      },
+      {
+        "text": "CNP Comisaría de Las Rozas de Madrid, José Echegaray, 10, Las Rozas de Madrid",
+        "value": "39"
+      },
+      {
+        "text": "CNP Comisaría de Leganés, Avda. de Universidad, 27, LEGANÉS (Madrid)",
+        "value": "22"
+      },
+      {
+        "text": "CNP Comisaría de Majadahonda, Ctra.Villanueva del Pardillo, 3, MAJADAHONDA (Madrid)",
+        "value": "29"
+      },
+      {
+        "text": "CNP Comisaría de Móstoles, Granada, 9, MÓSTOLES (Madrid)",
+        "value": "23"
+      },
+      {
+        "text": "CNP Comisaría de Parla, Avda. Juan Carlos I, 2, PARLA (Madrid)",
+        "value": "24"
+      },
+      {
+        "text": "CNP Comisaría de Pozuelo de Alarcón, Camino de las Huertas, 36, POZUELO DE ALARCÓN (Madrid)",
+        "value": "25"
+      },
+      {
+        "text": "CNP Comisaría de Rivas Vaciamadrid, José Hierro, 82, RIVAS-VACIAMADRID (Madrid)",
+        "value": "30"
+      },
+      {
+        "text": "CNP Comisaría de Torrejón de Ardoz, Hilados, 15, TORREJÓN DE ARDOZ (Madrid)",
+        "value": "26"
+      },
+      {
+        "text": "CNP Comisaría de Valdemoro, Avda. de España, 97, VALDEMORO (Madrid)",
+        "value": "31"
+      },
+      {
+        "text": "CNP DISTRITO ARGANZUELA, RONDA DE TOLEDO, 26, MADRID",
+        "value": "41"
+      },
+      {
+        "text": "CNP DISTRITO CARABANCHEL , PADRE AMIGO, 3, MADRID",
+        "value": "42"
+      },
+      {
+        "text": "CNP DISTRITO CENTRO, LEGANITOS, 19, MADRID",
+        "value": "43"
+      },
+      {
+        "text": "CNP DISTRITO CHAMARTIN, AVENIDA DE PIO XII, 48, MADRID",
+        "value": "44"
+      },
+      {
+        "text": "CNP DISTRITO CHAMBERÍ, DE RAFAEL CALVO, 33, MADRID",
+        "value": "45"
+      },
+      {
+        "text": "CNP DISTRITO CIUDAD LINEAL, TRAVESÍA VIRGEN DE LA ROCA, 25, MADRID",
+        "value": "46"
+      },
+      {
+        "text": "CNP DISTRITO FUENCARRAL-EL PARDO, DEL MIRADOR DE LA REINA, 4, MADRID",
+        "value": "47"
+      },
+      {
+        "text": "CNP DISTRITO HORTALEZA-BARAJAS, JAVIER DEL QUINTO, 9, MADRID",
+        "value": "48"
+      },
+      {
+        "text": "CNP DISTRITO LATINA, AVENIDA DE LOS POBLADOS, 51, MADRID",
+        "value": "49"
+      },
+      {
+        "text": "CNP DISTRITO MONCLOA-ARAVACA, DEL REY FRANCISCO, 15, MADRID",
+        "value": "50"
+      },
+      {
+        "text": "CNP DISTRITO MORATALAZ, DE LA TACONA, SN, MADRID",
+        "value": "51"
+      },
+      {
+        "text": "CNP DISTRITO PUENTE VALLECAS, SIERRA CARBONERA, 35, MADRID",
+        "value": "52"
+      },
+      {
+        "text": "CNP DISTRITO RETIRO, DE LAS HUERTAS, 76, MADRID",
+        "value": "53"
+      },
+      {
+        "text": "CNP DISTRITO SALAMANCA, PRÍNCIPE DE ASTURIAS, 8, MADRID",
+        "value": "54"
+      },
+      {
+        "text": "CNP DISTRITO SAN BLAS-VICÁLVARO, ALBERIQUE ESQUINA ANENIDA HELLIN, SN, MADRID",
+        "value": "55"
+      },
+      {
+        "text": "CNP DISTRITO TETUÁN, PASAJE MAESTROS LADRILLEROS, 2, MADRID",
+        "value": "56"
+      },
+      {
+        "text": "CNP DISTRITO USERA-VILLAVERDE, PRIMITIVA GAÑAN, SN, MADRID",
+        "value": "57"
+      },
+      {
+        "text": "CNP DISTRITO VILLA VALLECAS, PLAZA REGIONES, SN, MADRID",
+        "value": "58"
+      },
+      {
+        "text": "CNP OFICINA AQUILES 2, Aquiles, 2, MADRID",
+        "value": "34"
+      },
+      {
+        "text": "CNP Padre Piquer, Padre Piquer, 18, MADRID",
+        "value": "14"
+      },
+      {
+        "text": "CNP PROTECCION INTERNACIONAL CGEF, C/ Pradillo, 40, Madrid",
+        "value": "33"
+      },
+      {
+        "text": "CNP SAN FELIPE TIE, SAN FELIPE, 7, MADRID",
+        "value": "38"
+      },
+      {
+        "text": "CNP SANTA ENGRACIA, SANTA ENGRACIA, 18, MADRID",
+        "value": "36"
+      },
+      {
+        "text": "Comisaría de Getafe 2, churruca, 6, getafe",
+        "value": "35"
+      },
+      {
+        "text": "CREADE POZUELO, Paseo de la Casa Campo, 1, Pozuelo de Alarcón",
+        "value": "37"
+      }
+    ],
+    "/icpplustie/citar?p=29&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP Antequera, Calle Ciudad de Oaxaca, S/N, Antequera",
+        "value": "9"
+      },
+      {
+        "text": "CNP Benalmadena, Calle Las Flores, 6, Benalmadena",
+        "value": "5"
+      },
+      {
+        "text": "CNP CREADE-MÁLAGA, Avenida Pintor Joaquín Sorolla, 145, Málaga",
+        "value": "11"
+      },
+      {
+        "text": "CNP Estepona, Calle Valle Inclán, 1, Estepona",
+        "value": "3"
+      },
+      {
+        "text": "CNP Fuengirola, Avenida Condes de San Isidro, 98, Fuengirola",
+        "value": "4"
+      },
+      {
+        "text": "CNP MÁLAGA Provincial, Plaza de Manuel Azaña (TIES (HUELLAS): ZONA 1, RESTO DE TRÁMITES: ZONA 2), 3, Málaga",
+        "value": "2"
+      },
+      {
+        "text": "CNP Marbella, Avenida Duque de Lerma, L3, Marbella",
+        "value": "7"
+      },
+      {
+        "text": "CNP Ronda, Calle Rio Tinto, 2, RONDA",
+        "value": "10"
+      },
+      {
+        "text": "CNP Torremolinos, Calle Skal, 12, Torremolinos",
+        "value": "6"
+      },
+      {
+        "text": "CNP Velez Malaga, Calle Puerta del Mar, 4, Torre del Mar",
+        "value": "8"
+      },
+      {
+        "text": "MMP, C/ Mauricio Moro Pareto, 13, Málaga",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=52&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP MELILLA ASILO, Avenida General Astilleros , S/N, Melilla",
+        "value": "5"
+      },
+      {
+        "text": "Oficina Unica de Extranjería, Paseo Alcalde Rafael Ginel , s/n, Melilla",
+        "value": "1"
+      },
+      {
+        "text": "UDE MELILLA, Avenida General Astilleros (accceso por C/Vía Francesa, salida peatonal puesto fronterizo), SN, MELILLA",
+        "value": "4"
+      }
+    ],
+    "/icpplus/citar?p=30&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP CARTAGENA, MENENDEZ Y PELAYO, 6, CARTAGENA",
+        "value": "8"
+      },
+      {
+        "text": "CNP LORCA, Pza. Policía Nacional, 1, LORCA",
+        "value": "6"
+      },
+      {
+        "text": "CNP MOLINA DE SEGURA, CALLE CANÓNIGO MORENO, 11, MOLINA DE SEGURA",
+        "value": "7"
+      },
+      {
+        "text": "CNP MURCIA SANGONERA, AVDA. MERCAMURCIA, 15, SANGONERA LA VERDE",
+        "value": "9"
+      },
+      {
+        "text": "CNP YECLA, RAMBLA, 34, YECLA",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA DE EXTRANJEROS, CTRA NACIONAL 301, KM.388, 0, MURCIA",
+        "value": "4"
+      }
+    ],
+    "/icpplus/citar?p=31&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP TUDELA, PLAZA PADRE LASA, 7, TUDELA",
+        "value": "2"
+      },
+      {
+        "text": "OFICINA ÚNICA DE EXTRANJERÍA , Avenida Guipúzcoa, 40, Pamplona",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=32&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP BARCO DE VALDEORRAS, Plaza Do Concello, 2, Barco de Valdeorras",
+        "value": "3"
+      },
+      {
+        "text": "CNP ORENSE EXTRANJEROS, Mestre Vide, 4A, ORENSE",
+        "value": "2"
+      },
+      {
+        "text": "CNP VERÍN UNIDAD DE EXTRANJERIA Y DOCUMENTACION, Avenida de Portugal , 17, VERIN",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA DE EXTRANXEIROS, Parque de San Lázaro, 1, OURENSE",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=34&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP PALENCIA, AVENIDA SIMON NIETO, 8, PALENCIA",
+        "value": "2"
+      },
+      {
+        "text": "Subdelegación del Gobierno en Palencia, Avda Casado Alisal, 4, Palencia",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=36&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP MARIN, LAMEIRA , 27, MARIN",
+        "value": "8"
+      },
+      {
+        "text": "CNP PONTEVEDRA, FERNÁNDEZ VILLAVERDE, 1, PONTEVEDRA",
+        "value": "6"
+      },
+      {
+        "text": "CNP SALVATERRA DE MIÑO, RUA MATIAS CANDEIRA, 1, SALVATERRA DE MIÑO",
+        "value": "7"
+      },
+      {
+        "text": "CNP VILAGARCIA DE AROUSA, AVENIDA DE MARIÑA , 9, VILAGARCÍA DE AROUSA",
+        "value": "5"
+      },
+      {
+        "text": "Comisaría de Policía Nacional de Vigo, -ALVARO CUNQUEIRO, 6, VIGO",
+        "value": "3"
+      },
+      {
+        "text": "EXTRANJERÍA PONTEVEDRA, MICHELENA, 28, PONTEVEDRA",
+        "value": "1"
+      },
+      {
+        "text": "EXTRANJERÍA VIGO, TEÓFILO LLORENTE, 4, VIGO",
+        "value": "2"
+      },
+      {
+        "text": "Extranjería y Documentación de Tui, Párroco Rodríguez Vázquez, 3, Tui",
+        "value": "4"
+      }
+    ],
+    "/icpplus/citar?p=37&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP SALAMANCA, Jardines, s/n, SALAMANCA",
+        "value": "3"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERIA, GRAN VIA , 31, SALAMANCA",
+        "value": "2"
+      }
+    ],
+    "/icpco/citar?p=38&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP EL HIERRO TIE, AV. DACIO DARIAS, 103, (VALVERDE) ISLA DEL HIERRO",
+        "value": "9"
+      },
+      {
+        "text": "CNP ISLA DE LA PALMA, Calle Pérez Galdós, 16, Santa Cruz de La Palma",
+        "value": "5"
+      },
+      {
+        "text": "CNP LA GOMERA TIE, PLAZA LAS AMÉRICAS, 2, SAN SEBASTIÁN DE LA GOMERA (ISLA LA GOMERA)",
+        "value": "10"
+      },
+      {
+        "text": "CNP Playa de las Américas, Av. de los Pueblos, 2, Adeje",
+        "value": "2"
+      },
+      {
+        "text": "CNP Puerto de la Cruz Los Realejos, Av. José del Campo y Llarena, 3, Puerto de la Cruz",
+        "value": "3"
+      },
+      {
+        "text": "CNP San Cristobal de LA LAGUNA, CALLE NAVA Y GRIMON, 66, Santa Cruz de Tenerife",
+        "value": "7"
+      },
+      {
+        "text": "CNP Sta Cruz de TFE ROBAYNA, CALLE ROBAYNA, 23, Santa Cruz de Tenerife",
+        "value": "6"
+      },
+      {
+        "text": "CNP STA. CRUZ TENERIFE, Ramón Pérez Ayala, 6, Santa Cruz de Tenerife",
+        "value": "8"
+      },
+      {
+        "text": "EXTRANJERIA LA PALMA, Avenida Marítima, 2, Santa Cruz de La Palma",
+        "value": "4"
+      },
+      {
+        "text": "1 OUE SANTA CRUZ DE TENERIFE, C/LA MARINA, 20, SANTA CRUZ DE TENERIFE",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=40&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "Oficina de Extranjería en Segovia, Plaza Adolfo Suárez , 1, Segovia",
+        "value": "2"
+      },
+      {
+        "text": "SEGOVIA BPEF, Paseo Ezequiel González, 22, Segovia",
+        "value": "3"
+      }
+    ],
+    "/icpplus/citar?p=41&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "BPEF GRUPO 1, CALLE DOCTOR RAFAEL MARTINEZ DOMINGUEZ, S/N, SEVILLA",
+        "value": "3"
+      },
+      {
+        "text": "Documentación de Extranjeros POLICIA , Plaza de España Torre Norte, s/n, Sevilla",
+        "value": "1"
+      },
+      {
+        "text": "POLICÍA BPEF, Plaza de España - TORRE NORTE, S/N, Sevilla",
+        "value": "2"
+      }
+    ],
+    "/icpplus/citar?p=42&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP SORIA, Leon, 5, Soria",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de Extranjería en Soria, Alfonso VIII, 2, Soria",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=43&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP Comisaría Local de Reus, General Moragues, 54, Reus",
+        "value": "3"
+      },
+      {
+        "text": "CNP Comisaría Local de Tortosa, Passeig de Ribera, 21, Tortosa",
+        "value": "4"
+      },
+      {
+        "text": "CNP Comisaría Local El Vendrell, Camí Reial, 15 - 17, El Vendrell",
+        "value": "6"
+      },
+      {
+        "text": "CNP Comisaría Provincial de Tarragona, Plaza Orleans, s/n, TARRAGONA",
+        "value": "2"
+      },
+      {
+        "text": "Oficina de extranjería de Tarragona, Av, Estanislau Figueras, 59, TARRAGONA",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=44&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "ALCANIZ COMISARIA DOCUM EXTRANJEROS, RONDA DE CASPE, 1, ALCAÑIZ",
+        "value": "3"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERIA, MIGUEL VALLES, 2, TERUEL",
+        "value": "2"
+      },
+      {
+        "text": "TERUEL COMISARIA DOCUM EXTRANJEROS, MIGUEL VALLES, 2, TERUEL",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=46&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP COMISARIA DE ALZIRA, Pere Morell, 4, ALZIRA",
+        "value": "8"
+      },
+      {
+        "text": "CNP COMISARIA DE BURJASOT, C/ Doctor Joan Pesset , 2, Burjassot",
+        "value": "13"
+      },
+      {
+        "text": "CNP COMISARÍA DE MARÍTIMO EXTRANJERÍA, ERNESTO ANASTASIO , 60, VALENCIA",
+        "value": "16"
+      },
+      {
+        "text": "CNP COMISARIA DE ONTENIENTE, Plaza de Escura, 2, ONTENIENTE",
+        "value": "6"
+      },
+      {
+        "text": "CNP COMISARIA DE PATERNA, De les Roses, 27, Paterna",
+        "value": "14"
+      },
+      {
+        "text": "CNP COMISARIA DE SAGUNTO, Progreso, 14, SAGUNTO",
+        "value": "7"
+      },
+      {
+        "text": "CNP COMISARIA PATRAIX EXTRANJERIA, GREMIS, 6, VALENCIA",
+        "value": "3"
+      },
+      {
+        "text": "CNP COMISARIA XIRIVELLA-ALDAIA-ALAQUAS, C/ Jaume Roig Xirivella, 4, XIRIVELLA",
+        "value": "15"
+      },
+      {
+        "text": "CNP GANDIA EXPEDICION TIE, Ciudad de Laval, 5, Gandia",
+        "value": "5"
+      },
+      {
+        "text": "CNP GANDIA EXTRANJERÍA CERTIFICADOS, Ciudad de Laval , 5, GANDIA",
+        "value": "11"
+      },
+      {
+        "text": "CNP VALENCIA CALLE ZAPADORES 52, Zapadores, 52, Valencia",
+        "value": "12"
+      },
+      {
+        "text": "CNP-COMISARIA DE BAILEN, Bailen, 9, VALENCIA",
+        "value": "4"
+      },
+      {
+        "text": "CNP-COMISARIA DE BAILEN- RENOVACION ASILO, Bailén, 9, Valencia",
+        "value": "10"
+      },
+      {
+        "text": "OUE3, Avda. Constitución, 116, Valencia",
+        "value": "9"
+      }
+    ],
+    "/icpplus/citar?p=47&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP MEDINA DEL CAMPO, CALLE VALLADOLID, 30, MEDINA DEL CAMPO",
+        "value": "3"
+      },
+      {
+        "text": "CNP Valladolid, Gerona, s/n, Valladolid",
+        "value": "2"
+      },
+      {
+        "text": "OFICINA DE EXTRANJERÍA - VALLADOLID, Arzobispo José Delicado, 7, Valladolid",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=49&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "Subdelegación del Gobierno, Plaza de la Constitución, 2, ZAMORA",
+        "value": "1"
+      }
+    ],
+    "/icpplus/citar?p=45&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "CNP POLICIA TALAVERA DE LA REINA, CARLOS BARRAL, 2, TALAVERA DE LA REINA",
+        "value": "4"
+      },
+      {
+        "text": "JEFATURA SUPERIOR DE POLICIA, AV. PORTUGAL, S/N, TOLEDO",
+        "value": "5"
+      },
+      {
+        "text": "OFICINA EXTRANJEROS TOLEDO, RONDA DE BUENAVISTA, 57, TOLEDO",
+        "value": "1"
+      },
+      {
+        "text": "POLICIA TOLEDO, RONDA DE BUENAVISTA, 57, TOLEDO",
+        "value": "3"
+      }
+    ],
+    "/icpplus/citar?p=50&locale=es": [
+      {
+        "text": "Cualquier oficina",
+        "value": "99"
+      },
+      {
+        "text": "Oficina de Extranjeros, Obispo Covarrubias , 1, Zaragoza",
+        "value": "1"
+      },
+      {
+        "text": "CNP Calatayud Comisaría Policía, Manuela Sancho, 2, Calatayud",
+        "value": "2"
+      },
+      {
+        "text": "CNP Zaragoza Unidad Doc. Extranjeros, C/ Obispo Covarrubias, s/n, ZARAGOZA",
+        "value": "3"
+      }
+    ]
+  }
+}

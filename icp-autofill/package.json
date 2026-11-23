@@ -1,0 +1,13 @@
+{
+  "name": "citamate",
+  "version": "1.6.0",
+  "private": true,
+  "description": "CitaMate browser extension (loads unpacked from this folder). No runtime dependencies; package.json is only for the unit tests.",
+  "scripts": {
+    "test": "node --test",
+    "check": "for f in *.js lib/*.js; do node --check \"$f\" || exit 1; done"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

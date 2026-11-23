@@ -1,0 +1,23 @@
+{
+  "name": "ext-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend for the CitaMate and RelaySwitch browser extensions: users, expiry dates, devices, proxies, autofill entries, catalog, logs and a web panel.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/cli.js migrate",
+    "cli": "node src/cli.js",
+    "test": "node --test --test-concurrency=1 \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "dotenv": "^16.6.1",
+    "express": "^5.3.0"
+  }
+}

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CitaMate</title>
+  <!-- ?v= makes Chrome drop the cached old favicon -->
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png?v=cm2">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png?v=cm2">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg?v=cm2">
+  <link rel="apple-touch-icon" href="icons/icon128.png?v=cm2">
+  <link rel="stylesheet" href="entries.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="icons/icon.svg?v=cm2" alt="" width="30" height="30"><span>CitaMate</span></div>
+    <div class="appbar" id="appBar" hidden>
+      <nav class="tabs" aria-label="Sections">
+        <a href="#entries" data-tab="entries" class="tab">Entries</a>
+        <a href="#records" data-tab="records" class="tab">Records</a>
+      </nav>
+      <div class="actions" id="entryActions">
+        <button id="btnExport" class="ghost">Export</button>
+        <label class="ghost btnlike">Import<input id="fileImport" type="file" accept="application/json" hidden></label>
+      </div>
+      <div class="account">
+        <div class="who"><b id="who" data-testid="user-name"></b><span id="expiry" data-testid="access-expiry"></span></div>
+        <button id="btnSignOut" class="ghost small" data-testid="sign-out">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SIGN IN ================= -->
+  <main id="authView" class="authview" hidden>
+    <form id="loginForm" class="card authcard" data-testid="login-form" autocomplete="on">
+      <h1>Sign in to CitaMate</h1>
+      <p class="sub">Your entries, logs and page settings live on your CitaMate server. CitaMate needs it to work.</p>
+      <p id="loginError" class="autherr" data-testid="login-error" role="alert" hidden></p>
+      <label>Username
+        <input id="loginUser" name="username" autocomplete="username" required data-testid="login-username">
+      </label>
+      <label>Password
+        <input id="loginPass" name="password" type="password" autocomplete="current-password" required data-testid="login-password">
+      </label>
+      <details class="server">
+        <summary>Server address</summary>
+        <label>Server
+          <input id="loginServer" name="server" type="url" inputmode="url" spellcheck="false" data-testid="login-server" placeholder="https://api.example.com">
+        </label>
+      </details>
+      <button type="submit" id="loginSubmit" data-testid="login-submit">Sign in</button>
+      <p class="sub" id="loginVersion"></p>
+    </form>
+  </main>
+
+  <!-- Loading / error (e.g. server unreachable) -->
+  <main id="stateView" class="authview">
+    <div class="card authcard" data-testid="state-view">
+      <p id="stateText">Loading…</p>
+      <button id="stateRetry" hidden>Try again</button>
+    </div>
+  </main>
+
+  <div id="appView" hidden>
+  <div class="banner" id="migrateBanner" data-testid="migrate-banner" hidden>
+    <span id="migrateText"></span>
+    <button id="migrateUpload" data-testid="migrate-upload">Upload my local data</button>
+  </div>
+
+  <!-- ================= ENTRIES ================= -->
+  <main id="tab-entries" class="tabpane">
+    <div class="pagehead">
+      <div>
+        <h1>Saved entries <span id="count" class="count"></span></h1>
+        <p class="sub">These appear in the CitaMate button on the cita pages.</p>
+      </div>
+      <div class="pagehead-tools">
+        <input id="search" class="search" type="search" placeholder="Search label, name, document, province…">
+        <button id="btnBulk" class="ghost" data-testid="entry-bulk">Bulk add</button>
+        <button id="btnNew" data-testid="entry-new">+ New entry</button>
+      </div>
+    </div>
+    <div id="cards" class="cards"></div>
+    <div id="empty" class="emptybox" hidden>
+      <b>No entries yet</b>
+      <p>Add the people you book for. Their details are saved in your CitaMate account.</p>
+      <button id="btnNewEmpty">+ New entry</button>
+    </div>
+  </main>
+
+  <!-- Entry form drawer -->
+  <div class="drawer-bg" id="drawerBg" hidden></div>
+  <aside class="drawer" id="drawer" hidden aria-labelledby="formTitle">
+    <form id="entryForm" autocomplete="off">
+      <div class="drawer-head">
+        <h2 id="formTitle">New entry</h2>
+        <button type="button" class="icon ghost" id="btnClose" aria-label="Close">✕</button>
+      </div>
+      <div class="drawer-body">
+        <input type="hidden" id="id">
+        <div class="quick">
+          <label for="quickLine">Quick fill – paste a line</label>
+          <div class="row">
+            <input id="quickLine" class="mono" autocomplete="off" spellcheck="false"
+              placeholder="NIE:X1234567L:JHON DOE:1990:ALBANIA:Barcelona:4067:600123456:jhon@mail.com">
+            <button type="button" id="btnQuick">Fill</button>
+          </div>
+          <p class="hint">Colon-separated, in any order: doc type, NIE/DNI/passport, name, birth year, nationality, province, trámite (code or name), office, phone, email.</p>
+          <div id="quickResult" class="quickres" hidden></div>
+        </div>
+        <fieldset>
+          <legend>Identity</legend>
+          <div class="grid">
+            <label class="wide">Label (shown in the CitaMate menu)*
+              <input id="label" required placeholder="e.g. Ali – TIE renewal">
+            </label>
+            <label>Document type
+              <select id="docType">
+                <option value="NIE">NIE</option>
+                <option value="DNI">DNI</option>
+                <option value="PASAPORTE">Pasaporte</option>
+              </select>
+            </label>
+            <label>Document number*
+              <input id="docNumber" required placeholder="X1234567L">
+            </label>
+            <label class="wide">Full name (as on document)*
+              <input id="fullName" required placeholder="NOMBRE APELLIDOS">
+            </label>
+            <label>Birth year
+              <input id="birthYear" inputmode="numeric" maxlength="4" placeholder="1990">
+            </label>
+            <label>Nationality
+              <select id="nationality"><option value="">— Not set —</option></select>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Appointment</legend>
+          <div class="grid">
+            <label class="wide">Province
+              <select id="province"><option value="">— Not set —</option></select>
+            </label>
+            <label class="wide">Trámite
+              <select id="tramite"><option value="">— Pick province first —</option></select>
+            </label>
+            <label class="wide">Office
+              <select id="office"><option value="">— Pick province first —</option></select>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="grid">
+            <label>Phone
+              <input id="phone" inputmode="tel" placeholder="600123456">
+            </label>
+            <label>Email
+              <input id="email" type="email" placeholder="name@example.com">
+            </label>
+            <label class="wide">Notes (only for you, never filled)
+              <textarea id="notes" rows="2" placeholder="Anything to remember…"></textarea>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="drawer-foot">
+        <span id="formMsg" class="msg"></span>
+        <button type="button" id="btnCancel" class="ghost">Cancel</button>
+        <button type="submit" id="btnSave" data-testid="entry-save">Save entry</button>
+      </div>
+    </form>
+  </aside>
+
+  <!-- Bulk add drawer -->
+  <div class="drawer-bg" id="bulkBg" hidden></div>
+  <aside class="drawer wide-drawer" id="bulkDrawer" hidden aria-labelledby="bulkTitle">
+    <div class="drawer-form">
+      <div class="drawer-head">
+        <h2 id="bulkTitle">Bulk add entries</h2>
+        <button type="button" class="icon ghost" id="bulkClose" aria-label="Close">✕</button>
+      </div>
+      <div class="drawer-body">
+        <p class="hint">One entry per line, values separated by <b>:</b> in any order. Blank lines and lines starting with # are skipped. Entries whose document number is already saved are skipped.</p>
+        <textarea id="bulkText" class="mono" rows="8" spellcheck="false" placeholder="NIE:X1234567L:JHON DOE:1990:ALBANIA:Barcelona:4067:600123456:jhon@mail.com&#10;PASAPORTE:AB9988776:SARA AHMED:1995:PAKISTAN:Madrid:4010:611222333:sara@mail.com"></textarea>
+        <p class="msg" id="bulkSummary"></p>
+        <div class="tableWrap" id="bulkPreviewWrap" hidden>
+          <table>
+            <thead><tr><th>Line</th><th>Label</th><th>Document</th><th>Name</th><th>Province</th><th>Trámite</th><th>Office</th><th>Check</th></tr></thead>
+            <tbody id="bulkRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button type="button" id="bulkCancel" class="ghost">Cancel</button>
+        <button type="button" id="bulkAdd" disabled>Add entries</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= RECORDS ================= -->
+  <main id="tab-records" class="tabpane" hidden>
+    <nav class="subnav" aria-label="Records sections">
+      <a href="#records" data-sub="report">Entry reports</a>
+      <a href="#records/log" data-sub="log">Activity log</a>
+      <a href="#records/offices" data-sub="offices">Office availability</a>
+    </nav>
+
+    <!-- Entry report -->
+    <section class="card subpane" id="sub-report">
+      <div class="cardhead">
+        <h2>Entry report</h2>
+        <select id="repEntry" aria-label="Entry"><option value="">All entries – overview</option></select>
+      </div>
+      <div id="repOverview">
+        <div class="tableWrap">
+          <table>
+            <thead><tr><th>Entry</th><th>Booked</th><th>Moved</th><th>Failed</th><th>Stuck</th><th>Office checks</th><th>Last result</th><th>Last activity</th><th></th></tr></thead>
+            <tbody id="repRows"></tbody>
+          </table>
+        </div>
+        <p id="repEmpty" class="empty" hidden>No entries yet.</p>
+      </div>
+      <div id="repDetail" hidden>
+        <div class="repmeta" id="repMeta"></div>
+        <div class="stats" id="repStats"></div>
+        <div class="split">
+          <div>
+            <h3>Where it fails</h3>
+            <div class="tableWrap">
+              <table>
+                <thead><tr><th>Page</th><th>Reason</th><th>Times</th><th>Last</th></tr></thead>
+                <tbody id="repFails"></tbody>
+              </table>
+            </div>
+            <p id="repFailsEmpty" class="empty" hidden>No failures recorded.</p>
+          </div>
+          <div>
+            <h3>Offices seen</h3>
+            <div class="tableWrap">
+              <table>
+                <thead><tr><th>Office</th><th>Listed</th><th>Last</th></tr></thead>
+                <tbody id="repOffices"></tbody>
+              </table>
+            </div>
+            <p id="repOfficesEmpty" class="empty" hidden>Not on the office page yet.</p>
+          </div>
+        </div>
+        <div class="cardhead">
+          <h3>History</h3>
+          <div class="actions">
+            <button id="repCsv" class="ghost small">Export CSV</button>
+            <!-- The server API only clears a whole log, not one entry's records. -->
+          </div>
+        </div>
+        <ol class="timeline" id="repTimeline"></ol>
+        <p id="repTimelineEmpty" class="empty" hidden>No activity for this entry yet.</p>
+      </div>
+    </section>
+
+    <!-- Activity log -->
+    <section class="card subpane" id="sub-log" hidden>
+      <div class="cardhead"><h2>Activity log <span id="logCount" class="count"></span></h2></div>
+      <div class="stats" id="logStats"></div>
+      <div class="logTools">
+        <select id="logStatus" aria-label="Result">
+          <option value="">All results</option>
+          <option value="done">Done (booked)</option>
+          <option value="ok">OK / moved</option>
+          <option value="fail">Failed</option>
+          <option value="stuck">Stuck</option>
+          <option value="wait">Waiting (captcha)</option>
+          <option value="info">Info</option>
+        </select>
+        <select id="logEntry" aria-label="Entry"><option value="">All entries</option></select>
+        <select id="logKind" aria-label="Type">
+          <option value="">Bookings + office checks</option>
+          <option value="booking">Bookings only</option>
+          <option value="check">Office checks only</option>
+        </select>
+        <input id="logSearch" class="search" type="search" placeholder="Search details…">
+        <button id="btnLogCsv" class="ghost">Export CSV</button>
+        <button id="btnLogClear" class="ghost danger">Clear log</button>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Time</th><th>Result</th><th>Type</th><th>Entry</th><th>Page</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody id="logRows"></tbody>
+        </table>
+      </div>
+      <p id="logEmpty" class="empty" hidden>No activity yet.</p>
+    </section>
+
+    <!-- Office availability -->
+    <section class="card subpane" id="sub-offices" hidden>
+      <div class="cardhead"><h2>Office availability <span id="offCount" class="count"></span></h2></div>
+      <p class="msg">Recorded each time you reach the office page. The site only lists offices that have appointments at that moment.</p>
+      <div class="logTools">
+        <select id="offProvince" aria-label="Province"><option value="">All provinces</option></select>
+        <button id="btnOffCsv" class="ghost">Export CSV</button>
+        <button id="btnOffClear" class="ghost danger">Clear history</button>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Office</th><th>Province</th><th>Times listed</th><th>Checks</th><th>Last listed</th><th>First listed</th></tr></thead>
+          <tbody id="offRows"></tbody>
+        </table>
+      </div>
+      <h3>Recent checks</h3>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Time</th><th>Type</th><th>Entry</th><th>Province</th><th>Trámite</th><th>Offices listed</th></tr></thead>
+          <tbody id="offChecks"></tbody>
+        </table>
+      </div>
+      <p id="offEmpty" class="empty" hidden>No office checks yet. Reach the office page once and it will appear here.</p>
+    </section>
+  </main>
+  </div><!-- /appView -->
+
+  <script src="config.js"></script>
+  <script src="lib/entry.js"></script>
+  <script src="app.js"></script>
+  <script src="shared.js"></script>
+  <script src="paste.js"></script>
+  <script src="entries.js"></script>
+  <script src="logs.js"></script>
+  <script src="offices.js"></script>
+  <script src="report.js"></script>
+  <script src="tabs.js"></script>
+</body>
+</html>

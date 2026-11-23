@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "description": "Page selectors and text patterns CitaMate uses on the ICP cita pages. Regexes are { source, flags } and are matched against accent-free UPPER-CASE text unless noted.",
+  "selectors": {
+    "provinceSelect": "select#form, select[name='form'], select#provincia, select[name='provincia']",
+    "docBox": ["#txtIdCitado", "input[name=\"txtIdCitado\"]"],
+    "name": ["#txtDesCitado", "input[name=\"txtDesCitado\"]"],
+    "birthYear": ["#txtAnnoCitado", "input[name=\"txtAnnoCitado\"]"],
+    "nationality": "#txtPaisNac, select[name='txtPaisNac']",
+    "office": "#idSede, select[name='idSede']",
+    "phone": ["#txtTelefonoCitado", "#txtTelefonoMac", "#txtTelefono", "input[type=\"tel\"]"],
+    "email": ["#emailUNO", "input[name=\"txtMailCitado\"]", "#txtCorreoElectronico", "#emailDOS", "#txtRepiteCorreoElectronico"],
+    "next": [
+      "#btnAceptar", "#btnEnviar", "#btnSiguiente",
+      "input[type=\"submit\"][value=\"Aceptar\"]", "input[type=\"button\"][value=\"Aceptar\"]",
+      "input[value=\"Enviar\"]", "input[value=\"Siguiente\"]"
+    ],
+    "confirm": "#btnConfirmar, input[value='Confirmar']",
+    "slots": "input[name='rdbCita'], [id^='cita_'], #cita1",
+    "stepButtonCandidates": "input[type='button'], input[type='submit'], button, a.btn, a.mf-button",
+    "captchaWidget": ".g-recaptcha, iframe[src*='recaptcha/api2/anchor'], .h-captcha, iframe[src*='hcaptcha']",
+    "captchaResponse": "textarea[name='g-recaptcha-response'], textarea[name='h-captcha-response']",
+    "captchaImageBox": ["input[name*='captcha' i]", "input[id*='captcha' i]"],
+    "messageBoxes": [
+      ".mf-msg__error", ".mf-msg__info", "#mensajeInfo", "#mensajeError",
+      ".alert-danger", ".alert-warning", ".alert", ".msgError", ".error", "span.help-block"
+    ]
+  },
+  "patterns": {
+    "provinceName": { "source": "provinc", "flags": "i", "note": "matched against select id + name" },
+    "tramiteName": { "source": "tramite", "flags": "i", "note": "matched against select id + name" },
+    "tramiteExclude": { "source": "^(sede|form|idsede)$", "flags": "i", "note": "matched against select id (or name)" },
+    "bookedText": { "source": "JUSTIFICANTE DE (LA )?CITA|CITA CONFIRMADA|SU CITA HA SIDO (RESERVADA|CONFIRMADA)", "flags": "" },
+    "officePlaceholder": { "source": "^(SELECCION|ELIGE|CHOOSE|SELECT|CUALQUIER)", "flags": "" }
+  },
+  "officeExcludeValues": ["-1", "0", "99"],
+  "stepButtons": {
+    "Access": {
+      "ids": ["#btnEntrar"],
+      "text": { "source": "^(ENTRAR|ENTER|ACCEDER|ACCESS)$", "flags": "" }
+    },
+    "Request": {
+      "ids": ["#btnSolicitar"],
+      "text": { "source": "^(SOLICITAR CITA|REQUEST (AN )?APPOINTMENT|APPLY FOR (AN )?APPOINTMENT)$", "flags": "" },
+      "fallback": { "path": { "source": "\\/acValidarEntrada", "flags": "i" }, "ids": ["#btnEnviar"] }
+    }
+  },
+  "urlPages": [
+    { "pattern": { "source": "\\/acGrabarCita", "flags": "i" }, "page": "Booked" },
+    { "pattern": { "source": "\\/acVerificarCita", "flags": "i" }, "page": "Confirm" },
+    { "pattern": { "source": "\\/acOfertarCita", "flags": "i" }, "page": "Slots" },
+    { "pattern": { "source": "\\/acValidarEntrada", "flags": "i" }, "page": "Request" },
+    { "pattern": { "source": "\\/acInfo", "flags": "i" }, "page": "Access" }
+  ],
+  "knownMessages": [
+    { "pattern": { "source": "NO HAY CITAS DISPONIBLES", "flags": "" }, "label": "No appointments available right now" },
+    { "pattern": { "source": "REQUESTED URL WAS REJECTED|URL SOLICITADA HA SIDO RECHAZADA", "flags": "" }, "label": "Blocked by the site (request rejected)" },
+    { "pattern": { "source": "TOO MANY REQUESTS|DEMASIADAS (PETICIONES|SOLICITUDES)|ERROR 429", "flags": "" }, "label": "Too many requests – slow down" },
+    { "pattern": { "source": "SESION (HA )?(CADUCADO|EXPIRADO|FINALIZADO)|SESSION (HAS )?EXPIRED", "flags": "" }, "label": "Session expired – start again" },
+    { "pattern": { "source": "SERVICIO NO (ESTA )?DISPONIBLE|SERVICE UNAVAILABLE|ERROR 50\\d", "flags": "" }, "label": "Site unavailable" },
+    { "pattern": { "source": "CAPTCHA (INCORRECTO|NO VALIDO)|VERIFICACION.*INCORRECTA", "flags": "" }, "label": "Captcha rejected" },
+    { "pattern": { "source": "YA TIENE UNA CITA|DOCUMENTO YA TIENE CITA", "flags": "" }, "label": "This document already has an appointment" },
+    { "pattern": { "source": "(NIE|DNI|PASAPORTE|DOCUMENTO).{0,30}(NO (ES )?VALIDO|INCORRECTO|ERRONEO)", "flags": "" }, "label": "Document number rejected" }
+  ]
+}

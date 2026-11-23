@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · ext-hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script type="module" src="/js/login.js"></script>
+</head>
+<body>
+  <div data-theme-switch></div>
+  <main class="auth">
+    <div class="card">
+      <div class="brand"><span class="logo" aria-hidden="true">EH</span> ext-hub</div>
+      <h1 data-testid="page-title">Sign in</h1>
+      <p class="hint">Use the account your admin gave you. The same account signs in to CitaMate and RelaySwitch.</p>
+      <div id="notice" class="notice" data-testid="login-notice" hidden></div>
+      <form id="loginForm" novalidate>
+        <div id="error" class="form-error" role="alert" data-testid="login-error" hidden></div>
+        <label>Username
+          <input type="text" id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required data-testid="login-username">
+        </label>
+        <label>Password
+          <input type="password" id="password" name="password" autocomplete="current-password" required data-testid="login-password">
+        </label>
+        <button type="submit" class="btn primary" id="submit" data-testid="login-submit">Sign in</button>
+      </form>
+      <p class="alt">No account? <a href="/register" data-testid="register-link">Create one</a></p>
+    </div>
+  </main>
+</body>
+</html>
