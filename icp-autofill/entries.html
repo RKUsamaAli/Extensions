@@ -21,7 +21,6 @@
       </nav>
       <div class="actions" id="entryActions">
         <button id="btnExport" class="ghost">Export</button>
-        <label class="ghost btnlike">Import<input id="fileImport" type="file" accept="application/json" hidden></label>
       </div>
       <div class="account">
         <div class="who"><b id="who" data-testid="user-name"></b><span id="expiry" data-testid="access-expiry"></span></div>
@@ -64,7 +63,9 @@
   <div id="appView" hidden>
   <div class="banner" id="migrateBanner" data-testid="migrate-banner" hidden>
     <span id="migrateText"></span>
-    <button id="migrateUpload" data-testid="migrate-upload">Upload my local data</button>
+    <button id="migrateDownload" data-testid="migrate-download">Download old entries</button>
+    <button id="migrateOpen" class="ghost" data-testid="migrate-open">Open web panel ↗</button>
+    <button id="migrateDrop" class="ghost danger" data-testid="migrate-drop">Remove from this browser</button>
   </div>
 
   <!-- ================= ENTRIES ================= -->
@@ -76,127 +77,16 @@
       </div>
       <div class="pagehead-tools">
         <input id="search" class="search" type="search" placeholder="Search label, name, document, province…">
-        <button id="btnBulk" class="ghost" data-testid="entry-bulk">Bulk add</button>
-        <button id="btnNew" data-testid="entry-new">+ New entry</button>
+        <button id="btnManage" data-testid="entry-manage" title="Add, edit and delete entries in the web panel">Manage entries ↗</button>
       </div>
     </div>
     <div id="cards" class="cards"></div>
     <div id="empty" class="emptybox" hidden>
       <b>No entries yet</b>
-      <p>Add the people you book for. Their details are saved in your CitaMate account.</p>
-      <button id="btnNewEmpty">+ New entry</button>
+      <p>Add the people you book for in the web panel. They are saved in your CitaMate account and appear here automatically.</p>
+      <button id="btnManageEmpty">Open web panel ↗</button>
     </div>
   </main>
-
-  <!-- Entry form drawer -->
-  <div class="drawer-bg" id="drawerBg" hidden></div>
-  <aside class="drawer" id="drawer" hidden aria-labelledby="formTitle">
-    <form id="entryForm" autocomplete="off">
-      <div class="drawer-head">
-        <h2 id="formTitle">New entry</h2>
-        <button type="button" class="icon ghost" id="btnClose" aria-label="Close">✕</button>
-      </div>
-      <div class="drawer-body">
-        <input type="hidden" id="id">
-        <div class="quick">
-          <label for="quickLine">Quick fill – paste a line</label>
-          <div class="row">
-            <input id="quickLine" class="mono" autocomplete="off" spellcheck="false"
-              placeholder="NIE:X1234567L:JHON DOE:1990:ALBANIA:Barcelona:4067:600123456:jhon@mail.com">
-            <button type="button" id="btnQuick">Fill</button>
-          </div>
-          <p class="hint">Colon-separated, in any order: doc type, NIE/DNI/passport, name, birth year, nationality, province, trámite (code or name), office, phone, email.</p>
-          <div id="quickResult" class="quickres" hidden></div>
-        </div>
-        <fieldset>
-          <legend>Identity</legend>
-          <div class="grid">
-            <label class="wide">Label (shown in the CitaMate menu)*
-              <input id="label" required placeholder="e.g. Ali – TIE renewal">
-            </label>
-            <label>Document type
-              <select id="docType">
-                <option value="NIE">NIE</option>
-                <option value="DNI">DNI</option>
-                <option value="PASAPORTE">Pasaporte</option>
-              </select>
-            </label>
-            <label>Document number*
-              <input id="docNumber" required placeholder="X1234567L">
-            </label>
-            <label class="wide">Full name (as on document)*
-              <input id="fullName" required placeholder="NOMBRE APELLIDOS">
-            </label>
-            <label>Birth year
-              <input id="birthYear" inputmode="numeric" maxlength="4" placeholder="1990">
-            </label>
-            <label>Nationality
-              <select id="nationality"><option value="">— Not set —</option></select>
-            </label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Appointment</legend>
-          <div class="grid">
-            <label class="wide">Province
-              <select id="province"><option value="">— Not set —</option></select>
-            </label>
-            <label class="wide">Trámite
-              <select id="tramite"><option value="">— Pick province first —</option></select>
-            </label>
-            <label class="wide">Office
-              <select id="office"><option value="">— Pick province first —</option></select>
-            </label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Contact</legend>
-          <div class="grid">
-            <label>Phone
-              <input id="phone" inputmode="tel" placeholder="600123456">
-            </label>
-            <label>Email
-              <input id="email" type="email" placeholder="name@example.com">
-            </label>
-            <label class="wide">Notes (only for you, never filled)
-              <textarea id="notes" rows="2" placeholder="Anything to remember…"></textarea>
-            </label>
-          </div>
-        </fieldset>
-      </div>
-      <div class="drawer-foot">
-        <span id="formMsg" class="msg"></span>
-        <button type="button" id="btnCancel" class="ghost">Cancel</button>
-        <button type="submit" id="btnSave" data-testid="entry-save">Save entry</button>
-      </div>
-    </form>
-  </aside>
-
-  <!-- Bulk add drawer -->
-  <div class="drawer-bg" id="bulkBg" hidden></div>
-  <aside class="drawer wide-drawer" id="bulkDrawer" hidden aria-labelledby="bulkTitle">
-    <div class="drawer-form">
-      <div class="drawer-head">
-        <h2 id="bulkTitle">Bulk add entries</h2>
-        <button type="button" class="icon ghost" id="bulkClose" aria-label="Close">✕</button>
-      </div>
-      <div class="drawer-body">
-        <p class="hint">One entry per line, values separated by <b>:</b> in any order. Blank lines and lines starting with # are skipped. Entries whose document number is already saved are skipped.</p>
-        <textarea id="bulkText" class="mono" rows="8" spellcheck="false" placeholder="NIE:X1234567L:JHON DOE:1990:ALBANIA:Barcelona:4067:600123456:jhon@mail.com&#10;PASAPORTE:AB9988776:SARA AHMED:1995:PAKISTAN:Madrid:4010:611222333:sara@mail.com"></textarea>
-        <p class="msg" id="bulkSummary"></p>
-        <div class="tableWrap" id="bulkPreviewWrap" hidden>
-          <table>
-            <thead><tr><th>Line</th><th>Label</th><th>Document</th><th>Name</th><th>Province</th><th>Trámite</th><th>Office</th><th>Check</th></tr></thead>
-            <tbody id="bulkRows"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="drawer-foot">
-        <button type="button" id="bulkCancel" class="ghost">Cancel</button>
-        <button type="button" id="bulkAdd" disabled>Add entries</button>
-      </div>
-    </div>
-  </aside>
 
   <!-- ================= RECORDS ================= -->
   <main id="tab-records" class="tabpane" hidden>

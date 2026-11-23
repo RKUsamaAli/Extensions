@@ -16,11 +16,12 @@
 //   From extension pages only:
 //     CM_LOGIN { username, password, apiBase } → status (as CM_STATUS)
 //     CM_LOGOUT                                → {}
-//     CM_SAVE_ENTRY { entry, id? }             → { item }   (id → PUT, else POST)
-//     CM_SAVE_ENTRIES_BULK { items }           → { items }
-//     CM_DELETE_ENTRY { id }                   → {}
 //     CM_CLEAR_LOGS / CM_CLEAR_SIGHTINGS       → { removed }
-//     CM_MIGRATE                               → { entries, logs, sightings }  (uploaded counts)
+//     CM_LEGACY_EXPORT                         → { items }  entries saved by CitaMate 1.x in this browser,
+//                                                          ready for Import JSON in the web panel
+//     CM_LEGACY_DROP                           → {}         forget that old local data
+//   Entries are added, edited and deleted only in the web panel; the server refuses those
+//   changes from the extension.
 //
 // Cache (chrome.storage.session, cleared on sign-out / browser close):
 //   cm.boot {t, data}   cm.entries {t, items}   cm.logs {t, items}   cm.sightings {t, items}
@@ -32,7 +33,7 @@ const CFG = self.CM_CONFIG;
 const VERSION = chrome.runtime.getManifest().version;
 const LOG_LIMIT = 5000;
 const MAX_AGE = { boot: 5 * 60e3, entries: 30e3, logs: 60e3, sightings: 60e3 };
-const PAGE_ONLY = new Set(["CM_LOGIN", "CM_LOGOUT", "CM_SAVE_ENTRY", "CM_SAVE_ENTRIES_BULK", "CM_DELETE_ENTRY", "CM_CLEAR_LOGS", "CM_CLEAR_SIGHTINGS", "CM_MIGRATE"]);
+const PAGE_ONLY = new Set(["CM_LOGIN", "CM_LOGOUT", "CM_CLEAR_LOGS", "CM_CLEAR_SIGHTINGS", "CM_LEGACY_EXPORT", "CM_LEGACY_DROP"]);
 
 function deviceName() {
   const ua = navigator.userAgent || "";
@@ -152,29 +153,7 @@ function flushOutbox() {
 }
 
 // ---------- entries ----------
-async function saveEntry(entry, id) {
-  const body = CM_ENTRY.body(entry || {});
-  const r = id
-    ? await api.request("PUT", "/citamate/profiles/" + encodeURIComponent(id), body)
-    : await api.request("POST", "/citamate/profiles", body);
-  await updateCache("cm.entries", (old) => old.filter((x) => x.id !== r.item.id).concat(r.item).sort(byLabel));
-  return r.item;
-}
-
-async function saveBulk(items) {
-  const created = [];
-  for (const part of CM_MIGRATE.chunks((items || []).map((e) => CM_ENTRY.body(e)), 1000)) {
-    const r = await api.request("POST", "/citamate/profiles/bulk", { items: part });
-    created.push(...(r.items || []));
-  }
-  await updateCache("cm.entries", (old) => old.concat(created).sort(byLabel));
-  return created;
-}
-
-async function deleteEntry(id) {
-  await api.request("DELETE", "/citamate/profiles/" + encodeURIComponent(id));
-  await updateCache("cm.entries", (old) => old.filter((x) => x.id !== id));
-}
+// Read-only here: entries are managed in the web panel (see entries(force) for loading).
 
 async function clearKind(kind) {
   await flushOutbox().catch(() => {});
@@ -199,40 +178,18 @@ async function migrationInfo() {
   return p;
 }
 
-// Each stage removes its local key as soon as it is on the server, so a retry after a
-// failure never uploads entries twice. The id map survives in cm.migration meanwhile.
-async function migrate() {
-  const local = await chrome.storage.local.get(CM_MIGRATE.KEYS.concat("cm.migration"));
-  const state = local["cm.migration"] || { map: {}, labels: {} };
-  const done = { entries: 0, logs: 0, sightings: 0 };
-  const boot = await bootstrap(false);
-  const cat = await catalog(boot);
+/** Entries of CitaMate 1.x still in this browser, cleaned for Import JSON in the web panel. */
+async function legacyExport() {
+  const local = await chrome.storage.local.get(["entries"]);
+  if (!Array.isArray(local.entries) || !local.entries.length) return { items: [] };
+  const cat = await catalog(await bootstrap(false));
+  return { items: CM_MIGRATE.planEntries(local.entries, cat.paises).items };
+}
 
-  if (Array.isArray(local.entries) && local.entries.length) {
-    const plan = CM_MIGRATE.planEntries(local.entries, cat.paises);
-    const created = [];
-    for (const part of CM_MIGRATE.chunks(plan.items, 1000)) {
-      const r = await api.request("POST", "/citamate/profiles/bulk", { items: part });
-      created.push(...(r.items || []));
-    }
-    state.map = { ...state.map, ...CM_MIGRATE.idMap(plan.oldIds, created) };
-    created.forEach((c) => c.label && (state.labels[c.label] = c.id));
-    done.entries = created.length;
-    await chrome.storage.local.set({ "cm.migration": state });
-  }
-  await chrome.storage.local.remove("entries");
-
-  for (const [key, kind, path] of [["logs", "logs", "/citamate/logs"], ["officeSightings", "sightings", "/citamate/office-sightings"]]) {
-    const recs = CM_MIGRATE.remap(local[key], state.map, state.labels);
-    for (const part of CM_MIGRATE.chunks(recs, 500)) {
-      const r = await api.request("POST", path, { items: part });
-      done[kind] += r.saved || 0;
-    }
-    await chrome.storage.local.remove(key);
-  }
-  await chrome.storage.local.remove("cm.migration");
-  await Promise.all([entries(true), logs(true), sightings(true)]);
-  return done;
+/** Forgets the data of older versions in this browser (after it was imported in the panel). */
+async function legacyDrop() {
+  await chrome.storage.local.remove(CM_MIGRATE.KEYS.concat("cm.migration"));
+  return {};
 }
 
 // ---------- status ----------
@@ -279,19 +236,14 @@ async function handle(msg, sender) {
       return { queued: await queue("logs", msg.items) };
     case "CM_ADD_SIGHTINGS":
       return { queued: await queue("sightings", msg.items) };
-    case "CM_SAVE_ENTRY":
-      return { item: await saveEntry(msg.entry, msg.id) };
-    case "CM_SAVE_ENTRIES_BULK":
-      return { items: await saveBulk(msg.items) };
-    case "CM_DELETE_ENTRY":
-      await deleteEntry(msg.id);
-      return {};
     case "CM_CLEAR_LOGS":
       return { removed: await clearKind("logs") };
     case "CM_CLEAR_SIGHTINGS":
       return { removed: await clearKind("sightings") };
-    case "CM_MIGRATE":
-      return migrate();
+    case "CM_LEGACY_EXPORT":
+      return legacyExport();
+    case "CM_LEGACY_DROP":
+      return legacyDrop();
     default:
       throw new CM_API.ApiError("bad_message", "Unknown message " + msg.type);
   }

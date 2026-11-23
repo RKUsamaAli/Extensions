@@ -35,7 +35,7 @@ function makeServices(overrides = {}) {
     const config = testConfig(overrides);
     const clock = overrides.clock || makeClock();
     const db = openDb(':memory:');
-    const s = createServices({ db, config, clock });
+    const s = createServices({ db, config, clock, checkProxy: overrides.checkProxy });
     return { ...s, clock };
 }
 

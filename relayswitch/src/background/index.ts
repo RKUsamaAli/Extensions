@@ -1,7 +1,7 @@
 import { displayName } from "../core/profile";
 import { formatDuration } from "../core/format";
 import { testIdFromUrl } from "../core/pac";
-import { scoreOf } from "../core/score";
+import { scoreOf, byBestScore } from "../core/score";
 import type { ProxyProfile } from "../core/types";
 import { nextSession, renderUsername, usesSession } from "../core/username";
 import { MAX_AUTH_FAILURES } from "../shared/config";
@@ -22,18 +22,16 @@ import { HubError } from "../shared/hub";
 import {
   authInfo,
   bootstrap,
-  bulkCreate,
   clearLogsRemote,
-  deleteProfileRemote,
   isSignedIn,
+  dropLegacy,
   legacyInfo,
+  legacyProxyLines,
   loadAll,
   login,
   logout,
-  migrateLocal,
   onSignedOut,
   requireSignedIn,
-  saveProfileRemote,
   scheduleFlush,
   signOutLocal,
 } from "./sync";
@@ -346,6 +344,51 @@ async function connectServer(): Promise<boolean> {
   }
 }
 
+/** Proxy cleared while the server is unreachable; `enabled` stays on so it reconnects later. */
+async function waitForServer(detail: string): Promise<void> {
+  await clearProxy().catch(() => {});
+  await setSession({ status: "error", statusDetail: `${detail} – retrying`, exitIp: null, latencyMs: null, checkedAt: null });
+  await updateBadge();
+}
+
+let ensuring: Promise<void> | null = null;
+/**
+ * Keeps every tab working without opening the popup: loads the proxies when they are
+ * missing or stale (browser restart, failed start, changes made in the web panel),
+ * reconnects a proxy that is meant to be on, and disconnects one that was switched off
+ * or deleted in the panel. Runs at start, every minute and on each page menu request.
+ */
+function ensureReady(): Promise<void> {
+  ensuring ??= (async () => {
+    if (!support.canProxy || !(await isSignedIn())) return;
+    const before = await getSession();
+    await loadAll(false).catch(() => {});
+    const { enabled, activeProfileId } = await getLocal();
+    if (!enabled) return;
+    const s = await getSession();
+    if (s.loadedAt === null) return waitForServer(s.authError ?? "Can't reach the server");
+    const list = await cachedProfiles();
+    if (activeProfileId && !list.some((p) => p.id === activeProfileId)) {
+      return turnOff("error", "This proxy was switched off or deleted in the web panel. Pick another one.");
+    }
+    const waiting = s.status === "error" && /retrying$/.test(s.statusDetail ?? "");
+    if (s.status === "off" || waiting || (before.loadedAt === null && s.status !== "connected" && s.status !== "connecting")) {
+      await turnOn().catch((err: unknown) => turnOff("error", errorText(err)));
+    }
+  })().finally(() => {
+    ensuring = null;
+  });
+  return ensuring;
+}
+
+const SYNC_ALARM = "relayswitch-sync";
+safeListen("alarms", () => {
+  chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 1 });
+  chrome.alarms.onAlarm.addListener((a) => {
+    if (a.name === SYNC_ALARM) void ensureReady();
+  });
+}, missingListener);
+
 async function restore(): Promise<void> {
   if (!support.canProxy) {
     await setSession({ status: "error", statusDetail: "Browser not supported" }).catch(() => {});
@@ -357,7 +400,10 @@ async function restore(): Promise<void> {
   );
   const online = await connectServer();
   if (enabled && !online) {
-    await turnOff("error", (await getSession()).authError ?? "Sign in to RelaySwitch").catch(() => {});
+    // No server, no proxy – but remember it was on: ensureReady() reconnects when the
+    // server answers again (every minute, and whenever a page asks).
+    if (await isSignedIn()) await waitForServer((await getSession()).authError ?? "Can't reach the server");
+    else await turnOff("error", (await getSession()).authError ?? "Sign in to RelaySwitch").catch(() => {});
     return;
   }
   if (enabled) {
@@ -368,22 +414,6 @@ async function restore(): Promise<void> {
 }
 
 // ---- Profiles ----
-
-async function saveProfile(profile: ProxyProfile): Promise<void> {
-  const { activeProfileId, enabled } = await getLocal();
-  const saved = await saveProfileRemote(profile);
-  await setLocal({ activeProfileId: activeProfileId ?? saved.id });
-  if (enabled && (activeProfileId === saved.id || !activeProfileId)) await turnOn();
-}
-
-async function deleteProfile(id: string): Promise<void> {
-  const local = await getLocal();
-  const wasActive = local.activeProfileId === id;
-  await deleteProfileRemote(id);
-  const rest = await cachedProfiles();
-  await setLocal({ activeProfileId: wasActive ? (rest[0]?.id ?? null) : local.activeProfileId });
-  if (wasActive && local.enabled) await turnOff();
-}
 
 async function setActive(id: string): Promise<void> {
   const { enabled } = await getLocal();
@@ -405,21 +435,6 @@ async function assertNotTesting(type: string): Promise<void> {
   if (testRun?.running) throw new Error("Proxy test in progress. Wait for it or cancel it first.");
 }
 
-async function bulkAdd(incoming: ProxyProfile[]): Promise<string[]> {
-  const local = await getLocal();
-  const key = (p: ProxyProfile) => `${p.host.toLowerCase()}:${p.port}:${p.usernameTemplate}`;
-  const seen = new Set((await cachedProfiles()).map(key));
-  const fresh = incoming.filter((p) => {
-    if (seen.has(key(p))) return false;
-    seen.add(key(p));
-    return true;
-  });
-  const created = fresh.length ? await bulkCreate(fresh) : [];
-  await setLocal({ activeProfileId: local.activeProfileId ?? created[0]?.id ?? null });
-  await log({ level: "info", event: "bulk_add", detail: `${created.length} added, ${incoming.length - fresh.length} duplicates skipped` });
-  return created.map((p) => p.id);
-}
-
 async function scores(): Promise<Record<string, number | null>> {
   const { profiles, stats } = await getSession();
   return Object.fromEntries(profiles.map((p) => [p.id, scoreOf(stats[p.id]?.results ?? []).value]));
@@ -431,9 +446,7 @@ const SIGNED_OUT_OK = new Set(["getState", "listProfiles", "getAuth", "login", "
 async function handle(msg: Message): Promise<Reply> {
   await assertNotTesting(msg.type);
   if (!SIGNED_OUT_OK.has(msg.type)) await requireSignedIn();
-  let added: number | undefined;
-  let addedIds: string[] | undefined;
-  let migrated: LegacyInfo | undefined;
+  let legacyText: string | undefined;
   let check: CheckStep[] | undefined;
   switch (msg.type) {
     case "getAuth":
@@ -454,12 +467,15 @@ async function handle(msg: Message): Promise<Reply> {
         throw err;
       });
       break;
+    case "legacyExport":
+      legacyText = await legacyProxyLines();
+      break;
+    case "dropLegacy":
+      await dropLegacy();
+      break;
     case "logout":
       await turnOff().catch(() => {});
       await logout();
-      break;
-    case "migrateLocal":
-      migrated = await migrateLocal();
       break;
     case "setEnabled":
       if (msg.enabled) await turnOn();
@@ -471,21 +487,11 @@ async function handle(msg: Message): Promise<Reply> {
     case "newSession":
       await newSession();
       break;
-    case "saveProfile":
-      await saveProfile(msg.profile);
-      break;
-    case "deleteProfile":
-      await deleteProfile(msg.id);
-      break;
     case "setActive":
       await setActive(msg.id);
       break;
     case "clearLogs":
       await clearLogsRemote();
-      break;
-    case "bulkAdd":
-      addedIds = await bulkAdd(msg.profiles);
-      added = addedIds.length;
       break;
     case "testProxies":
       await assertCanProxy();
@@ -517,13 +523,11 @@ async function handle(msg: Message): Promise<Reply> {
     profiles: auth.signedIn ? await cachedProfiles() : [],
     settings,
     scores: auth.signedIn ? await scores() : {},
-    added,
-    addedIds,
     check,
     support: await supportReply(),
     auth,
     legacy: await legacyInfo().catch(() => null),
-    migrated,
+    legacyText,
   };
 }
 
@@ -542,6 +546,8 @@ async function handlePage(msg: PageMessage): Promise<MenuReply> {
   }
   switch (msg?.type) {
     case "menu":
+      // Any tab asking for the menu gets loaded proxies and an applied proxy, popup or not.
+      if (signedIn) await ensureReady();
       break;
     case "menuSignIn":
       await chrome.runtime.openOptionsPage();
@@ -578,7 +584,7 @@ async function handlePage(msg: PageMessage): Promise<MenuReply> {
       activeId: state.activeProfileId,
       status: state.status,
       exitIp: state.exitIp,
-      items: profiles.map((p) => ({ id: p.id, name: displayName(p), score: scoreMap[p.id] ?? null })),
+      items: [...profiles].sort(byBestScore<ProxyProfile>(scoreMap, displayName)).map((p) => ({ id: p.id, name: displayName(p), score: scoreMap[p.id] ?? null })),
       pos: fabPos,
     },
   };

@@ -28,6 +28,7 @@ const E = {
         new HttpError(403, 'device_limit', `Device limit reached (${maxDevices}). Ask the admin to remove a device.`, { maxDevices }),
     deviceRevoked: () => new HttpError(403, 'device_revoked', 'This device was removed from your account.'),
     forbidden: (message = 'You are not allowed to do this.') => new HttpError(403, 'forbidden', message),
+    panelOnly: (message, extra) => new HttpError(403, 'panel_only', message, extra),
     notFound: (message = 'Not found.') => new HttpError(404, 'not_found', message),
     conflict: (message) => new HttpError(409, 'conflict', message),
     updateRequired: (minVersion) => new HttpError(426, 'update_required', `Please update the extension to version ${minVersion} or newer.`, { minVersion }),

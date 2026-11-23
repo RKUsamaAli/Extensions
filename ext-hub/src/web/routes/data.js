@@ -3,12 +3,14 @@
 const express = require('express');
 const { E } = require('../../lib/errors');
 const { isExt, parseClientHeader } = require('../../lib/util');
-const { requireExt, scopeOf } = require('../middleware');
+const { requireExt, scopeOf, panelOnly } = require('../middleware');
 
 function dataRoutes(services) {
     const r = express.Router();
     const { users, profiles, proxies, activity, configStore, devices, settings } = services;
     const items = (req) => (req.body && req.body.items) || null;
+    const entriesPanelOnly = panelOnly(services.config, 'CitaMate entries');
+    const proxiesPanelOnly = panelOnly(services.config, 'Proxies');
 
     // ------------------------------------------------------------ bootstrap ----
     r.get('/bootstrap', (req, res) => {
@@ -32,15 +34,24 @@ function dataRoutes(services) {
     // ------------------------------------------------------------- citamate ----
     const cm = express.Router();
     cm.use(requireExt(services, 'citamate'));
-    cm.get('/profiles', (req, res) => res.json({ items: profiles.list(scopeOf(req)) }));
-    cm.post('/profiles', (req, res) => res.status(201).json({ item: profiles.create(req.actor, req.body || {}) }));
-    cm.post('/profiles/bulk', (req, res) => res.status(201).json({ items: profiles.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
-    cm.put('/profiles/:id', (req, res) => res.json({ item: profiles.update(req.actor, req.params.id, req.body || {}) }));
-    cm.delete('/profiles/:id', (req, res) => {
+    cm.get('/profiles', (req, res) => {
+        // CitaMate gets the active entries only (pending / in progress); the panel gets all + counts.
+        if (req.auth.session.kind === 'extension') return res.json({ items: profiles.list(scopeOf(req), { activeOnly: true }) });
+        res.json({ items: profiles.list(scopeOf(req)), counts: profiles.statusCounts(scopeOf(req)) });
+    });
+    cm.post('/profiles/actions', entriesPanelOnly, (req, res) => {
+        const b = req.body || {};
+        res.json(profiles.bulkAction(req.actor, b.ids, b.action, b.status));
+    });
+    cm.post('/profiles', entriesPanelOnly, (req, res) => res.status(201).json({ item: profiles.create(req.actor, req.body || {}) }));
+    cm.post('/profiles/bulk', entriesPanelOnly, (req, res) => res.status(201).json({ items: profiles.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
+    cm.put('/profiles/:id', entriesPanelOnly, (req, res) => res.json({ item: profiles.update(req.actor, req.params.id, req.body || {}) }));
+    cm.delete('/profiles/:id', entriesPanelOnly, (req, res) => {
         profiles.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });
-    cm.get('/logs', (req, res) => res.json({ items: activity.listLogs(scopeOf(req), { entryId: req.query.entryId, limit: req.query.limit }) }));
+    // ?context=1 adds the page snapshots of failed steps (panel); the extension leaves them out.
+    cm.get('/logs', (req, res) => res.json({ items: activity.listLogs(scopeOf(req), { entryId: req.query.entryId, limit: req.query.limit, context: req.query.context === '1' }) }));
     cm.post('/logs', (req, res) => res.json({ saved: activity.addLogs(req.actor, items(req)) }));
     cm.delete('/logs', (req, res) => res.json({ removed: activity.clearLogs(req.actor) }));
     cm.get('/office-sightings', (req, res) => res.json({ items: activity.listSightings(scopeOf(req), { limit: req.query.limit }) }));
@@ -61,15 +72,23 @@ function dataRoutes(services) {
         res.setHeader('Cache-Control', 'no-store');
         // With `limit`: one scored, filtered, sorted page + summary of all (panel). Without: everything (extension).
         if (req.query.limit !== undefined) {
-            const { q, filter, sort, limit, offset } = req.query;
-            return res.json(proxies.page(scopeOf(req), { q, filter, sort, limit, offset }));
+            const { q, filter, sort, limit, offset, ids } = req.query;
+            return res.json(proxies.page(scopeOf(req), { q, filter, sort, limit, offset, idsOnly: ids === '1' }));
         }
-        res.json({ items: proxies.list(scopeOf(req)) });
+        // The extension gets only switched-on proxies.
+        res.json({ items: proxies.list(scopeOf(req), { enabledOnly: req.auth.session.kind === 'extension' }) });
     });
-    rs.post('/proxies', (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
-    rs.post('/proxies/bulk', (req, res) => res.status(201).json({ items: proxies.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
-    rs.put('/proxies/:id', (req, res) => res.json({ item: proxies.update(req.actor, req.params.id, req.body || {}) }));
-    rs.delete('/proxies/:id', (req, res) => {
+    rs.post('/proxies/actions', proxiesPanelOnly, (req, res) => {
+        const b = req.body || {};
+        res.json(proxies.bulkAction(req.actor, b.ids, b.action));
+    });
+    rs.post('/proxies/server-check', proxiesPanelOnly, async (req, res) => {
+        res.json({ results: await proxies.serverCheck(req.actor, (req.body || {}).ids) });
+    });
+    rs.post('/proxies', proxiesPanelOnly, (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
+    rs.post('/proxies/bulk', proxiesPanelOnly, (req, res) => res.status(201).json({ items: proxies.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
+    rs.put('/proxies/:id', proxiesPanelOnly, (req, res) => res.json({ item: proxies.update(req.actor, req.params.id, req.body || {}) }));
+    rs.delete('/proxies/:id', proxiesPanelOnly, (req, res) => {
         proxies.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });

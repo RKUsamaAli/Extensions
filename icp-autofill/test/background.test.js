@@ -158,7 +158,7 @@ test("wrong password → error, still signed out", async () => {
   assert.equal(r.error.code, "invalid_credentials");
 });
 
-test("full flow: login, data, save/delete entry, content logs, clear, logout", async () => {
+test("full flow: login, data, read-only entries, content logs, clear, logout", async () => {
   const s = fakeServer();
   const bg = loadBackground(s);
   const st = await bg.send({ type: "CM_LOGIN", username: "ali", password: "pw", apiBase: "http://localhost:4000" });
@@ -180,20 +180,18 @@ test("full flow: login, data, save/delete entry, content logs, clear, logout", a
   await bg.send({ type: "CM_GET_DATA", what: ["catalog"] });
   assert.equal(s.calls.filter((c) => c.path === "/citamate/catalog").length, 1);
 
-  // Content scripts may not change entries.
-  const denied = await bg.send({ type: "CM_SAVE_ENTRY", entry: { label: "x" } }, bg.SITE);
-  assert.equal(denied.ok, false);
-  assert.equal(denied.error.code, "forbidden");
-
-  const saved = await bg.send({ type: "CM_SAVE_ENTRY", entry: { label: "Ali", docNumber: "X1", fullName: "ALI", id: "ignored", ownerId: "x" } });
-  assert.equal(saved.ok, true);
-  const post = s.calls.find((c) => c.method === "POST" && c.path === "/citamate/profiles");
-  assert.ok(!("id" in post.body) && !("ownerId" in post.body));
-  assert.equal(bg.session._dump()["cm.entries"].items.length, 1);
-
-  const upd = await bg.send({ type: "CM_SAVE_ENTRY", entry: { label: "Ali 2", docNumber: "X1", fullName: "ALI" }, id: saved.item.id });
-  assert.equal(upd.item.label, "Ali 2");
-  assert.equal(bg.session._dump()["cm.entries"].items[0].label, "Ali 2");
+  // Entries are managed in the web panel: no message can change them, from any sender.
+  for (const type of ["CM_SAVE_ENTRY", "CM_SAVE_ENTRIES_BULK", "CM_DELETE_ENTRY", "CM_MIGRATE"]) {
+    for (const sender of [undefined, bg.SITE]) {
+      const r = await bg.send({ type, entry: { label: "x" }, items: [], id: "x" }, sender);
+      assert.equal(r.ok, false, type);
+    }
+  }
+  assert.ok(!s.calls.some((c) => c.path.startsWith("/citamate/profiles") && c.method !== "GET"), "no entry write reaches the server");
+  // An entry added in the panel shows up after a fresh load.
+  s.db.profiles.push({ id: "p1", label: "Ali", docNumber: "X1", fullName: "ALI" });
+  const saved = { item: (await bg.send({ type: "CM_GET_DATA", what: ["entries"], fresh: true })).entries[0] };
+  assert.equal(saved.item.label, "Ali");
 
   // Content script gets entries + config, and posts logs/sightings through the outbox.
   const cd = await bg.send({ type: "CM_GET_DATA", what: ["entries", "logs", "siteConfig"] }, bg.SITE);
@@ -212,27 +210,13 @@ test("full flow: login, data, save/delete entry, content logs, clear, logout", a
   assert.equal(cl.removed, 1);
   assert.equal(bg.session._dump()["cm.logs"].items.length, 0);
 
-  const del = await bg.send({ type: "CM_DELETE_ENTRY", id: saved.item.id });
-  assert.equal(del.ok, true);
-  assert.equal(s.db.profiles.length, 0);
-
   await bg.send({ type: "CM_LOGOUT" });
   assert.equal(bg.local._dump()["cm.refresh"], undefined);
   assert.deepEqual(bg.session._dump(), {});
   assert.ok(s.calls.some((c) => c.path === "/auth/logout"));
 });
 
-test("bulk save chunks and caches", async () => {
-  const s = fakeServer();
-  const bg = loadBackground(s);
-  await bg.send({ type: "CM_LOGIN", username: "ali", password: "pw" });
-  const items = Array.from({ length: 1001 }, (_, i) => ({ label: "E" + i, docNumber: "D" + i, fullName: "N" }));
-  const r = await bg.send({ type: "CM_SAVE_ENTRIES_BULK", items });
-  assert.equal(r.items.length, 1001);
-  assert.equal(s.calls.filter((c) => c.path === "/citamate/profiles/bulk").length, 2);
-});
-
-test("migration uploads old local data, remaps ids and removes the local keys", async () => {
+test("old local data: entries exported for the web panel, then removed on request", async () => {
   const s = fakeServer();
   const bg = loadBackground(s);
   await bg.local.set({
@@ -248,15 +232,18 @@ test("migration uploads old local data, remaps ids and removes the local keys", 
   const st = await bg.send({ type: "CM_STATUS" });
   assert.deepEqual(st.migration, { entries: 2, logs: 1, sightings: 1 });
 
-  const r = await bg.send({ type: "CM_MIGRATE" });
-  assert.equal(r.ok, true, JSON.stringify(r));
-  assert.deepEqual({ entries: r.entries, logs: r.logs, sightings: r.sightings }, { entries: 2, logs: 1, sightings: 1 });
-  const sara = s.db.profiles.find((p) => p.label === "Sara");
-  assert.equal(s.db.logs[0].entryId, sara.id);
-  assert.equal(s.db.sightings[0].entryId, s.db.profiles.find((p) => p.label === "Ali").id);
-  assert.ok(s.db.sightings[0].id, "sighting got an id");
+  const ex = await bg.send({ type: "CM_LEGACY_EXPORT" });
+  assert.equal(ex.ok, true, JSON.stringify(ex));
+  assert.deepEqual(ex.items.map((e) => e.label), ["Ali", "Sara"]);
+  assert.ok(ex.items.every((e) => !("id" in e)), "ready for Import JSON (no old ids)");
+  assert.equal(s.db.profiles.length, 0, "nothing uploaded by the extension");
+  assert.ok(bg.local._dump().entries, "kept until the user removes it");
+
+  const site = await bg.send({ type: "CM_LEGACY_DROP" }, bg.SITE);
+  assert.equal(site.ok, false, "content scripts can't drop it");
+  assert.equal((await bg.send({ type: "CM_LEGACY_DROP" })).ok, true);
   const left = bg.local._dump();
-  assert.ok(!("entries" in left) && !("logs" in left) && !("officeSightings" in left) && !("cm.migration" in left));
+  assert.ok(!("entries" in left) && !("logs" in left) && !("officeSightings" in left));
   assert.deepEqual(left.dialogUi, { side: "left" }, "UI state untouched");
   assert.equal((await bg.send({ type: "CM_STATUS" })).migration, null);
 });

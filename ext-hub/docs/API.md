@@ -34,6 +34,7 @@ Every error is `{"code": "<code>", "message": "<human text>", ...extra}` with:
 | 403 | `subscription_expired` | `ext`, `expiresAt` | "Access expired on <date>" , sign out |
 | 403 | `device_limit` | `maxDevices` | "Device limit reached – ask admin to remove a device" |
 | 403 | `device_revoked` | | sign out |
+| 403 | `panel_only` | `panelUrl` | an extension tried to add, change or delete an entry or proxy: "Manage them in the web panel" + link |
 | 403 | `forbidden` | | |
 | 404 | `not_found` | | |
 | 409 | `conflict` | | e.g. username taken |
@@ -87,6 +88,13 @@ Password rules: 8–200 chars. Username: 3–40 chars, `[A-Za-z0-9._-]`.
   "siteConfig": { … },          // per-extension JSON the admin can edit (see below), {} when none
   "serverTime": 1764000000000 }
 ```
+
+## Panel-only changes
+
+Entries (`/citamate/profiles…`) and proxies (`/relayswitch/proxies…`) are **added, edited and
+deleted only from the web panel**. With an extension session (`client.kind = "extension"`) every
+`POST`/`PUT`/`DELETE` on them returns 403 `panel_only`, so a modified extension can't change data
+either. Extensions still read them and still send logs, checks and office sightings.
 
 ## Ownership rules (all data endpoints)
 

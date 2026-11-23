@@ -55,20 +55,18 @@ export type Message =
   | { type: "setEnabled"; enabled: boolean }
   | { type: "checkIp" }
   | { type: "newSession" }
-  | { type: "saveProfile"; profile: ProxyProfile }
-  | { type: "deleteProfile"; id: string }
   | { type: "setActive"; id: string }
   | { type: "listProfiles" }
   | { type: "clearLogs" }
   | { type: "setSettings"; settings: Partial<Settings> }
-  | { type: "bulkAdd"; profiles: ProxyProfile[] }
   | { type: "testProxies"; ids?: string[] }
   | { type: "cancelTests" }
   | { type: "browserCheck" }
   | { type: "getAuth" }
   | { type: "login"; username: string; password: string; apiBase: string }
   | { type: "logout" }
-  | { type: "migrateLocal" };
+  | { type: "legacyExport" }
+  | { type: "dropLegacy" };
 
 /** The only messages accepted from the on-page button (a content script). */
 export type PageMessage =
@@ -86,16 +84,12 @@ export type Reply =
       settings: Settings;
       /** Score out of 100 per proxy id; null = not checked yet. */
       scores: Record<string, number | null>;
-      /** Set when bulkAdd ran. */
-      added?: number;
-      /** Server ids of the proxies bulkAdd created. */
-      addedIds?: string[];
       /** Sign-in state; when signedIn is false, profiles is empty. */
       auth: AuthInfo;
-      /** Old local data waiting for "Upload my local data"; null = none. */
+      /** Data saved by RelaySwitch 0.1.x in this browser (to move to the web panel); null = none. */
       legacy: LegacyInfo | null;
-      /** Set when migrateLocal ran. */
-      migrated?: LegacyInfo;
+      /** Set when legacyExport ran: the old proxies, one per line, for Bulk add in the web panel. */
+      legacyText?: string;
       /** What this browser supports; canProxy false = RelaySwitch can't work here. */
       support: SupportInfo;
       /** Set when browserCheck ran. */
@@ -118,7 +112,7 @@ export async function send(msg: Message): Promise<Reply> {
           error:
             "RelaySwitch's background didn't answer. Reload the extension. If it keeps happening, this browser may not support RelaySwitch.",
         }),
-      msg.type === "getAuth" ? 8_000 : msg.type === "migrateLocal" ? 120_000 : REPLY_TIMEOUT_MS,
+      msg.type === "getAuth" ? 8_000 : REPLY_TIMEOUT_MS,
     );
   });
   try {

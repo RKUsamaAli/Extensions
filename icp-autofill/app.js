@@ -106,7 +106,10 @@
     if (m.entries) parts.push(m.entries + " entr" + (m.entries === 1 ? "y" : "ies"));
     if (m.logs) parts.push(m.logs + " log record" + (m.logs === 1 ? "" : "s"));
     if (m.sightings) parts.push(m.sightings + " office check" + (m.sightings === 1 ? "" : "s"));
-    $("migrateText").textContent = "This browser still has data from an older CitaMate version (" + parts.join(", ") + "). Upload it to your account – it is removed from this browser afterwards.";
+    $("migrateText").textContent =
+      "This browser still has data from an older CitaMate version (" + parts.join(", ") + "). Entries are now added in the web panel: " +
+      "download them, use Import JSON on the panel's Entries page, then remove them from this browser.";
+    $("migrateDownload").hidden = !m.entries;
   }
 
   // ---------- sign in / out ----------
@@ -137,20 +140,32 @@
 
   $("stateRetry").addEventListener("click", () => start());
 
-  $("migrateUpload").addEventListener("click", async () => {
-    const b = $("migrateUpload");
-    b.disabled = true;
-    b.textContent = "Uploading…";
+  // Old local data: entries go to the web panel (Import JSON); the extension can't add them.
+  const panelUrl = () => String((CM.status && (CM.status.apiBase || CM.status.defaultApiBase)) || "").replace(/\/+$/, "") + "/app#entries";
+  $("migrateOpen").addEventListener("click", () => window.open(panelUrl(), "_blank", "noopener"));
+  $("migrateDownload").addEventListener("click", async () => {
     try {
-      const r = await send("CM_MIGRATE");
-      $("migrateBanner").hidden = true;
-      alert("Uploaded " + r.entries + " entries, " + r.logs + " log records and " + r.sightings + " office checks to your account.");
+      const r = await send("CM_LEGACY_EXPORT");
+      const blob = new Blob([JSON.stringify(r.items || [], null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "citamate-old-entries.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     } catch (err) {
-      alert("Upload failed: " + err.message + "\nNothing was lost – you can try again.");
+      alert("Download failed: " + err.message);
     }
-    b.disabled = false;
-    b.textContent = "Upload my local data";
   });
+  $("migrateDrop").addEventListener("click", async () => {
+    if (!confirm("Remove the old entries and logs from this browser? Do this after importing them in the web panel.")) return;
+    try {
+      await send("CM_LEGACY_DROP");
+      $("migrateBanner").hidden = true;
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
 
   // ---------- start ----------
   async function start() {

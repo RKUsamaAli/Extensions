@@ -1,17 +1,13 @@
-import { bulkNames, parseBulk, proxyKey, type BulkResult, type NameBy } from "../core/bulk";
 import { formatAgo, formatDuration } from "../core/format";
-import { isValidHost, parsePort, parseProxyLine } from "../core/parse";
 import { displayName } from "../core/profile";
 import { scoreBand, scoreOf, type Score } from "../core/score";
-import type { LogEntry, ProxyProfile, ProxyStats, Scheme } from "../core/types";
-import { renderUsername, templateTokens, usesSession } from "../core/username";
+import type { LogEntry, ProxyProfile, ProxyStats } from "../core/types";
 import { send, type AuthInfo, type LegacyInfo, type Message, type Reply } from "../shared/messages";
 import { renderAccount, renderSignIn } from "../shared/signin";
 import type { TestRun } from "../shared/storage";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const val = (id: string) => $<HTMLInputElement>(id).value.trim();
-const setVal = (id: string, v: string | number) => ($<HTMLInputElement>(id).value = String(v));
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -28,7 +24,8 @@ let activeId: string | null = null;
 /** True only while RelaySwitch is on and connected through the selected proxy. */
 let connected = false;
 let enabled = false;
-let editingId: string | null = null;
+/** Web panel page where proxies are added, edited and deleted. */
+let panelUrl = "";
 let testing = false;
 let signedIn = false;
 let lastReply: Extract<Reply, { ok: true }> | null = null;
@@ -39,16 +36,14 @@ function renderAuth(auth: AuthInfo, legacy: LegacyInfo | null): void {
   const changed = signedIn !== auth.signedIn;
   signedIn = auth.signedIn;
   $("appContent").hidden = !signedIn;
-  $("bulkBtn").hidden = !signedIn;
-  $("newBtn").hidden = !signedIn;
+  $("manageBtn").hidden = !signedIn;
+  panelUrl = auth.apiBase.replace(/\/+$/, "") + "/app#proxies";
   $("account").hidden = !signedIn;
   $("signinCard").hidden = signedIn;
   $("serverError").hidden = !(signedIn && auth.error);
   $("serverError").textContent = signedIn ? (auth.error ?? "") : "";
   if (!signedIn) {
     $("migrate").hidden = true;
-    $("editor").hidden = true;
-    $("bulk").hidden = true;
     // Don't wipe what the user is typing when the page refreshes itself.
     if (changed || !$("signinCard").childElementCount) {
       renderSignIn($("signinCard"), auth, () => void run({ type: "listProfiles" }));
@@ -69,21 +64,28 @@ function renderMigrate(legacy: LegacyInfo | null): void {
   ].filter(Boolean);
   $("migrateText").textContent =
     `This browser still has ${parts.join(", ")} saved by an older RelaySwitch version. ` +
-    "Upload them to your account to keep them; they are then removed from this browser.";
+    "Proxies are now kept in your account and added in the web panel. To keep these ones:";
+  $("migrateCopy").hidden = !legacy.profiles;
 }
 
-$("migrateBtn").addEventListener("click", () => {
-  const btn = $<HTMLButtonElement>("migrateBtn");
-  btn.disabled = true;
-  $("migrateSpin").hidden = false;
-  $("migrateLabel").textContent = "Uploading…";
-  void run({ type: "migrateLocal" }).then((ok) => {
-    btn.disabled = false;
-    $("migrateSpin").hidden = true;
-    $("migrateLabel").textContent = "Upload my local data";
-    const m = lastReply?.migrated;
-    if (ok && m) alert(`Uploaded ${m.profiles} proxies, ${m.checks} test results and ${m.logs} activity entries.`);
+/** Opens the web panel (proxies are added, edited and deleted there). */
+function openPanel(): void {
+  if (panelUrl) void chrome.tabs.create({ url: panelUrl });
+}
+
+$("manageBtn").addEventListener("click", openPanel);
+$("migrateOpen").addEventListener("click", openPanel);
+$("migrateCopy").addEventListener("click", () => {
+  void send({ type: "legacyExport" }).then(async (reply) => {
+    if (!reply?.ok || !reply.legacyText) return showPageError("Nothing to copy.");
+    await navigator.clipboard.writeText(reply.legacyText);
+    const n = reply.legacyText.split("\n").length;
+    $("migrateCopy").textContent = `Copied ${n} prox${n === 1 ? "y" : "ies"} ✓`;
   });
+});
+$("migrateDrop").addEventListener("click", () => {
+  if (!confirm("Remove the old proxies, test results and activity from this browser? Do this after adding the proxies in the web panel.")) return;
+  void run({ type: "dropLegacy" });
 });
 
 // ---------- talking to the worker ----------
@@ -98,9 +100,7 @@ async function run(msg: Message): Promise<boolean> {
   }
   if (!reply.ok) {
     $("loadingList").hidden = true;
-    // Form errors go next to the open form; anything else at the top.
-    if (!$("editor").hidden) showError(reply.error);
-    else showPageError(reply.error);
+    showPageError(reply.error);
     return false;
   }
   $("pageError").hidden = true;
@@ -242,9 +242,7 @@ function row(p: ProxyProfile): HTMLLIElement {
   test.addEventListener("click", () => void startTest([p.id]));
   const logs = el("button", "", "Logs");
   logs.addEventListener("click", () => showLogsFor(p.id));
-  const edit = el("button", "", "Edit");
-  edit.addEventListener("click", () => openEditor(p));
-  actions.append(test, logs, edit);
+  actions.append(test, logs);
 
   li.append(scoreBadge(s), main, actions);
   return li;
@@ -347,209 +345,13 @@ function renderSummary(p: ProxyProfile | undefined): void {
   );
 }
 
-// ---------- single editor ----------
-
-function openEditor(p?: ProxyProfile): void {
-  $("bulk").hidden = true;
-  editingId = p?.id ?? null;
-  $("editorTitle").textContent = p ? `Edit ${displayName(p)}` : "Add proxy";
-  setVal("paste", "");
-  setVal("name", p?.name ?? "");
-  setVal("scheme", p?.scheme ?? "http");
-  setVal("host", p?.host ?? "");
-  setVal("port", p?.port ?? "");
-  setVal("user", p?.usernameTemplate ?? "");
-  setVal("pass", p?.password ?? "");
-  setVal("country", p?.country ?? "");
-  setVal("city", p?.city ?? "");
-  setVal("sStart", p?.sessionStart ?? 1000);
-  setVal("sEnd", p?.sessionEnd ?? 1999);
-  $("deleteBtn").hidden = !p;
-  $("formError").hidden = true;
-  $("editor").hidden = false;
-  updateSocksWarning();
-  $("editor").scrollIntoView({ behavior: "smooth", block: "start" });
-  $("name").focus({ preventScroll: true });
-}
-
-function showError(text: string): void {
-  const e = $("formError");
-  e.textContent = text;
-  e.hidden = false;
-}
-
-function updateSocksWarning(): void {
-  $("socksWarn").hidden = !(val("scheme").startsWith("socks") && val("pass") !== "");
-}
-
-function readForm(): ProxyProfile {
-  const host = val("host");
-  if (!isValidHost(host)) throw new Error(`Invalid host: ${host}`);
-  const template = val("user");
-  const profile: ProxyProfile = {
-    id: editingId ?? crypto.randomUUID(),
-    name: val("name"), // empty = show the username (see displayName)
-    scheme: val("scheme") as Scheme,
-    host,
-    port: parsePort(val("port")),
-    usernameTemplate: template,
-    password: $<HTMLInputElement>("pass").value, // keep spaces, passwords are exact
-    country: val("country").toLowerCase(),
-    city: val("city").toLowerCase(),
-    sessionStart: Number(val("sStart") || 0),
-    sessionEnd: Number(val("sEnd") || 0),
-  };
-  if (usesSession(template) && profile.sessionEnd < profile.sessionStart) {
-    throw new Error("Session 'to' must be at least 'from'");
-  }
-  // Validate the template now, with sample values, so errors show here.
-  if (templateTokens(template).length) {
-    renderUsername(template, { session: profile.sessionStart, country: profile.country, city: profile.city });
-  }
-  return profile;
-}
-
-function setSaving(on: boolean): void {
-  $<HTMLButtonElement>("saveBtn").disabled = on;
-  $("saveSpin").hidden = !on;
-  // Saving the active proxy reconnects and re-checks the IP, which takes a moment.
-  $("saveText").textContent = on ? "Saving…" : "Save";
-}
-
-// ---------- bulk add ----------
-
-let bulkParsed: BulkResult | null = null;
-
-function openBulk(): void {
-  $("editor").hidden = true;
-  $("bulk").hidden = false;
-  previewBulk();
-  $("bulk").scrollIntoView({ behavior: "smooth", block: "start" });
-  $("bulkText").focus({ preventScroll: true });
-}
-
-function previewBulk(): void {
-  const existing = new Set(profiles.map((p) => proxyKey({ host: p.host, port: p.port, username: p.usernameTemplate })));
-  bulkParsed = parseBulk($<HTMLTextAreaElement>("bulkText").value, val("bulkScheme") as Scheme, existing);
-  const { proxies, errors, duplicates } = bulkParsed;
-  const parts = [`${proxies.length} ready to add`];
-  if (duplicates) parts.push(`${duplicates} duplicate${duplicates === 1 ? "" : "s"} skipped`);
-  if (errors.length) parts.push(`${errors.length} line${errors.length === 1 ? "" : "s"} with errors`);
-  $("bulkSummary").textContent = $<HTMLTextAreaElement>("bulkText").value.trim() ? parts.join(" · ") : "";
-  $("bulkErrors").replaceChildren(
-    ...errors.slice(0, 20).map((e) => el("li", "error", `Line ${e.line}: ${e.error} — ${e.text.slice(0, 60)}`)),
-    ...(errors.length > 20 ? [el("li", "muted", `…and ${errors.length - 20} more`)] : []),
-  );
-  $<HTMLButtonElement>("bulkAddBtn").disabled = proxies.length === 0;
-  $("bulkAddText").textContent = proxies.length ? `Add ${proxies.length} prox${proxies.length === 1 ? "y" : "ies"}` : "Add proxies";
-}
-
-async function addBulk(): Promise<void> {
-  if (!bulkParsed?.proxies.length) return;
-  const start = Number(val("bulkStart") || 0);
-  const end = Number(val("bulkEnd") || 0);
-  if (end < start) {
-    showPageError("Session 'to' must be at least 'from'");
-    return;
-  }
-  const names = bulkNames(bulkParsed.proxies, val("bulkNameBy") as NameBy);
-  const country = val("bulkCountry").toLowerCase();
-  const city = val("bulkCity").toLowerCase();
-  const list: ProxyProfile[] = bulkParsed.proxies.map((p, i) => ({
-    id: crypto.randomUUID(),
-    name: names[i] ?? "",
-    scheme: p.scheme,
-    host: p.host,
-    port: p.port,
-    usernameTemplate: p.username,
-    password: p.password,
-    country,
-    city,
-    sessionStart: start,
-    sessionEnd: end,
-  }));
-  // Templates with tokens need values; catch that here, not at connect time.
-  for (const p of list) {
-    if (templateTokens(p.usernameTemplate).length) {
-      try {
-        renderUsername(p.usernameTemplate, { session: start, country, city });
-      } catch (err) {
-        showPageError(`${displayName(p)}: ${err instanceof Error ? err.message : String(err)}`);
-        return;
-      }
-    }
-  }
-  $<HTMLButtonElement>("bulkAddBtn").disabled = true;
-  $("bulkSpin").hidden = false;
-  $("bulkAddText").textContent = `Adding ${list.length}…`;
-  const ok = await run({ type: "bulkAdd", profiles: list });
-  $("bulkSpin").hidden = true;
-  if (ok) {
-    setVal("bulkText", "");
-    $("bulk").hidden = true;
-    const ids = lastReply?.addedIds ?? [];
-    if (ids.length && confirm(`Added ${ids.length} proxies. Test them now to get their scores?`)) {
-      void startTest(ids);
-    }
-  } else {
-    previewBulk();
-  }
-}
-
 // ---------- events ----------
 
 $("search").addEventListener("input", renderList);
 $("sort").addEventListener("change", renderList);
-$("newBtn").addEventListener("click", () => openEditor());
-$("bulkBtn").addEventListener("click", openBulk);
-$("bulkCancel").addEventListener("click", () => ($("bulk").hidden = true));
-$("bulkText").addEventListener("input", previewBulk);
-$("bulkScheme").addEventListener("change", previewBulk);
-$("bulkAddBtn").addEventListener("click", () => void addBulk());
 $("testAllBtn").addEventListener("click", () => void startTest());
 $("testCancel").addEventListener("click", () => void run({ type: "cancelTests" }).then(syncTestRun));
 $("logFilter").addEventListener("change", () => void renderLogs());
-$("cancelBtn").addEventListener("click", () => ($("editor").hidden = true));
-$("scheme").addEventListener("change", updateSocksWarning);
-$("pass").addEventListener("input", updateSocksWarning);
-
-$("pasteBtn").addEventListener("click", () => {
-  try {
-    const p = parseProxyLine(val("paste"), val("scheme") as Scheme);
-    setVal("scheme", p.scheme);
-    setVal("host", p.host);
-    setVal("port", p.port);
-    setVal("user", p.username);
-    setVal("pass", p.password);
-    $("formError").hidden = true;
-    updateSocksWarning();
-  } catch (err) {
-    showError(err instanceof Error ? err.message : String(err));
-  }
-});
-
-$<HTMLFormElement>("form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  let profile: ProxyProfile;
-  try {
-    profile = readForm();
-  } catch (err) {
-    showError(err instanceof Error ? err.message : String(err));
-    return;
-  }
-  setSaving(true);
-  void run({ type: "saveProfile", profile }).then((ok) => {
-    setSaving(false);
-    if (ok) $("editor").hidden = true;
-  });
-});
-
-$("deleteBtn").addEventListener("click", () => {
-  if (!editingId) return;
-  const p = profiles.find((x) => x.id === editingId);
-  if (!confirm(`Delete ${p ? displayName(p) : "this proxy"}?`)) return;
-  void run({ type: "deleteProfile", id: editingId }).then(() => ($("editor").hidden = true));
-});
 
 $<HTMLInputElement>("fabToggle").addEventListener("change", (e) => {
   const on = (e.target as HTMLInputElement).checked;

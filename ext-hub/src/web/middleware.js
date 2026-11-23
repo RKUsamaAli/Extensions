@@ -75,6 +75,20 @@ function requireExt(services, ext) {
     };
 }
 
+/**
+ * Proxies and CitaMate entries are managed only in the web panel. Extension sessions may
+ * read them (and still send logs, checks and sightings), but every change is refused here,
+ * on the server, so a modified extension can't add or edit data either.
+ */
+function panelOnly(config, what) {
+    return (req, _res, next) => {
+        if (req.auth && req.auth.session && req.auth.session.kind === 'extension') {
+            throw E.panelOnly(`${what} are managed in the web panel. Open ${config.publicUrl}/app to add or change them.`, { panelUrl: config.publicUrl + '/app' });
+        }
+        next();
+    };
+}
+
 /** Per-user API limit (writes count 3x). Mounted after requireAuth. */
 function userRateLimit(config) {
     const limiter = createLimiter({ limit: config.apiRateLimitRpm, windowMs: 60 * 1000 });
@@ -116,4 +130,5 @@ function errorHandler(logger) {
     };
 }
 
-module.exports = { securityHeaders, extensionCors, requireAuth, requireAdmin, requireExt, userRateLimit, scopeOf, notFoundApi, errorHandler, bearer, CSP };
+module.exports = {
+    panelOnly, securityHeaders, extensionCors, requireAuth, requireAdmin, requireExt, userRateLimit, scopeOf, notFoundApi, errorHandler, bearer, CSP };

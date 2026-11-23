@@ -292,7 +292,7 @@ test('proxies page: server-side score, filter, sort, paging and a summary of all
     assert.equal(all.nextOffset, 2);
     assert.deepEqual(
         { ...all.summary, lastChecked: undefined },
-        { total: 4, checked: 3, neverChecked: 1, good: 1, fair: 2, poor: 0, none: 1, failing: 1, successRatio: (20 + 15 + 10) / 60, medianMs: 300, lastChecked: undefined }
+        { total: 4, disabled: 0, checked: 3, neverChecked: 1, good: 1, fair: 2, poor: 0, none: 1, failing: 1, successRatio: (20 + 15 + 10) / 60, medianMs: 300, lastChecked: undefined }
     );
     const rest = s.proxies.page(scope, { limit: 2, offset: 2 });
     assert.deepEqual(rest.items.map((p) => p.name), ['broken', 'never'], 'never-checked last');
@@ -315,4 +315,112 @@ test('score formula matches RelaySwitch', () => {
     assert.equal(scoreOf([{ t: 1, ok: true, ms: 250, ip: 'a' }, { t: 2, ok: false }]).value, 50);
     assert.equal(scoreOf([{ t: 1, ok: true, ms: 3000 }]).value, 70);
     assert.equal(scoreOf(Array.from({ length: 30 }, (_, i) => ({ t: i, ok: i >= 10, ms: 300 }))).value, 100, 'only the last 20 count');
+});
+
+test('citamate logs keep the page snapshot of a failed step (opt-in on read, size-capped)', () => {
+    const { s, ali } = setup();
+    const ctx = { page: 'Personal data', url: '/icpplus/acEntrada', missing: ['Name'], tried: [{ field: 'Name', selectors: ['#txtDesCitado'] }], fields: [{ tag: 'input', id: 'txtNombre' }] };
+    s.activity.addLogs(ali, [
+        { id: 'a', t: 1, status: 'fail', detail: 'Not found: Name', context: ctx },
+        { id: 'b', t: 2, status: 'ok', detail: 'fine', context: 'not an object' },
+        { id: 'c', t: 3, status: 'fail', context: { page: 'x', fields: Array.from({ length: 400 }, (_, i) => ({ tag: 'select', id: 'f' + i, options: Array.from({ length: 40 }, (_, j) => 'option text ' + j) })) } }
+    ]);
+    const scope = scopeFor(ali);
+    assert.equal(s.activity.listLogs(scope)[0].context, undefined, 'left out unless asked for');
+    const [a, b, c] = s.activity.listLogs(scope, { context: true });
+    assert.deepEqual(a.context, ctx);
+    assert.equal(b.context, undefined);
+    assert.equal(c.context.truncated, true, 'big snapshots are shortened, not dropped');
+    assert.equal(c.context.page, 'x');
+    assert.ok(JSON.stringify(c.context).length <= 32 * 1024);
+});
+
+test('admin creates entries and proxies for a user, sees what they created, and can reassign them', () => {
+    const s = makeServices();
+    const boss = addUser(s, 'boss', { role: 'admin' });
+    const ali = addUser(s, 'ali');
+    const sara = addUser(s, 'sara');
+    const e = s.profiles.create(boss, { ...entry('For Ali'), ownerId: ali.id });
+    assert.equal(e.ownerName, 'ali');
+    assert.equal(e.createdByName, 'boss', 'the creator is kept');
+    assert.deepEqual(s.profiles.list(scopeFor(ali)).map((x) => x.label), ['For Ali'], 'the user sees it when they sign in');
+    s.profiles.create(ali, entry('Ali own'));
+    assert.deepEqual(s.profiles.list(scopeFor(boss, 'created')).map((x) => x.label), ['For Ali'], '"created" = what the admin added, for anyone');
+
+    const p = s.proxies.create(boss, { host: 'h', port: 80, ownerId: ali.id });
+    s.proxies.addChecks(boss, [{ proxyId: p.id, ok: true, ms: 100 }]);
+    assert.equal(s.proxies.stats(scopeFor(ali))[p.id].results.length, 1);
+    const moved = s.proxies.update(boss, p.id, { host: 'h', port: 80, ownerId: sara.id });
+    assert.equal(moved.ownerName, 'sara');
+    assert.equal(s.proxies.list(scopeFor(ali)).length, 0);
+    assert.equal(s.proxies.stats(scopeFor(sara))[p.id].results.length, 1, 'check history moves with the proxy');
+    assert.equal(s.proxies.page(scopeFor(boss, 'created'), { limit: 10 }).total, 1);
+
+    assert.equal(s.profiles.update(boss, e.id, { ...entry('For Sara'), ownerId: sara.id }).ownerName, 'sara');
+    assert.throws(() => s.profiles.update(sara, e.id, { ...entry('x'), ownerId: ali.id }), /admin/);
+    assert.throws(() => s.profiles.update(boss, e.id, { ...entry('x'), ownerId: 'nobody' }), (err) => err.code === 'validation_error');
+});
+
+test('proxies: switch off/on and delete in bulk; the extension list hides switched-off ones', () => {
+    const { s, ali, sara } = setup();
+    const a = s.proxies.create(ali, { name: 'a', host: 'h', port: 1 });
+    const b = s.proxies.create(ali, { name: 'b', host: 'h', port: 2 });
+    const theirs = s.proxies.create(sara, { name: 'x', host: 'h', port: 3 });
+    assert.equal(a.enabled, true);
+    assert.deepEqual(s.proxies.bulkAction(ali, [a.id, theirs.id, 'junk'], 'disable'), { changed: 1 }, 'only own rows change');
+    assert.deepEqual(s.proxies.list(scopeFor(ali), { enabledOnly: true }).map((p) => p.name), ['b']);
+    assert.equal(s.proxies.list(scopeFor(ali)).length, 2, 'the panel still lists it');
+    const pg = s.proxies.page(scopeFor(ali), { limit: 10, filter: 'disabled' });
+    assert.deepEqual(pg.items.map((p) => p.name), ['a']);
+    assert.equal(pg.summary.disabled, 1);
+    s.proxies.bulkAction(ali, [a.id], 'enable');
+    assert.equal(s.proxies.list(scopeFor(ali), { enabledOnly: true }).length, 2);
+    assert.deepEqual(s.proxies.bulkAction(ali, [a.id, b.id], 'delete'), { changed: 2 });
+    assert.equal(s.proxies.list(scopeFor(sara)).length, 1);
+    assert.throws(() => s.proxies.bulkAction(ali, [], 'explode'), (e) => e.code === 'validation_error');
+});
+
+test('proxies: server check renders the username, runs the checker and stores "server" checks', async () => {
+    const seen = [];
+    const s = makeServices({ checkProxy: async (p) => { seen.push(p); return p.host === 'good' ? { ok: true, ms: 120, ip: '198.51.100.9' } : { ok: false, error: 'No answer in 10 s' }; } });
+    const ali = addUser(s, 'ali');
+    const good = s.proxies.create(ali, { name: 'g', host: 'good', port: 80, usernameTemplate: 'u-{country}-s-{session}', country: 'es', password: 'pw', sessionStart: 5, sessionEnd: 5 });
+    const bad = s.proxies.create(ali, { name: 'b', host: 'bad', port: 80 });
+    const res = await s.proxies.serverCheck(ali, [good.id, bad.id]);
+    assert.deepEqual(res.map((r) => [r.name, r.ok, r.ip || r.error]), [['g', true, '198.51.100.9'], ['b', false, 'No answer in 10 s']]);
+    assert.deepEqual(seen[0], { scheme: 'http', host: 'good', port: 80, username: 'u-es-s-5', password: 'pw' });
+    const st = s.proxies.stats(scopeFor(ali));
+    assert.equal(st[good.id].results[0].source, 'server');
+    assert.equal(st[good.id].results[0].ms, 120);
+    assert.equal(s.proxies.page(scopeFor(ali), { limit: 5 }).items[0].name, 'g', 'the working one scores first');
+    s.proxies.addChecks(ali, [{ proxyId: good.id, ok: true, source: 'server' }]);
+    assert.equal(s.proxies.stats(scopeFor(ali))[good.id].results[1].source, 'test', 'clients cannot claim "server"');
+});
+
+test('entries: appointment status, bulk change, CitaMate sees active ones, results move them along', () => {
+    const { s, ali, sara } = setup();
+    const a = s.profiles.create(ali, entry('A'));
+    const b = s.profiles.create(ali, entry('B', { status: 'on_hold' }));
+    const c = s.profiles.create(ali, entry('C'));
+    const theirs = s.profiles.create(sara, entry('X'));
+    assert.equal(a.status, 'pending');
+    assert.equal(b.status, 'on_hold');
+    assert.ok(a.statusAt);
+    assert.deepEqual(s.profiles.list(scopeFor(ali), { activeOnly: true }).map((e) => e.label), ['A', 'C'], 'on hold is not offered in CitaMate');
+    assert.deepEqual(s.profiles.statusCounts(scopeFor(ali)), { pending: 2, in_progress: 0, on_hold: 1, booked: 0, done: 0, cancelled: 0 });
+    assert.deepEqual(s.profiles.bulkAction(ali, [c.id, theirs.id], 'status', 'cancelled'), { changed: 1 }, 'own rows only');
+    assert.throws(() => s.profiles.bulkAction(ali, [a.id], 'status', 'lost'), (e) => e.code === 'validation_error');
+    assert.equal(s.profiles.update(ali, b.id, { ...entry('B'), status: 'pending' }).status, 'pending');
+
+    // CitaMate results: first booking step -> in progress; confirmation -> booked. Office checks don't count.
+    s.activity.addLogs(ali, [{ id: 'k1', entryId: a.id, status: 'ok', kind: 'check' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'pending');
+    s.activity.addLogs(ali, [{ id: 'l1', entryId: a.id, status: 'ok' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'in_progress');
+    s.activity.addLogs(ali, [{ id: 'l2', entryId: a.id, status: 'done' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'booked');
+    s.activity.addLogs(ali, [{ id: 'l3', entryId: c.id, status: 'done' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'C').status, 'cancelled', 'never overrides a status the user set');
+    s.activity.addLogs(sara, [{ id: 'l4', entryId: a.id, status: 'ok' }]);
+    assert.deepEqual(s.profiles.bulkAction(ali, [a.id, b.id], 'delete'), { changed: 2 });
 });

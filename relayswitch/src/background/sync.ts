@@ -168,51 +168,8 @@ export function loadAll(force = false): Promise<void> {
 
 // ---- proxies ----
 
-export async function saveProfileRemote(profile: ProxyProfile): Promise<ProxyProfile> {
-  const list = (await getSession()).profiles;
-  const exists = list.some((p) => p.id === profile.id);
-  const { item } = exists
-    ? await hub.put<{ item: ServerProxy }>(`/relayswitch/proxies/${encodeURIComponent(profile.id)}`, profileBody(profile))
-    : await hub.post<{ item: ServerProxy }>("/relayswitch/proxies", profileBody(profile));
-  const saved = toProfile(item);
-  await serial(async () => {
-    const s = await getSession();
-    const i = s.profiles.findIndex((p) => p.id === profile.id);
-    const next = [...s.profiles];
-    if (i >= 0) next[i] = saved;
-    else next.push(saved);
-    await setSession({ profiles: next });
-  });
-  return saved;
-}
-
-export async function deleteProfileRemote(id: string): Promise<void> {
-  await hub.del(`/relayswitch/proxies/${encodeURIComponent(id)}`);
-  await serial(async () => {
-    const s = await getSession();
-    const stats = { ...s.stats };
-    delete stats[id];
-    await setSession({
-      profiles: s.profiles.filter((p) => p.id !== id),
-      stats,
-      pendingChecks: s.pendingChecks.filter((c) => c.proxyId !== id),
-    });
-  });
-}
-
-/** Creates proxies in batches; returns them with their server ids, in order. */
-export async function bulkCreate(list: ProxyProfile[]): Promise<ProxyProfile[]> {
-  const created: ProxyProfile[] = [];
-  for (const part of chunk(list, MAX_BULK)) {
-    const { items } = await hub.post<{ items: ServerProxy[] }>("/relayswitch/proxies/bulk", { items: part.map(profileBody) });
-    created.push(...(items ?? []).map(toProfile));
-  }
-  await serial(async () => {
-    const s = await getSession();
-    await setSession({ profiles: [...s.profiles, ...created] });
-  });
-  return created;
-}
+// Proxies are added, edited and deleted only in the web panel (the server refuses these
+// changes from the extension). The extension reads them and sends checks and logs.
 
 export async function clearLogsRemote(): Promise<void> {
   await hub.del("/relayswitch/logs");
@@ -279,19 +236,22 @@ export async function legacyInfo(): Promise<LegacyInfo | null> {
   return info.profiles || info.logs || info.checks ? info : null;
 }
 
-export async function migrateLocal(): Promise<LegacyInfo> {
-  await requireSignedIn();
+/**
+ * Proxies saved by RelaySwitch 0.1.x in this browser, one per line, ready to paste into
+ * Bulk add on the web panel ("scheme://user:pass@host:port" or "scheme://host:port").
+ */
+export async function legacyProxyLines(): Promise<string> {
   const old = await getLegacy();
-  const oldProfiles = Array.isArray(old.profiles) ? old.profiles : [];
-  const created = oldProfiles.length ? await bulkCreate(oldProfiles) : [];
-  const ids = remapIds(oldProfiles, created);
-  const checks = statsToChecks(old.stats, ids);
-  for (const part of chunk(checks, MAX_BATCH)) await hub.post("/relayswitch/checks", { items: part });
-  const logs = remapLogs(old.logs, ids);
-  for (const part of chunk(logs, MAX_BATCH)) await hub.post("/relayswitch/logs", { items: part });
-  const { activeProfileId } = await getLocal();
-  if (activeProfileId && ids.has(activeProfileId)) await setLocal({ activeProfileId: ids.get(activeProfileId)! });
+  const list = Array.isArray(old.profiles) ? old.profiles : [];
+  return list
+    .map((p) => {
+      const auth = p.usernameTemplate ? `${p.usernameTemplate}${p.password ? ":" + p.password : ""}@` : "";
+      return `${p.scheme || "http"}://${auth}${p.host}:${p.port}`;
+    })
+    .join("\n");
+}
+
+/** Forgets the data of older versions in this browser (after it was moved to the panel). */
+export async function dropLegacy(): Promise<void> {
   await removeLegacy();
-  await loadAll(true);
-  return { profiles: created.length, logs: logs.length, checks: checks.length };
 }
