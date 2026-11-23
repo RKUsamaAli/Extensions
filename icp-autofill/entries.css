@@ -210,3 +210,4 @@ a { color: var(--accent); }
 @media (prefers-color-scheme: dark) {
   .autherr { background: #3a1717; border-color: #5b2121; }
 }
+.pill.warn { background: var(--warn); }

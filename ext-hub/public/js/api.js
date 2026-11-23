@@ -140,3 +140,63 @@ export function qs(params) {
   const s = u.toString();
   return s ? "?" + s : "";
 }
+
+/**
+ * Server-Sent Events over fetch (EventSource can't send the Bearer token).
+ * onEvent(name, data) for each event; reconnects with backoff, refreshing the token first.
+ * -> stop()
+ */
+export function stream(path, onEvent, { onOpen } = {}) {
+  let stopped = false;
+  let ctrl = null;
+  let delay = 2000;
+  async function connect() {
+    while (!stopped) {
+      try {
+        if (!accessToken || accessExpiresAt - Date.now() < 30_000) await refresh();
+        ctrl = new AbortController();
+        const res = await fetch(BASE + path, { headers: { Accept: "text/event-stream", Authorization: "Bearer " + accessToken }, signal: ctrl.signal, credentials: "same-origin" });
+        if (res.status === 401 || res.status === 403) {
+          if (res.status === 403) return; // no CitaMate access: nothing to stream
+          await refresh();
+          continue;
+        }
+        if (!res.ok || !res.body) throw new Error("HTTP " + res.status);
+        delay = 2000;
+        if (onOpen) onOpen();
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = buf.indexOf("\n\n")) >= 0) {
+            const block = buf.slice(0, i);
+            buf = buf.slice(i + 2);
+            let name = "message";
+            const data = [];
+            for (const line of block.split("\n")) {
+              if (line.startsWith("event:")) name = line.slice(6).trim();
+              else if (line.startsWith("data:")) data.push(line.slice(5).trim());
+            }
+            if (data.length) {
+              try { onEvent(name, JSON.parse(data.join("\n"))); } catch (_) { /* bad event: skip */ }
+            }
+          }
+        }
+      } catch (_) {
+        if (stopped) return;
+      }
+      // Server ended the stream (every few minutes) or the network dropped: come back.
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay * 2, 30_000);
+    }
+  }
+  connect();
+  return () => {
+    stopped = true;
+    if (ctrl) ctrl.abort();
+  };
+}

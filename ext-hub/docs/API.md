@@ -154,6 +154,27 @@ Log object (what `content.js` writes today):
 | `POST /citamate/office-sightings` | `{ items: [sighting] }` (≤ 500) | `{ saved: n }` |
 | `DELETE /citamate/office-sightings` | | `{ removed: n }` |
 
+### Office availability (shared by all users)
+
+Sightings may carry `page` (CitaMate's page type); only `"Office"` (or none, older clients)
+counts as availability. Each sighting gets an "open since" (streak of sightings with offices,
+less than 30 min apart) and per-office first-seen times. Nothing below names a client or user.
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `GET /citamate/availability?days=30` | | `{ days, freshMinutes, pairs: [{ province, tramite, status: open\|closed\|stale, openSince, offices: [{ value, text, since }], lastChecked, lastSeenOpen, checks24h, open24h, history: [[t, officesListed]] }] }` |
+| `GET /citamate/check-queue` | | `{ items: [{ province, tramite, entries, wanted, status, openSince, offices, lastChecked, watched, claim: { by, mine, until } \| null, checkEntryId }] }` – one row per province + trámite of everyone's active entries, stalest first; `checkEntryId` is one of *your* entries for it (or null) |
+| `POST /citamate/check-queue/claim` | `{ province, tramite, entryId }` | `{ until }` – "being checked" for 3 min; 409 `conflict` when someone else holds it. A sighting for the pair releases it. |
+| `GET /citamate/watches` / `POST /citamate/watches` | `{ province, tramite, on }` | your watch list / `{ watched }` |
+| `GET /citamate/alerts?since=&limit=` | | `{ items, unread, seenAt }` – alerts for your watches, newest first |
+| `POST /citamate/alerts/seen` | | `{ ok: true }` |
+| `GET /citamate/alerts/stream` | | Server-Sent Events: `event: alert` with the alert; `: ping` every 25 s; ends after 9 min (reconnect with a fresh token) |
+
+At most one alert per province + trámite per clock minute (`cm_alerts` unique on the minute),
+only for sightings less than 10 minutes old. `GET /citamate/profiles` items carry
+`officeOpen: { since, offices, checked } | null` for active entries whose office was seen open in
+the last 15 minutes (any office when the entry has none).
+
 ### Catalog
 `GET /citamate/catalog` → `{ version: 3, data: { provinces: [...], paises: [...], tramites: {...}, offices: {...} } }`
 — exactly the four objects `catalog.js` defines today as `ICP_PROVINCES`, `ICP_PAISES`,

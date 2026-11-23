@@ -37,6 +37,8 @@ function start() {
             db.close();
             process.exit(0);
         });
+        // Live alert streams stay open: end them so the close can finish.
+        setTimeout(() => server.closeAllConnections(), 2000).unref();
         setTimeout(() => process.exit(1), 10 * 1000).unref();
     };
     process.on('SIGINT', stop);

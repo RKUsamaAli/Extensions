@@ -47,6 +47,14 @@ window.CM.ready.then(() => {
         el("div", { class: "ecard-title" }, el("b", { text: e.label, title: e.label }), el("span", { text: e.fullName })),
         el("span", { class: "doc", text: doc + " " + e.docNumber }),
         e.status === "in_progress" ? el("span", { class: "pill warn", text: "In progress", title: "Status set in the web panel" }) : null,
+        e.officeOpen
+          ? el("span", {
+              class: "pill ok",
+              "data-testid": "entry-office-open",
+              text: "Office open · since " + new Date(e.officeOpen.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              title: "Seen open: " + e.officeOpen.offices.join(", "),
+            })
+          : null,
       ),
       el(
         "dl",

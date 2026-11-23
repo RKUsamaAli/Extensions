@@ -336,9 +336,16 @@
     return !!(imgBox && !String(imgBox.value || "").trim());
   }
 
+  // The mode lives in this tab's sessionStorage: it follows the booking flow from page to
+  // page (every Aceptar loads a new page) but never leaks into other tabs or a new session.
+  const MODE_KEY = "citamate:mode";
   function setMode(m) {
     if (ui.mode === m) return;
     ui.mode = m;
+    try {
+      if (m) sessionStorage.setItem(MODE_KEY, m);
+      else sessionStorage.removeItem(MODE_KEY);
+    } catch (_) { /* storage blocked: the mode lasts for this page only */ }
     saveUi();
     applyUi();
   }
@@ -443,9 +450,11 @@
     }
     if (!offices) return;
     const e = entries.find((x) => x.id === ui.lastId);
+    const page = pageType();
     const sighting = {
       id: newId(),
       t: Date.now(),
+      page, // only the real office page counts as availability (some trámite pages list every office)
       entry: e ? e.label : "",
       entryId: e ? e.id : "",
       province: (e && e.provinceText) || "",
@@ -456,6 +465,7 @@
     outbox.sightings.push(sighting);
     scheduleFlush();
 
+    if (page !== "Office") return; // an office list on another page: kept, but no result yet
     renderOffices(offices, e);
     const checking = ui.mode === "check";
     const act = checking ? "Office check" : "Offices";
@@ -606,6 +616,7 @@
 
       <div class="acts">
         <button class="btn primary" id="actNext" title="Fill this page and press its Aceptar / Siguiente / Entrar / Solicitar Cita (Alt+Enter)">${IC.check}<span>Fill &amp; Next</span><span class="k">Alt+Enter</span></button>
+        <button class="btn ghost" id="actCheck" title="Go through the pages up to the office list without booking, and share which offices are open (Alt+Enter on each page, you solve the captcha)">Check offices</button>
       </div>
 
       <div class="status" id="foot"><i class="sdot"></i><span id="status">Pick an entry, then press Fill &amp; Next on each page.</span></div>
@@ -687,10 +698,14 @@
     $("pickAv").textContent = e ? initials(e.label) : "?";
     $("pickName").textContent = e ? e.label : entries.length ? "Choose an entry" : "No entries yet";
     syncQuick();
+    const open = e && e.officeOpen;
     $("pickSub").textContent = e
-      ? (e.docType + " " + e.docNumber + " · " + [e.provinceText, (e.officeText || "").split(",")[0]].filter(Boolean).join(" · ")).trim()
+      ? open
+        ? "🟢 Office open since " + new Date(open.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " · " + open.offices.slice(0, 2).join(", ")
+        : (e.docType + " " + e.docNumber + " · " + [e.provinceText, (e.officeText || "").split(",")[0]].filter(Boolean).join(" · ")).trim()
       : entries.length ? entries.length + " saved – click to choose" : "Add one in Manage entries";
     $("actNext").disabled = !e;
+    $("actCheck").disabled = !e;
   }
 
   function renderList() {
@@ -861,8 +876,14 @@
     fn(e);
   };
   $("actNext").addEventListener("click", withEntry((e) => {
-    setMode(null);
+    if (ui.mode !== "check") setMode(null);
     doFillAndNext(e);
+  }));
+  $("actCheck").addEventListener("click", withEntry((e) => {
+    setMode("check");
+    show("info", "Office check: " + [e.provinceText, (e.tramiteText || "").split("(")[0].trim()].filter(Boolean).join(" · ") +
+      ". Press Fill & Next (Alt+Enter) on each page and solve the captcha – it stops at the office list without booking.");
+    if (pageType() === "Office") recordOffices();
   }));
   $("picker").addEventListener("click", () => toggleList());
   $("search").addEventListener("input", renderList);
@@ -948,7 +969,18 @@
 
   chrome.storage.local.get([UI_KEY]).then((got) => {
     if (got[UI_KEY]) ui = { ...ui, ...got[UI_KEY] };
-    ui.mode = null;
+    let tabMode = null;
+    try { tabMode = sessionStorage.getItem("citamate:mode"); } catch (_) {}
+    ui.mode = tabMode === "check" || tabMode === "checkDone" ? tabMode : null;
+    // Started from the panel's "Offices to check": #citamate-check=<entry id>.
+    const startCheck = /(?:^#|&)citamate-check=([\w-]+)/.exec(location.hash);
+    if (startCheck) {
+      ui.lastId = startCheck[1];
+      ui.mode = "check";
+      try { sessionStorage.setItem("citamate:mode", "check"); } catch (_) {}
+      history.replaceState(null, "", location.pathname + location.search);
+      saveUi();
+    }
     // Older versions stored a pixel position for the old box.
     if (ui.side !== "left" && ui.side !== "right") ui.side = "right";
     if (!(ui.top >= 4 && ui.top <= 92) || ui.right !== undefined) {
@@ -1035,7 +1067,7 @@
 .item .av { width: 26px; height: 26px; font-size: 11px !important; }
 .nomatch { padding: 8px; color: #64748b; font-size: 12px; }
 
-.acts { display: grid; grid-template-columns: 1fr; padding: 10px 12px; }
+.acts { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 10px 12px; }
 .btn { display: flex; align-items: center; justify-content: center; gap: 7px; }
 .btn svg { width: 17px; height: 17px; flex: none; }
 .btn .k { font: 11px ui-monospace, Menlo, monospace !important; color: #ffedd5 !important; margin-left: 8px; opacity: .85; }

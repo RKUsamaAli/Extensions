@@ -189,7 +189,7 @@ test('maintenance deletes old logs, checks, sightings and dead sessions', () => 
     s.proxies.addLogs(ali, [{ t: old, event: 'x' }]);
     s.proxies.addChecks(ali, [{ proxyId: p.id, t: old, ok: true }]);
     const out = s.maintenance();
-    assert.deepEqual(out, { cm_logs: 1, cm_sightings: 1, rs_logs: 1, proxy_checks: 1, auth_sessions: 0 });
+    assert.deepEqual(out, { cm_logs: 1, cm_sightings: 1, rs_logs: 1, proxy_checks: 1, cm_alerts: 0, check_claims: 0, auth_sessions: 0 });
     assert.deepEqual(s.activity.listLogs(scopeFor(ali)).map((l) => l.id), ['new']);
 });
 
@@ -423,4 +423,77 @@ test('entries: appointment status, bulk change, CitaMate sees active ones, resul
     assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'C').status, 'cancelled', 'never overrides a status the user set');
     s.activity.addLogs(sara, [{ id: 'l4', entryId: a.id, status: 'ok' }]);
     assert.deepEqual(s.profiles.bulkAction(ali, [a.id, b.id], 'delete'), { changed: 2 });
+});
+
+test('office availability: open since, one alert per clock minute, watches, live push, shared, entry marker', () => {
+    const { s, admin, ali, sara } = setup();
+    const MIN = 60000;
+    const base = Math.floor(s.clock.now() / MIN) * MIN + 5000; // 5 s into a clock minute
+    s.clock.set(base);
+    const sight = (actor, id, dt, offices, page = 'Office') => {
+        s.clock.set(base + dt);
+        s.activity.addSightings(actor, [{ id, t: base + dt, province: 'Albacete', tramite: 'Toma de huellas', page, offices }]);
+    };
+    const A = { value: '1', text: 'CNP Albacete, Avda. España' };
+    const H = { value: '2', text: 'CNP Hellín, Calle Mayor' };
+    s.availability.setWatch(sara, 'Albacete', 'Toma de huellas', true);
+    const pushed = [];
+    const off = s.availability.subscribe(sara.id, (a) => pushed.push(a));
+
+    sight(ali, 's1', 0, []); // closed
+    sight(ali, 's2', 10000, [A]); // opens -> alert
+    assert.equal(pushed.length, 1, 'watchers get it live');
+    assert.equal(pushed[0].openSince, base + 10000);
+    assert.deepEqual(pushed[0].newOffices.map((o) => o.value), ['1']);
+    sight(sara, 's3', 30000, [A, H]); // same clock minute -> no second alert, Hellín is new
+    assert.equal(pushed.length, 1, 'at most one alert per clock minute');
+    sight(ali, 's4', MIN, [A, H]); // next minute, still open -> alert again
+    assert.equal(pushed.length, 2);
+    assert.equal(pushed[1].openSince, base + 10000, 'open since the first open sighting of the streak');
+    assert.deepEqual(pushed[1].offices.map((o) => [o.value, o.since - base]), [['1', 10000], ['2', 30000]]);
+    sight(ali, 's5', MIN + 1000, [A], 'Trámite'); // not the office page: no alert, not availability
+    assert.equal(pushed.length, 2);
+    off();
+
+    // Shared state + entry marker (any office / a specific office)
+    const latest = s.availability.latestByPair();
+    const st = latest.get(s.availability.pairKey('albacete', 'toma de huellas'));
+    assert.equal(st.status, 'open');
+    assert.equal(st.openSince, base + 10000);
+    const anyEntry = { provinceText: 'Albacete', tramiteText: 'Toma de huellas', office: '' };
+    assert.deepEqual(s.availability.entryOpenState(anyEntry, latest).offices, ['CNP Albacete', 'CNP Hellín']);
+    assert.equal(s.availability.entryOpenState({ ...anyEntry, office: '2', officeText: 'CNP Hellín, Calle Mayor' }, latest).since, base + 30000);
+    assert.equal(s.availability.entryOpenState({ ...anyEntry, office: '9', officeText: 'Elsewhere' }, latest), null);
+
+    // Alerts list: only watched pairs; unread until seen
+    const al = s.availability.alerts(sara);
+    assert.equal(al.items.length, 2);
+    assert.equal(al.unread, 2);
+    s.availability.markSeen(sara);
+    assert.equal(s.availability.alerts(sara).unread, 0);
+    assert.equal(s.availability.alerts(ali).items.length, 0, 'ali watches nothing');
+
+    // Closed again -> status closed, no open since
+    sight(ali, 's6', 2 * MIN, []);
+    assert.equal(s.availability.latestByPair().get(s.availability.pairKey('Albacete', 'Toma de huellas')).status, 'closed');
+
+    // Queue: one row per pair from everyone's active entries; claims; a check needs your own entry
+    s.profiles.create(ali, entry('E1', { provinceText: 'Albacete', tramiteText: 'Toma de huellas', office: '1', officeText: 'CNP Albacete' }));
+    s.profiles.create(sara, entry('E2', { provinceText: 'Albacete', tramiteText: 'Toma de huellas' }));
+    s.profiles.create(sara, entry('E3', { provinceText: 'Madrid', tramiteText: 'Recogida', status: 'booked' }));
+    const q = s.availability.queue(admin, s.profiles.list({ ownerId: null }, { activeOnly: true }));
+    assert.equal(q.length, 1, 'booked entries are not checked; same pair counted once');
+    assert.equal(q[0].entries, 2);
+    assert.deepEqual(q[0].wanted.sort(), ['Any office', 'CNP Albacete']);
+    assert.equal(q[0].checkEntryId, null, 'admin has no entry for it');
+    assert.ok(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].checkEntryId);
+    s.availability.claim(ali, 'Albacete', 'Toma de huellas');
+    assert.throws(() => s.availability.claim(sara, 'Albacete', 'Toma de huellas'), (e) => e.code === 'conflict');
+    assert.equal(s.availability.queue(sara, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].claim.by, 'ali');
+    sight(ali, 's7', 3 * MIN, []); // the check result releases the claim
+    assert.equal(s.availability.queue(sara, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].claim, null);
+
+    const ov = s.availability.overview({ days: 7 });
+    assert.equal(ov.pairs.length, 1);
+    assert.equal(ov.pairs[0].history.length, 6, 'office-page sightings only');
 });

@@ -211,7 +211,12 @@ export default async function entriesPage() {
           return el("div", null, sel, r.statusAt ? el("div", { class: "hint" }, ago(r.statusAt)) : null);
         },
       },
-      { label: "Label", render: (r) => el("strong", null, r.label) },
+      {
+        label: "Label",
+        render: (r) => el("div", null, el("strong", null, r.label),
+          r.officeOpen ? el("div", { class: "office-open", testid: "entry-office-open", title: "Seen open: " + r.officeOpen.offices.join(", ") },
+            "🟢 Office open · since " + new Date(r.officeOpen.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })) : null),
+      },
       { label: "Document", render: (r) => `${r.docType || ""} ${r.docNumber || ""}`.trim() },
       { label: "Name", render: (r) => r.fullName },
       { label: "Province", render: (r) => r.provinceText },

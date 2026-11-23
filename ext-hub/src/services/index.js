@@ -13,6 +13,7 @@ const { createProfiles } = require('./profiles');
 const { createProxies } = require('./proxies');
 const { createActivity } = require('./activity');
 const { createConfigStore } = require('./config');
+const { createAvailability } = require('./availability');
 const { createDevices } = require('./devices');
 
 const systemClock = { now: () => Date.now() };
@@ -27,7 +28,8 @@ function createServices({ db, config, clock = systemClock, checkProxy }) {
     const profiles = createProfiles({ db, clock, cipher, users });
     const proxies = createProxies({ db, clock, cipher, users, ...(checkProxy ? { checkProxy } : {}) });
     // CitaMate results move entries along (pending -> in progress -> booked).
-    const activity = createActivity({ db, clock, onLog: profiles.noteActivity });
+    const availability = createAvailability({ db, clock });
+    const activity = createActivity({ db, clock, onLog: profiles.noteActivity, onSighting: availability.noteSighting });
     const configStore = createConfigStore({ db, clock, audit });
     const devices = createDevices({ db, clock, audit });
 
@@ -37,9 +39,10 @@ function createServices({ db, config, clock = systemClock, checkProxy }) {
         const cutoff = clock.now() - days * 24 * 3600 * 1000;
         const out = {};
         db.transaction(() => {
-            for (const table of ['cm_logs', 'cm_sightings', 'rs_logs', 'proxy_checks']) {
+            for (const table of ['cm_logs', 'cm_sightings', 'rs_logs', 'proxy_checks', 'cm_alerts']) {
                 out[table] = db.prepare(`DELETE FROM ${table} WHERE t < ?`).run(cutoff).changes;
             }
+            out.check_claims = db.prepare('DELETE FROM cm_check_claims WHERE until < ?').run(clock.now()).changes;
             const weekAgo = clock.now() - 7 * 24 * 3600 * 1000;
             out.auth_sessions = db.prepare('DELETE FROM auth_sessions WHERE expires_at < ? OR (revoked_at IS NOT NULL AND revoked_at < ?)').run(weekAgo, weekAgo).changes;
         })();
@@ -78,7 +81,7 @@ function createServices({ db, config, clock = systemClock, checkProxy }) {
         return out;
     }
 
-    return { db, config, clock, cipher, jwt, audit, settings, users, auth, profiles, proxies, activity, configStore, devices, maintenance, expiringSoon, dashboard };
+    return { db, config, clock, cipher, jwt, audit, settings, users, auth, profiles, proxies, activity, availability, configStore, devices, maintenance, expiringSoon, dashboard };
 }
 
 module.exports = { createServices, systemClock };

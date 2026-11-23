@@ -388,3 +388,33 @@ test('per-user API rate limit returns 429 with Retry-After', () =>
         },
         { apiRateLimitRpm: 5 }
     ));
+
+test('live alerts: a sighting from CitaMate reaches a watcher on the stream', () =>
+    withApp(async ({ call, app }) => {
+        const P = await panelLogin(call, 'boss');
+        await call('POST', '/api/v1/citamate/watches', { token: P.accessToken, body: { province: 'Albacete', tramite: 'Huellas' } });
+        const ctrl = new AbortController();
+        const res = await fetch(app.base + '/api/v1/citamate/alerts/stream', { headers: { authorization: 'Bearer ' + P.accessToken }, signal: ctrl.signal });
+        assert.equal(res.status, 200);
+        assert.match(res.headers.get('content-type'), /text\/event-stream/);
+        const reader = res.body.getReader();
+        const L = await extLogin(call, 'ali', 'citamate');
+        const H = { 'x-client': 'citamate/1.7.0', 'x-device-id': 'dev-1' };
+        const r = await call('POST', '/api/v1/citamate/office-sightings', { token: L.accessToken, headers: H, body: { items: [{ id: 'x1', t: Date.now(), province: 'Albacete', tramite: 'Huellas', page: 'Office', offices: [{ value: '1', text: 'CNP Albacete' }] }] } });
+        assert.equal(r.json.saved, 1);
+        let text = '';
+        const deadline = Date.now() + 3000;
+        while (!/event: alert/.test(text) && Date.now() < deadline) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            text += new TextDecoder().decode(value);
+        }
+        ctrl.abort();
+        const data = JSON.parse(/data: (.*)/.exec(text.slice(text.indexOf('event: alert')))[1]);
+        assert.equal(data.province, 'Albacete');
+        assert.equal(data.offices[0].text, 'CNP Albacete');
+        const list = await call('GET', '/api/v1/citamate/alerts', { token: P.accessToken });
+        assert.equal(list.json.unread, 1);
+        const q = await call('GET', '/api/v1/citamate/check-queue', { token: P.accessToken });
+        assert.equal(q.status, 200);
+    }));
