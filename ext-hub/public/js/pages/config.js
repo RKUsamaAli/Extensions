@@ -189,7 +189,7 @@ export default async function configPage() {
       jsonEditor({
         title: `${x.name} site config`,
         testid: "site-config-" + x.id,
-        view: { titles: { "": "Settings", selectors: "Page selectors", patterns: "Text patterns", urlPages: "Pages by URL", knownMessages: "Known messages", stepButtons: "Step buttons" }, groups: { selectors: "Selector", patterns: "Pattern", stepButtons: "Page" } },
+        view: { titles: { "": "Settings", selectors: "Page selectors", patterns: "Text patterns", urlPages: "Pages by URL", knownMessages: "Known messages", stepButtons: "Step buttons" }, groups: { selectors: "Selector", patterns: "Name", stepButtons: "Page" } },
         hint: "Page selectors and settings sent to the extension at start. A wrong value can stop the extension from filling pages – keep a copy before editing.",
         validate: (v) => (v && typeof v === "object" && !Array.isArray(v) ? null : "The config must be an object."),
         load: async () => {

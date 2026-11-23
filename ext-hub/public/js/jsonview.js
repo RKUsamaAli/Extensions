@@ -209,9 +209,10 @@ export function tableSections(value, { titles = {}, groups = {}, labelFor = null
       sections.push({ path, title: title(path, name), rows, group: g });
       return;
     }
-    if (entries.length > 1 && entries.every(([, x]) => isObj(x) && Object.values(x).every((y) => !isObj(y)))) {
+    // Object of objects (patterns, stepButtons…): one row per key; deeper values stay inside their cell.
+    if (entries.length > 1 && entries.every(([, x]) => isObj(x))) {
       const g = groups[path] || "Key";
-      sections.push({ path, title: title(path, name), rows: entries.map(([k, x]) => ({ [g]: keyText(k, path), ...x })), group: g });
+      sections.push({ path, title: title(path, name), rows: entries.map(([k, x]) => (isRegex(x) ? { [g]: keyText(k, path), Pattern: x } : { [g]: keyText(k, path), ...x })), group: g });
       return;
     }
     const scalars = entries.filter(([, x]) => !isContainer(x) || (Array.isArray(x) && x.every(isScalar)));
@@ -231,8 +232,21 @@ export function tableSections(value, { titles = {}, groups = {}, labelFor = null
   return sections;
 }
 
+/** { source, flags } as stored for regular expressions in the site config. */
+function isRegex(v) {
+  return isObj(v) && typeof v.source === "string" && Object.keys(v).every((k) => k === "source" || k === "flags" || k === "note");
+}
+function regexNode(v) {
+  return el("span", { class: "jv-regex", title: v.note || null }, el("span", { class: "mono" }, `/${v.source}/${v.flags || ""}`), v.note ? el("span", { class: "hint" }, " " + v.note) : null);
+}
+
 function cellNode(v) {
   if (v === undefined) return el("span", { class: "jv-null" }, "—");
+  if (isRegex(v)) return regexNode(v);
+  if (isObj(v) && Object.values(v).some(isRegex)) {
+    return el("span", { class: "jv-pairs" }, Object.entries(v).map(([k, x]) => el("span", { class: "jv-pair" }, el("span", { class: "jv-k" }, k), ": ",
+      isRegex(x) ? regexNode(x) : Array.isArray(x) && x.every(isScalar) ? x.join(", ") : isScalar(x) ? String(x) : jsonInline(x))));
+  }
   if (isScalar(v)) return v === null ? el("span", { class: "jv-null" }, "null") : typeof v === "boolean" ? el("span", { class: "jv-b" }, String(v)) : String(v);
   if (Array.isArray(v) && v.every(isScalar)) return el("span", { class: "jv-chips" }, v.map((x) => el("span", { class: "jv-chip" }, String(x))));
   return jsonInline(v);
