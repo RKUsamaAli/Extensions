@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RelaySwitch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Switch between the proxies in your RelaySwitch account, with login, sessions and an exit-IP check. Requires an account.",
   "minimum_chrome_version": "120",
   "icons": {

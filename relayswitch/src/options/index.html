@@ -11,8 +11,7 @@
   <main>
     <header class="row wrap">
       <h1 class="grow">RelaySwitch · Proxies</h1>
-      <button id="bulkBtn" data-testid="bulk-add">Bulk add</button>
-      <button id="newBtn" class="primary" data-testid="add-proxy">Add proxy</button>
+      <button id="manageBtn" class="primary" data-testid="manage-proxies" title="Add, edit and delete proxies in the web panel" hidden>Manage proxies ↗</button>
     </header>
 
     <section class="card" id="signinCard" hidden></section>
@@ -20,10 +19,17 @@
     <p id="serverError" class="error card" data-testid="server-error" hidden></p>
 
     <section class="card" id="migrate" data-testid="migrate-card" hidden>
-      <h2>Upload my local data</h2>
+      <h2>Proxies from an older version</h2>
       <p id="migrateText" class="muted"></p>
-      <div class="row">
-        <button id="migrateBtn" class="primary" data-testid="migrate-button"><span id="migrateSpin" class="spinner" hidden></span> <span id="migrateLabel">Upload my local data</span></button>
+      <ol class="muted steps">
+        <li>Click <b>Copy proxy list</b>.</li>
+        <li>Open the web panel → Proxies → <b>Bulk add</b>, paste and save.</li>
+        <li>Come back and click <b>Remove from this browser</b>.</li>
+      </ol>
+      <div class="row wrap">
+        <button id="migrateCopy" class="primary" data-testid="migrate-copy">Copy proxy list</button>
+        <button id="migrateOpen" data-testid="migrate-open">Open web panel ↗</button>
+        <button id="migrateDrop" class="danger" data-testid="migrate-drop">Remove from this browser</button>
       </div>
     </section>
 
@@ -32,87 +38,6 @@
     <p id="unsupported" class="error card" hidden></p>
     <p id="limited" class="warn card" hidden></p>
     <p id="pageError" class="error card" hidden></p>
-
-    <!-- Bulk add -->
-    <section class="card" id="bulk" hidden>
-      <h2>Bulk add proxies</h2>
-      <p class="muted">One proxy per line: <span class="mono">host:port</span>, <span class="mono">host:port:user:pass</span> or <span class="mono">http://user:pass@host:port</span>. Lines starting with # are skipped.</p>
-      <textarea id="bulkText" class="mono" rows="8" spellcheck="false" placeholder="185.199.1.10:8080:myuser:mypass&#10;185.199.1.11:8080:myuser:mypass&#10;socks5://10.0.0.5:1080"></textarea>
-      <div class="grid bulk-grid">
-        <div class="field"><label for="bulkScheme">Type (when the line has none)</label>
-          <select id="bulkScheme">
-            <option value="http">HTTP</option>
-            <option value="https">HTTPS</option>
-            <option value="socks5">SOCKS5</option>
-            <option value="socks4">SOCKS4</option>
-          </select>
-        </div>
-        <div class="field"><label for="bulkNameBy">Name each proxy by</label>
-          <select id="bulkNameBy">
-            <option value="host" selected>Server (host)</option>
-            <option value="username">Username</option>
-            <option value="none">No name</option>
-          </select>
-        </div>
-        <div class="field"><label for="bulkCountry">Country code</label><input id="bulkCountry" class="mono" maxlength="8" placeholder="optional"></div>
-        <div class="field"><label for="bulkCity">City</label><input id="bulkCity" class="mono" maxlength="40" placeholder="optional"></div>
-        <div class="field"><label for="bulkStart">Session from</label><input id="bulkStart" class="mono" type="number" min="0" value="1000"></div>
-        <div class="field"><label for="bulkEnd">Session to</label><input id="bulkEnd" class="mono" type="number" min="0" value="1999"></div>
-      </div>
-      <p id="bulkSummary" class="muted"></p>
-      <ul id="bulkErrors" class="mono errors"></ul>
-      <div class="row">
-        <button id="bulkAddBtn" class="primary" disabled data-testid="bulk-submit"><span id="bulkSpin" class="spinner" hidden></span> <span id="bulkAddText">Add proxies</span></button>
-        <button id="bulkCancel" type="button">Cancel</button>
-      </div>
-    </section>
-
-    <!-- Single proxy editor -->
-    <section class="card" id="editor" hidden>
-      <h2 id="editorTitle">Add proxy</h2>
-
-      <div class="field">
-        <label for="paste">Quick fill: paste a line</label>
-        <div class="row">
-          <input id="paste" class="mono grow" placeholder="host:port:user:pass  or  http://user:pass@host:port" autocomplete="off">
-          <button id="pasteBtn" type="button">Fill</button>
-        </div>
-      </div>
-
-      <form id="form" autocomplete="off">
-        <div class="grid">
-          <div class="field span2"><label for="name">Name <span class="muted">(optional)</span></label><input id="name" maxlength="40" placeholder="e.g. Spain residential"><small class="muted">Shown in the popup and on-page button. If empty, the username is used.</small></div>
-          <div class="field"><label for="scheme">Type</label>
-            <select id="scheme">
-              <option value="http">HTTP</option>
-              <option value="https">HTTPS</option>
-              <option value="socks5">SOCKS5</option>
-              <option value="socks4">SOCKS4</option>
-            </select>
-          </div>
-          <div class="field"><label for="host">Host</label><input id="host" class="mono" required></div>
-          <div class="field"><label for="port">Port</label><input id="port" class="mono" type="number" min="1" max="65535" required></div>
-          <div class="field span2">
-            <label for="user">Username or template</label>
-            <input id="user" class="mono" placeholder="user-{country}-session-{session}">
-            <small class="muted">Optional tokens: {session} {country} {city}</small>
-          </div>
-          <div class="field span2"><label for="pass">Password</label><input id="pass" class="mono" type="password"></div>
-          <div class="field"><label for="country">Country code</label><input id="country" class="mono" maxlength="8" placeholder="es"></div>
-          <div class="field"><label for="city">City</label><input id="city" class="mono" maxlength="40"></div>
-          <div class="field"><label for="sStart">Session from</label><input id="sStart" class="mono" type="number" min="0" value="1000"></div>
-          <div class="field"><label for="sEnd">Session to</label><input id="sEnd" class="mono" type="number" min="0" value="1999"></div>
-        </div>
-        <p id="socksWarn" class="warn" hidden>Chrome can't send a username/password to SOCKS proxies. Use HTTP, or allow-list your IP at the provider.</p>
-        <p id="formError" class="error" hidden></p>
-        <div class="row">
-          <button type="submit" id="saveBtn" class="primary" data-testid="save-proxy"><span id="saveSpin" class="spinner" hidden></span> <span id="saveText">Save</span></button>
-          <button type="button" id="cancelBtn">Cancel</button>
-          <span class="grow"></span>
-          <button type="button" id="deleteBtn" class="danger" hidden data-testid="delete-proxy">Delete</button>
-        </div>
-      </form>
-    </section>
 
     <!-- Proxy list -->
     <section class="card">
@@ -133,7 +58,7 @@
       </div>
       <input id="search" type="search" placeholder="Search by name, username, host or IP" aria-label="Search proxies" hidden>
       <p id="loadingList" class="row muted"><span class="spinner"></span>Loading proxies…</p>
-      <p id="noProfiles" class="muted" hidden>No proxies yet. Use Add proxy or Bulk add.</p>
+      <p id="noProfiles" class="muted" hidden>No proxies yet. Add them in the web panel with <b>Manage proxies</b>; they appear here automatically.</p>
       <p id="noMatch" class="muted" hidden>No matching proxies</p>
       <ul id="list" data-testid="proxy-list"></ul>
       <p class="muted legend">Score out of 100 from the last 20 checks: 70 for how often it works, 30 for speed (0.3 s or faster = full, 3 s or slower = none), minus 15 if the latest check failed.</p>

@@ -3,12 +3,14 @@
 const express = require('express');
 const { E } = require('../../lib/errors');
 const { isExt, parseClientHeader } = require('../../lib/util');
-const { requireExt, scopeOf } = require('../middleware');
+const { requireExt, scopeOf, panelOnly } = require('../middleware');
 
 function dataRoutes(services) {
     const r = express.Router();
     const { users, profiles, proxies, activity, configStore, devices, settings } = services;
     const items = (req) => (req.body && req.body.items) || null;
+    const entriesPanelOnly = panelOnly(services.config, 'CitaMate entries');
+    const proxiesPanelOnly = panelOnly(services.config, 'Proxies');
 
     // ------------------------------------------------------------ bootstrap ----
     r.get('/bootstrap', (req, res) => {
@@ -33,10 +35,10 @@ function dataRoutes(services) {
     const cm = express.Router();
     cm.use(requireExt(services, 'citamate'));
     cm.get('/profiles', (req, res) => res.json({ items: profiles.list(scopeOf(req)) }));
-    cm.post('/profiles', (req, res) => res.status(201).json({ item: profiles.create(req.actor, req.body || {}) }));
-    cm.post('/profiles/bulk', (req, res) => res.status(201).json({ items: profiles.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
-    cm.put('/profiles/:id', (req, res) => res.json({ item: profiles.update(req.actor, req.params.id, req.body || {}) }));
-    cm.delete('/profiles/:id', (req, res) => {
+    cm.post('/profiles', entriesPanelOnly, (req, res) => res.status(201).json({ item: profiles.create(req.actor, req.body || {}) }));
+    cm.post('/profiles/bulk', entriesPanelOnly, (req, res) => res.status(201).json({ items: profiles.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
+    cm.put('/profiles/:id', entriesPanelOnly, (req, res) => res.json({ item: profiles.update(req.actor, req.params.id, req.body || {}) }));
+    cm.delete('/profiles/:id', entriesPanelOnly, (req, res) => {
         profiles.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });
@@ -66,10 +68,10 @@ function dataRoutes(services) {
         }
         res.json({ items: proxies.list(scopeOf(req)) });
     });
-    rs.post('/proxies', (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
-    rs.post('/proxies/bulk', (req, res) => res.status(201).json({ items: proxies.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
-    rs.put('/proxies/:id', (req, res) => res.json({ item: proxies.update(req.actor, req.params.id, req.body || {}) }));
-    rs.delete('/proxies/:id', (req, res) => {
+    rs.post('/proxies', proxiesPanelOnly, (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
+    rs.post('/proxies/bulk', proxiesPanelOnly, (req, res) => res.status(201).json({ items: proxies.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
+    rs.put('/proxies/:id', proxiesPanelOnly, (req, res) => res.json({ item: proxies.update(req.actor, req.params.id, req.body || {}) }));
+    rs.delete('/proxies/:id', proxiesPanelOnly, (req, res) => {
         proxies.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });

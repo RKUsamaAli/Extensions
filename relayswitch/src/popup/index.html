@@ -28,8 +28,8 @@
   </div>
 
   <section id="empty" hidden>
-    <p class="muted">No proxy yet. Add one to get started.</p>
-    <button id="addFirst" class="primary">Add a proxy</button>
+    <p class="muted">No proxy yet. Add your proxies in the web panel; they appear here automatically.</p>
+    <button id="addFirst" class="primary" data-testid="add-first">Open web panel ↗</button>
   </section>
 
   <section id="main" hidden>
@@ -58,7 +58,8 @@
   </label>
 
   <footer class="row" id="footer">
-    <a href="#" id="options" class="grow">Manage proxies</a>
+    <a href="#" id="manage" class="grow" data-testid="manage-proxies" title="Add, edit and delete proxies in the web panel">Manage proxies ↗</a>
+    <a href="#" id="options" data-testid="open-options">Tests &amp; settings</a>
   </footer>
   <div id="account" class="row account" data-testid="account" hidden></div>
   <script type="module" src="popup.js"></script>

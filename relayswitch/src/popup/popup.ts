@@ -20,8 +20,11 @@ let unsupported = false;
 let signedIn = false;
 
 /** Signed out: only the sign-in form. Signed in: the normal popup plus the account line. */
+let panelUrl = "";
+
 function renderAuth(auth: AuthInfo): void {
   signedIn = auth.signedIn;
+  panelUrl = auth.apiBase.replace(/\/+$/, "") + "/app#proxies";
   $("signin").hidden = signedIn;
   $("account").hidden = !signedIn;
   $("fabRow").hidden = !signedIn;
@@ -193,10 +196,16 @@ toggle.addEventListener("change", () => void run({ type: "setEnabled", enabled: 
 select.addEventListener("change", () => void run({ type: "setActive", id: select.value }));
 $("check").addEventListener("click", () => void run({ type: "checkIp" }));
 $("newSession").addEventListener("click", () => void run({ type: "newSession" }));
-for (const id of ["options", "addFirst"]) {
+$("options").addEventListener("click", (e) => {
+  e.preventDefault();
+  void chrome.runtime.openOptionsPage();
+});
+// Proxies are added, edited and deleted in the web panel (already signed in with the same account).
+for (const id of ["manage", "addFirst"]) {
   $(id).addEventListener("click", (e) => {
     e.preventDefault();
-    void chrome.runtime.openOptionsPage();
+    if (panelUrl) void chrome.tabs.create({ url: panelUrl });
+    window.close();
   });
 }
 

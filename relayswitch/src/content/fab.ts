@@ -127,7 +127,7 @@ function mount(): void {
     if (!m.items.length) {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = "No proxies yet. Add one in RelaySwitch options.";
+      empty.textContent = "No proxies yet. Add them in the web panel (Manage proxies).";
       items.replaceChildren(rows[0]!, empty);
     } else {
       items.replaceChildren(...rows);

@@ -46,19 +46,30 @@ test('extension journey: login, bootstrap, CRUD, logs, refresh, logout', () =>
         assert.equal(cat.json.version, 1);
         assert.equal(cat.json.data.paises[0].text, 'PAKISTAN');
 
-        const c = await call('POST', '/api/v1/citamate/profiles', { token: L.accessToken, headers: H, body: { label: 'Ali', docNumber: 'x1', fullName: 'ali' } });
-        assert.equal(c.status, 201);
+        // Entries are managed in the panel only: every change from an extension is refused.
+        for (const [m, path, body] of [
+            ['POST', '/api/v1/citamate/profiles', { label: 'Ali', docNumber: 'x1', fullName: 'ali' }],
+            ['POST', '/api/v1/citamate/profiles/bulk', { items: [{ label: 'B', docNumber: '1', fullName: 'b' }] }],
+            ['PUT', '/api/v1/citamate/profiles/any', { label: 'x' }],
+            ['DELETE', '/api/v1/citamate/profiles/any', undefined]
+        ]) {
+            const r = await call(m, path, { token: L.accessToken, headers: H, body });
+            assert.equal(r.status, 403, `${m} ${path}`);
+            assert.equal(r.json.code, 'panel_only');
+            assert.equal(r.json.panelUrl, 'http://hub.test/app');
+        }
+        const P = await panelLogin(call, 'ali');
+        const c = await call('POST', '/api/v1/citamate/profiles', { token: P.accessToken, body: { label: 'Ali', docNumber: 'x1', fullName: 'ali' } });
+        assert.equal(c.status, 201, 'the panel can add entries');
         const id = c.json.item.id;
-        const bad = await call('POST', '/api/v1/citamate/profiles', { token: L.accessToken, headers: H, body: { label: '' } });
+        const bad = await call('POST', '/api/v1/citamate/profiles', { token: P.accessToken, body: { label: '' } });
         assert.equal(bad.status, 400);
         assert.equal(bad.json.code, 'validation_error');
         assert.ok(bad.json.fields.label);
-        const up = await call('PUT', `/api/v1/citamate/profiles/${id}`, { token: L.accessToken, headers: H, body: { label: 'Ali 2', docNumber: 'x1', fullName: 'ali' } });
-        assert.equal(up.json.item.label, 'Ali 2');
-        const bulk = await call('POST', '/api/v1/citamate/profiles/bulk', { token: L.accessToken, headers: H, body: { items: [{ label: 'B', docNumber: '1', fullName: 'b' }] } });
-        assert.equal(bulk.status, 201);
+        assert.equal((await call('PUT', `/api/v1/citamate/profiles/${id}`, { token: P.accessToken, body: { label: 'Ali 2', docNumber: 'x1', fullName: 'ali' } })).json.item.label, 'Ali 2');
+        assert.equal((await call('POST', '/api/v1/citamate/profiles/bulk', { token: P.accessToken, body: { items: [{ label: 'B', docNumber: '1', fullName: 'b' }] } })).status, 201);
         const list = await call('GET', '/api/v1/citamate/profiles', { token: L.accessToken, headers: H });
-        assert.deepEqual(list.json.items.map((p) => p.label), ['Ali 2', 'B']);
+        assert.deepEqual(list.json.items.map((p) => p.label), ['Ali 2', 'B'], 'the extension reads what the panel saved');
 
         const lg = await call('POST', '/api/v1/citamate/logs', { token: L.accessToken, headers: H, body: { items: [{ id: 'l1', t: 1, status: 'ok', entryId: id }] } });
         assert.equal(lg.json.saved, 1);
@@ -66,7 +77,7 @@ test('extension journey: login, bootstrap, CRUD, logs, refresh, logout', () =>
         const sg = await call('POST', '/api/v1/citamate/office-sightings', { token: L.accessToken, headers: H, body: { items: [{ id: 's1', offices: [{ value: '1', text: 'A' }] }] } });
         assert.equal(sg.json.saved, 1);
         assert.equal((await call('DELETE', '/api/v1/citamate/logs', { token: L.accessToken, headers: H })).json.removed, 1);
-        assert.equal((await call('DELETE', `/api/v1/citamate/profiles/${id}`, { token: L.accessToken, headers: H })).json.ok, true);
+        assert.equal((await call('DELETE', `/api/v1/citamate/profiles/${id}`, { token: P.accessToken })).json.ok, true);
 
         const R = await call('POST', '/api/v1/auth/refresh', { headers: H, body: { refreshToken: L.refreshToken } });
         assert.equal(R.status, 200);
@@ -84,18 +95,25 @@ test('extension journey: login, bootstrap, CRUD, logs, refresh, logout', () =>
 test('relayswitch over HTTP: proxies, checks, logs; a citamate token cannot use it', () =>
     withApp(async ({ call }) => {
         const L = await extLogin(call, 'ali', 'relayswitch');
-        const p = await call('POST', '/api/v1/relayswitch/proxies', { token: L.accessToken, body: { name: 'DE', host: '1.2.3.4', port: 8080, password: 'pw' } });
+        // Proxies are managed in the panel only.
+        for (const [m, path] of [['POST', '/api/v1/relayswitch/proxies'], ['POST', '/api/v1/relayswitch/proxies/bulk'], ['PUT', '/api/v1/relayswitch/proxies/x'], ['DELETE', '/api/v1/relayswitch/proxies/x']]) {
+            const r = await call(m, path, { token: L.accessToken, body: m === 'DELETE' ? undefined : { name: 'DE', host: '1.2.3.4', port: 8080, items: [{ host: 'b', port: 1 }] } });
+            assert.equal(r.json.code, 'panel_only', `${m} ${path}`);
+        }
+        const P = await panelLogin(call, 'ali');
+        const p = await call('POST', '/api/v1/relayswitch/proxies', { token: P.accessToken, body: { name: 'DE', host: '1.2.3.4', port: 8080, password: 'pw' } });
         assert.equal(p.status, 201);
         const pid = p.json.item.id;
-        assert.equal((await call('POST', '/api/v1/relayswitch/proxies/bulk', { token: L.accessToken, body: { items: [{ host: 'b', port: 1 }] } })).json.items.length, 1);
-        assert.equal((await call('PUT', `/api/v1/relayswitch/proxies/${pid}`, { token: L.accessToken, body: { name: 'DE2', host: '1.2.3.4', port: 8080 } })).json.item.password, 'pw');
+        assert.equal((await call('POST', '/api/v1/relayswitch/proxies/bulk', { token: P.accessToken, body: { items: [{ host: 'b', port: 1 }] } })).json.items.length, 1);
+        assert.equal((await call('PUT', `/api/v1/relayswitch/proxies/${pid}`, { token: P.accessToken, body: { name: 'DE2', host: '1.2.3.4', port: 8080 } })).json.item.password, 'pw');
+        assert.equal((await call('GET', '/api/v1/relayswitch/proxies', { token: L.accessToken })).json.items.length, 2, 'the extension reads them');
         assert.equal((await call('POST', '/api/v1/relayswitch/checks', { token: L.accessToken, body: { items: [{ proxyId: pid, ok: true, ms: 50 }] } })).json.saved, 1);
         const st = await call('GET', '/api/v1/relayswitch/checks', { token: L.accessToken });
         assert.equal(st.json.stats[pid].results[0].ms, 50);
         assert.equal((await call('POST', '/api/v1/relayswitch/logs', { token: L.accessToken, body: { items: [{ event: 'Connected' }] } })).json.saved, 1);
         assert.equal((await call('GET', '/api/v1/relayswitch/logs', { token: L.accessToken })).json.items[0].event, 'Connected');
         assert.equal((await call('DELETE', '/api/v1/relayswitch/logs', { token: L.accessToken })).json.removed, 1);
-        assert.equal((await call('DELETE', `/api/v1/relayswitch/proxies/${pid}`, { token: L.accessToken })).json.ok, true);
+        assert.equal((await call('DELETE', `/api/v1/relayswitch/proxies/${pid}`, { token: P.accessToken })).json.ok, true);
         const cross = await call('GET', '/api/v1/citamate/profiles', { token: L.accessToken });
         assert.equal(cross.status, 403);
         const bootWrong = await call('GET', '/api/v1/bootstrap?ext=citamate', { token: L.accessToken });

@@ -22,18 +22,16 @@ import { HubError } from "../shared/hub";
 import {
   authInfo,
   bootstrap,
-  bulkCreate,
   clearLogsRemote,
-  deleteProfileRemote,
   isSignedIn,
+  dropLegacy,
   legacyInfo,
+  legacyProxyLines,
   loadAll,
   login,
   logout,
-  migrateLocal,
   onSignedOut,
   requireSignedIn,
-  saveProfileRemote,
   scheduleFlush,
   signOutLocal,
 } from "./sync";
@@ -369,22 +367,6 @@ async function restore(): Promise<void> {
 
 // ---- Profiles ----
 
-async function saveProfile(profile: ProxyProfile): Promise<void> {
-  const { activeProfileId, enabled } = await getLocal();
-  const saved = await saveProfileRemote(profile);
-  await setLocal({ activeProfileId: activeProfileId ?? saved.id });
-  if (enabled && (activeProfileId === saved.id || !activeProfileId)) await turnOn();
-}
-
-async function deleteProfile(id: string): Promise<void> {
-  const local = await getLocal();
-  const wasActive = local.activeProfileId === id;
-  await deleteProfileRemote(id);
-  const rest = await cachedProfiles();
-  await setLocal({ activeProfileId: wasActive ? (rest[0]?.id ?? null) : local.activeProfileId });
-  if (wasActive && local.enabled) await turnOff();
-}
-
 async function setActive(id: string): Promise<void> {
   const { enabled } = await getLocal();
   const profiles = await cachedProfiles();
@@ -405,21 +387,6 @@ async function assertNotTesting(type: string): Promise<void> {
   if (testRun?.running) throw new Error("Proxy test in progress. Wait for it or cancel it first.");
 }
 
-async function bulkAdd(incoming: ProxyProfile[]): Promise<string[]> {
-  const local = await getLocal();
-  const key = (p: ProxyProfile) => `${p.host.toLowerCase()}:${p.port}:${p.usernameTemplate}`;
-  const seen = new Set((await cachedProfiles()).map(key));
-  const fresh = incoming.filter((p) => {
-    if (seen.has(key(p))) return false;
-    seen.add(key(p));
-    return true;
-  });
-  const created = fresh.length ? await bulkCreate(fresh) : [];
-  await setLocal({ activeProfileId: local.activeProfileId ?? created[0]?.id ?? null });
-  await log({ level: "info", event: "bulk_add", detail: `${created.length} added, ${incoming.length - fresh.length} duplicates skipped` });
-  return created.map((p) => p.id);
-}
-
 async function scores(): Promise<Record<string, number | null>> {
   const { profiles, stats } = await getSession();
   return Object.fromEntries(profiles.map((p) => [p.id, scoreOf(stats[p.id]?.results ?? []).value]));
@@ -431,9 +398,7 @@ const SIGNED_OUT_OK = new Set(["getState", "listProfiles", "getAuth", "login", "
 async function handle(msg: Message): Promise<Reply> {
   await assertNotTesting(msg.type);
   if (!SIGNED_OUT_OK.has(msg.type)) await requireSignedIn();
-  let added: number | undefined;
-  let addedIds: string[] | undefined;
-  let migrated: LegacyInfo | undefined;
+  let legacyText: string | undefined;
   let check: CheckStep[] | undefined;
   switch (msg.type) {
     case "getAuth":
@@ -454,12 +419,15 @@ async function handle(msg: Message): Promise<Reply> {
         throw err;
       });
       break;
+    case "legacyExport":
+      legacyText = await legacyProxyLines();
+      break;
+    case "dropLegacy":
+      await dropLegacy();
+      break;
     case "logout":
       await turnOff().catch(() => {});
       await logout();
-      break;
-    case "migrateLocal":
-      migrated = await migrateLocal();
       break;
     case "setEnabled":
       if (msg.enabled) await turnOn();
@@ -471,21 +439,11 @@ async function handle(msg: Message): Promise<Reply> {
     case "newSession":
       await newSession();
       break;
-    case "saveProfile":
-      await saveProfile(msg.profile);
-      break;
-    case "deleteProfile":
-      await deleteProfile(msg.id);
-      break;
     case "setActive":
       await setActive(msg.id);
       break;
     case "clearLogs":
       await clearLogsRemote();
-      break;
-    case "bulkAdd":
-      addedIds = await bulkAdd(msg.profiles);
-      added = addedIds.length;
       break;
     case "testProxies":
       await assertCanProxy();
@@ -517,13 +475,11 @@ async function handle(msg: Message): Promise<Reply> {
     profiles: auth.signedIn ? await cachedProfiles() : [],
     settings,
     scores: auth.signedIn ? await scores() : {},
-    added,
-    addedIds,
     check,
     support: await supportReply(),
     auth,
     legacy: await legacyInfo().catch(() => null),
-    migrated,
+    legacyText,
   };
 }
 

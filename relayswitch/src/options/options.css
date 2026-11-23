@@ -73,3 +73,4 @@ label.inline { margin: 0; }
   #list li { flex-wrap: wrap; }
   #list .actions { width: 100%; justify-content: flex-end; }
 }
+.steps { margin: 4px 0 12px; padding-left: 20px; } .steps li { margin: 2px 0; }
