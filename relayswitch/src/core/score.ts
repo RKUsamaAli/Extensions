@@ -58,3 +58,17 @@ export function scoreBand(value: number | null): ScoreBand {
   if (value >= 50) return "fair";
   return "poor";
 }
+
+/** Sorts best score first; never-checked proxies last; ties by name. */
+export function byBestScore<T extends { id: string }>(scores: Record<string, number | null | undefined>, name: (p: T) => string) {
+  return (a: T, b: T): number => {
+    const x = scores[a.id] ?? null;
+    const y = scores[b.id] ?? null;
+    if (x !== y) {
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return y - x;
+    }
+    return name(a).localeCompare(name(b), undefined, { numeric: true, sensitivity: "base" });
+  };
+}

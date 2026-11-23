@@ -1,5 +1,6 @@
 import type { ProxyProfile, RuntimeState } from "../core/types";
 import { formatAgo, formatDuration } from "../core/format";
+import { byBestScore } from "../core/score";
 import { displayName } from "../core/profile";
 import { renderUsername, usesSession } from "../core/username";
 import { send, type AuthInfo, type Message } from "../shared/messages";
@@ -111,9 +112,10 @@ function render(state: RuntimeState, profiles: ProxyProfile[]): void {
   if (search.hidden) search.value = "";
   const q = search.value.trim().toLowerCase();
   // The active proxy always stays in the list so the select shows it.
-  const shown = profiles.filter(
-    (p) => !q || p.id === state.activeProfileId || displayName(p).toLowerCase().includes(q),
-  );
+  // Best score first, so the strongest proxies are at the top.
+  const shown = profiles
+    .filter((p) => !q || p.id === state.activeProfileId || displayName(p).toLowerCase().includes(q))
+    .sort(byBestScore<ProxyProfile>(lastScores, displayName));
   $("noMatch").hidden = !q || shown.some((p) => p.id !== state.activeProfileId);
   select.size = q ? Math.min(Math.max(shown.length, 2), 6) : 0;
   select.replaceChildren(

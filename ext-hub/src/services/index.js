@@ -17,7 +17,7 @@ const { createDevices } = require('./devices');
 
 const systemClock = { now: () => Date.now() };
 
-function createServices({ db, config, clock = systemClock }) {
+function createServices({ db, config, clock = systemClock, checkProxy }) {
     const cipher = cipherFor(config);
     const jwt = createJwt({ secret: config.appSecret, audience: config.publicUrl });
     const audit = createAudit({ db, clock });
@@ -25,7 +25,7 @@ function createServices({ db, config, clock = systemClock }) {
     const users = createUsers({ db, clock, audit });
     const auth = createAuth({ db, clock, config, jwt, users, settings, audit });
     const profiles = createProfiles({ db, clock, cipher, users });
-    const proxies = createProxies({ db, clock, cipher, users });
+    const proxies = createProxies({ db, clock, cipher, users, ...(checkProxy ? { checkProxy } : {}) });
     const activity = createActivity({ db, clock });
     const configStore = createConfigStore({ db, clock, audit });
     const devices = createDevices({ db, clock, audit });

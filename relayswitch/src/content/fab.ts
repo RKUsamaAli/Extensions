@@ -238,8 +238,18 @@ function mount(): void {
   });
 
   // Initial position and status dot.
-  void call({ type: "menu" }).then((m) => {
-    if (m) render(m);
+  const refresh = () =>
+    void call({ type: "menu" }).then((m) => {
+      if (m && !busy) render(m);
+    });
+  refresh();
+  // Same state in every tab: follow changes made in another tab, the popup or the
+  // worker (on/off, chosen proxy, sign-in), and catch up when this tab comes back.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && ["enabled", "activeProfileId", "fabPos", "refreshToken", "apiBase"].some((k) => k in changes)) refresh();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refresh();
   });
 }
 

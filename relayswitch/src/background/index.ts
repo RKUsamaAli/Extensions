@@ -1,7 +1,7 @@
 import { displayName } from "../core/profile";
 import { formatDuration } from "../core/format";
 import { testIdFromUrl } from "../core/pac";
-import { scoreOf } from "../core/score";
+import { scoreOf, byBestScore } from "../core/score";
 import type { ProxyProfile } from "../core/types";
 import { nextSession, renderUsername, usesSession } from "../core/username";
 import { MAX_AUTH_FAILURES } from "../shared/config";
@@ -344,6 +344,51 @@ async function connectServer(): Promise<boolean> {
   }
 }
 
+/** Proxy cleared while the server is unreachable; `enabled` stays on so it reconnects later. */
+async function waitForServer(detail: string): Promise<void> {
+  await clearProxy().catch(() => {});
+  await setSession({ status: "error", statusDetail: `${detail} – retrying`, exitIp: null, latencyMs: null, checkedAt: null });
+  await updateBadge();
+}
+
+let ensuring: Promise<void> | null = null;
+/**
+ * Keeps every tab working without opening the popup: loads the proxies when they are
+ * missing or stale (browser restart, failed start, changes made in the web panel),
+ * reconnects a proxy that is meant to be on, and disconnects one that was switched off
+ * or deleted in the panel. Runs at start, every minute and on each page menu request.
+ */
+function ensureReady(): Promise<void> {
+  ensuring ??= (async () => {
+    if (!support.canProxy || !(await isSignedIn())) return;
+    const before = await getSession();
+    await loadAll(false).catch(() => {});
+    const { enabled, activeProfileId } = await getLocal();
+    if (!enabled) return;
+    const s = await getSession();
+    if (s.loadedAt === null) return waitForServer(s.authError ?? "Can't reach the server");
+    const list = await cachedProfiles();
+    if (activeProfileId && !list.some((p) => p.id === activeProfileId)) {
+      return turnOff("error", "This proxy was switched off or deleted in the web panel. Pick another one.");
+    }
+    const waiting = s.status === "error" && /retrying$/.test(s.statusDetail ?? "");
+    if (s.status === "off" || waiting || (before.loadedAt === null && s.status !== "connected" && s.status !== "connecting")) {
+      await turnOn().catch((err: unknown) => turnOff("error", errorText(err)));
+    }
+  })().finally(() => {
+    ensuring = null;
+  });
+  return ensuring;
+}
+
+const SYNC_ALARM = "relayswitch-sync";
+safeListen("alarms", () => {
+  chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 1 });
+  chrome.alarms.onAlarm.addListener((a) => {
+    if (a.name === SYNC_ALARM) void ensureReady();
+  });
+}, missingListener);
+
 async function restore(): Promise<void> {
   if (!support.canProxy) {
     await setSession({ status: "error", statusDetail: "Browser not supported" }).catch(() => {});
@@ -355,7 +400,10 @@ async function restore(): Promise<void> {
   );
   const online = await connectServer();
   if (enabled && !online) {
-    await turnOff("error", (await getSession()).authError ?? "Sign in to RelaySwitch").catch(() => {});
+    // No server, no proxy – but remember it was on: ensureReady() reconnects when the
+    // server answers again (every minute, and whenever a page asks).
+    if (await isSignedIn()) await waitForServer((await getSession()).authError ?? "Can't reach the server");
+    else await turnOff("error", (await getSession()).authError ?? "Sign in to RelaySwitch").catch(() => {});
     return;
   }
   if (enabled) {
@@ -498,6 +546,8 @@ async function handlePage(msg: PageMessage): Promise<MenuReply> {
   }
   switch (msg?.type) {
     case "menu":
+      // Any tab asking for the menu gets loaded proxies and an applied proxy, popup or not.
+      if (signedIn) await ensureReady();
       break;
     case "menuSignIn":
       await chrome.runtime.openOptionsPage();
@@ -534,7 +584,7 @@ async function handlePage(msg: PageMessage): Promise<MenuReply> {
       activeId: state.activeProfileId,
       status: state.status,
       exitIp: state.exitIp,
-      items: profiles.map((p) => ({ id: p.id, name: displayName(p), score: scoreMap[p.id] ?? null })),
+      items: [...profiles].sort(byBestScore<ProxyProfile>(scoreMap, displayName)).map((p) => ({ id: p.id, name: displayName(p), score: scoreMap[p.id] ?? null })),
       pos: fabPos,
     },
   };

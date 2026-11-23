@@ -107,6 +107,12 @@ test('relayswitch over HTTP: proxies, checks, logs; a citamate token cannot use 
         assert.equal((await call('POST', '/api/v1/relayswitch/proxies/bulk', { token: P.accessToken, body: { items: [{ host: 'b', port: 1 }] } })).json.items.length, 1);
         assert.equal((await call('PUT', `/api/v1/relayswitch/proxies/${pid}`, { token: P.accessToken, body: { name: 'DE2', host: '1.2.3.4', port: 8080 } })).json.item.password, 'pw');
         assert.equal((await call('GET', '/api/v1/relayswitch/proxies', { token: L.accessToken })).json.items.length, 2, 'the extension reads them');
+        assert.equal((await call('POST', '/api/v1/relayswitch/proxies/actions', { token: P.accessToken, body: { ids: [pid], action: 'disable' } })).json.changed, 1);
+        assert.equal((await call('GET', '/api/v1/relayswitch/proxies', { token: L.accessToken })).json.items.length, 1, 'switched-off proxies are not sent to the extension');
+        assert.equal((await call('GET', '/api/v1/relayswitch/proxies', { token: P.accessToken })).json.items.length, 2, 'the panel still lists them');
+        assert.equal((await call('POST', '/api/v1/relayswitch/proxies/actions', { token: L.accessToken, body: { ids: [pid], action: 'enable' } })).json.code, 'panel_only');
+        assert.equal((await call('POST', '/api/v1/relayswitch/proxies/server-check', { token: L.accessToken, body: { ids: [pid] } })).json.code, 'panel_only');
+        await call('POST', '/api/v1/relayswitch/proxies/actions', { token: P.accessToken, body: { ids: [pid], action: 'enable' } });
         assert.equal((await call('POST', '/api/v1/relayswitch/checks', { token: L.accessToken, body: { items: [{ proxyId: pid, ok: true, ms: 50 }] } })).json.saved, 1);
         const st = await call('GET', '/api/v1/relayswitch/checks', { token: L.accessToken });
         assert.equal(st.json.stats[pid].results[0].ms, 50);

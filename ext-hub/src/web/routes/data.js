@@ -64,10 +64,18 @@ function dataRoutes(services) {
         res.setHeader('Cache-Control', 'no-store');
         // With `limit`: one scored, filtered, sorted page + summary of all (panel). Without: everything (extension).
         if (req.query.limit !== undefined) {
-            const { q, filter, sort, limit, offset } = req.query;
-            return res.json(proxies.page(scopeOf(req), { q, filter, sort, limit, offset }));
+            const { q, filter, sort, limit, offset, ids } = req.query;
+            return res.json(proxies.page(scopeOf(req), { q, filter, sort, limit, offset, idsOnly: ids === '1' }));
         }
-        res.json({ items: proxies.list(scopeOf(req)) });
+        // The extension gets only switched-on proxies.
+        res.json({ items: proxies.list(scopeOf(req), { enabledOnly: req.auth.session.kind === 'extension' }) });
+    });
+    rs.post('/proxies/actions', proxiesPanelOnly, (req, res) => {
+        const b = req.body || {};
+        res.json(proxies.bulkAction(req.actor, b.ids, b.action));
+    });
+    rs.post('/proxies/server-check', proxiesPanelOnly, async (req, res) => {
+        res.json({ results: await proxies.serverCheck(req.actor, (req.body || {}).ids) });
     });
     rs.post('/proxies', proxiesPanelOnly, (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
     rs.post('/proxies/bulk', proxiesPanelOnly, (req, res) => res.status(201).json({ items: proxies.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));

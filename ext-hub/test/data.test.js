@@ -292,7 +292,7 @@ test('proxies page: server-side score, filter, sort, paging and a summary of all
     assert.equal(all.nextOffset, 2);
     assert.deepEqual(
         { ...all.summary, lastChecked: undefined },
-        { total: 4, checked: 3, neverChecked: 1, good: 1, fair: 2, poor: 0, none: 1, failing: 1, successRatio: (20 + 15 + 10) / 60, medianMs: 300, lastChecked: undefined }
+        { total: 4, disabled: 0, checked: 3, neverChecked: 1, good: 1, fair: 2, poor: 0, none: 1, failing: 1, successRatio: (20 + 15 + 10) / 60, medianMs: 300, lastChecked: undefined }
     );
     const rest = s.proxies.page(scope, { limit: 2, offset: 2 });
     assert.deepEqual(rest.items.map((p) => p.name), ['broken', 'never'], 'never-checked last');
@@ -359,4 +359,40 @@ test('admin creates entries and proxies for a user, sees what they created, and 
     assert.equal(s.profiles.update(boss, e.id, { ...entry('For Sara'), ownerId: sara.id }).ownerName, 'sara');
     assert.throws(() => s.profiles.update(sara, e.id, { ...entry('x'), ownerId: ali.id }), /admin/);
     assert.throws(() => s.profiles.update(boss, e.id, { ...entry('x'), ownerId: 'nobody' }), (err) => err.code === 'validation_error');
+});
+
+test('proxies: switch off/on and delete in bulk; the extension list hides switched-off ones', () => {
+    const { s, ali, sara } = setup();
+    const a = s.proxies.create(ali, { name: 'a', host: 'h', port: 1 });
+    const b = s.proxies.create(ali, { name: 'b', host: 'h', port: 2 });
+    const theirs = s.proxies.create(sara, { name: 'x', host: 'h', port: 3 });
+    assert.equal(a.enabled, true);
+    assert.deepEqual(s.proxies.bulkAction(ali, [a.id, theirs.id, 'junk'], 'disable'), { changed: 1 }, 'only own rows change');
+    assert.deepEqual(s.proxies.list(scopeFor(ali), { enabledOnly: true }).map((p) => p.name), ['b']);
+    assert.equal(s.proxies.list(scopeFor(ali)).length, 2, 'the panel still lists it');
+    const pg = s.proxies.page(scopeFor(ali), { limit: 10, filter: 'disabled' });
+    assert.deepEqual(pg.items.map((p) => p.name), ['a']);
+    assert.equal(pg.summary.disabled, 1);
+    s.proxies.bulkAction(ali, [a.id], 'enable');
+    assert.equal(s.proxies.list(scopeFor(ali), { enabledOnly: true }).length, 2);
+    assert.deepEqual(s.proxies.bulkAction(ali, [a.id, b.id], 'delete'), { changed: 2 });
+    assert.equal(s.proxies.list(scopeFor(sara)).length, 1);
+    assert.throws(() => s.proxies.bulkAction(ali, [], 'explode'), (e) => e.code === 'validation_error');
+});
+
+test('proxies: server check renders the username, runs the checker and stores "server" checks', async () => {
+    const seen = [];
+    const s = makeServices({ checkProxy: async (p) => { seen.push(p); return p.host === 'good' ? { ok: true, ms: 120, ip: '198.51.100.9' } : { ok: false, error: 'No answer in 10 s' }; } });
+    const ali = addUser(s, 'ali');
+    const good = s.proxies.create(ali, { name: 'g', host: 'good', port: 80, usernameTemplate: 'u-{country}-s-{session}', country: 'es', password: 'pw', sessionStart: 5, sessionEnd: 5 });
+    const bad = s.proxies.create(ali, { name: 'b', host: 'bad', port: 80 });
+    const res = await s.proxies.serverCheck(ali, [good.id, bad.id]);
+    assert.deepEqual(res.map((r) => [r.name, r.ok, r.ip || r.error]), [['g', true, '198.51.100.9'], ['b', false, 'No answer in 10 s']]);
+    assert.deepEqual(seen[0], { scheme: 'http', host: 'good', port: 80, username: 'u-es-s-5', password: 'pw' });
+    const st = s.proxies.stats(scopeFor(ali));
+    assert.equal(st[good.id].results[0].source, 'server');
+    assert.equal(st[good.id].results[0].ms, 120);
+    assert.equal(s.proxies.page(scopeFor(ali), { limit: 5 }).items[0].name, 'g', 'the working one scores first');
+    s.proxies.addChecks(ali, [{ proxyId: good.id, ok: true, source: 'server' }]);
+    assert.equal(s.proxies.stats(scopeFor(ali))[good.id].results[1].source, 'test', 'clients cannot claim "server"');
 });

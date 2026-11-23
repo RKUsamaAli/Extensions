@@ -180,6 +180,8 @@ const FILTERS = [
   ["poor", "Poor (<50)"],
   ["failing", "Latest check failed"],
   ["none", "Not checked"],
+  ["enabled", "On (sent to RelaySwitch)"],
+  ["disabled", "Off (hidden from RelaySwitch)"],
 ];
 const SORTS = [
   ["score", "Best score"],
@@ -204,7 +206,7 @@ export default async function proxiesPage() {
     const tile = (n, label, note, testid, kind) => el("div", { class: "card stat" + (kind ? " " + kind : ""), testid }, el("b", null, n), el("span", null, label), el("small", null, note || " "));
     summary.textContent = "";
     summary.append(
-      tile(String(m.total), "Proxies", "in this list", "sum-total"),
+      tile(String(m.total), "Proxies", m.disabled ? `${m.disabled} switched off` : "all switched on", "sum-total", ""),
       tile(String(m.checked), "Checked", m.neverChecked ? `${m.neverChecked} not checked yet` : "all checked", "sum-checked"),
       tile(String(m.good), "Healthy", "score 80 or more", "sum-good", m.good ? "good" : ""),
       tile(String(m.failing), "Failing", "latest check failed", "sum-failing", m.failing ? "bad" : ""),
@@ -212,6 +214,61 @@ export default async function proxiesPage() {
       tile(m.medianMs === null ? "—" : m.medianMs + " ms", "Response time", "median, OK checks", "sum-speed"),
     );
   }
+
+  // ---------- selection + bulk actions ----------
+  const selected = new Set();
+  let loadedRows = [];
+  let total = 0;
+  const bar = el("div", { class: "bulkbar", testid: "proxies-bulkbar", hidden: true });
+  const barText = el("strong", { testid: "proxies-selected" });
+  const selectAllMatching = el("button", { type: "button", class: "btn link", testid: "proxies-select-all", onclick: async () => {
+    const r = await get("/relayswitch/proxies" + qs({ owner: ownerParam(), q: search.value.trim(), filter: filter.value, sort: sortSel.value, limit: 1, ids: "1" }));
+    (r.ids || []).forEach((id) => selected.add(id));
+    syncChecks();
+  } });
+  const progress = el("span", { class: "hint", testid: "proxies-progress" });
+  const syncChecks = () => {
+    for (const cb of listBox.querySelectorAll("input[data-proxy-id]")) cb.checked = selected.has(cb.dataset.proxyId);
+    const head = listBox.querySelector("input[data-select-page]");
+    if (head) {
+      const onPage = loadedRows.filter((r) => selected.has(r.id)).length;
+      head.checked = loadedRows.length > 0 && onPage === loadedRows.length;
+      head.indeterminate = onPage > 0 && onPage < loadedRows.length;
+    }
+    bar.hidden = selected.size === 0;
+    barText.textContent = `${selected.size} selected`;
+    selectAllMatching.hidden = selected.size >= total;
+    selectAllMatching.textContent = `Select all ${total}`;
+  };
+  async function act(action) {
+    const ids = [...selected];
+    if (action === "delete" && !(await confirmDialog(`Delete ${ids.length} prox${ids.length === 1 ? "y" : "ies"}? Their check history is deleted too.`))) return;
+    const r = await post("/relayswitch/proxies/actions", { ids, action });
+    toast(`${action === "delete" ? "Deleted" : action === "enable" ? "Switched on" : "Switched off"} ${r.changed} prox${r.changed === 1 ? "y" : "ies"}.`, "ok");
+    if (action === "delete") selected.clear();
+    load(true);
+  }
+  /** Checks from the server, 10 at a time, with progress. */
+  async function checkNow(ids) {
+    let ok = 0, failed = 0;
+    for (let i = 0; i < ids.length; i += 10) {
+      progress.textContent = `Checking ${Math.min(i + 10, ids.length)} of ${ids.length}…`;
+      const r = await post("/relayswitch/proxies/server-check", { ids: ids.slice(i, i + 10) });
+      for (const x of r.results || []) x.ok ? ok++ : failed++;
+    }
+    progress.textContent = "";
+    toast(`Checked ${ok + failed}: ${ok} working, ${failed} failed.`, failed && !ok ? "error" : "ok");
+    load(true);
+  }
+  bar.append(
+    barText, selectAllMatching,
+    el("span", { class: "spacer" }), progress,
+    el("button", { type: "button", class: "btn", testid: "bulk-check", onclick: () => checkNow([...selected]) }, "Check now"),
+    el("button", { type: "button", class: "btn", testid: "bulk-enable", onclick: () => act("enable") }, "Turn on"),
+    el("button", { type: "button", class: "btn", testid: "bulk-disable", onclick: () => act("disable") }, "Turn off"),
+    el("button", { type: "button", class: "btn danger", testid: "bulk-delete", onclick: () => act("delete") }, "Delete"),
+    el("button", { type: "button", class: "btn link", testid: "bulk-clear", onclick: () => { selected.clear(); syncChecks(); } }, "Clear"),
+  );
 
   async function showHistory(r) {
     try {
@@ -221,7 +278,40 @@ export default async function proxiesPage() {
   }
 
   const columns = () => {
+    const head = el("input", { type: "checkbox", "aria-label": "Select the loaded proxies", dataset: { selectPage: "1" }, testid: "proxies-select-page" });
+    head.addEventListener("change", () => {
+      for (const r of loadedRows) head.checked ? selected.add(r.id) : selected.delete(r.id);
+      syncChecks();
+    });
     const cols = [
+      {
+        label: head,
+        class: "pick",
+        render: (r) => {
+          const cb = el("input", { type: "checkbox", "aria-label": "Select " + r.name, dataset: { proxyId: r.id }, testid: "row-select" });
+          cb.checked = selected.has(r.id);
+          cb.addEventListener("change", () => { cb.checked ? selected.add(r.id) : selected.delete(r.id); syncChecks(); });
+          return cb;
+        },
+      },
+      {
+        label: "Status",
+        class: "nowrap",
+        render: (r) => el("button", {
+          type: "button",
+          class: "switch-btn" + (r.enabled ? " on" : ""),
+          role: "switch",
+          "aria-checked": String(!!r.enabled),
+          title: r.enabled ? "On: sent to RelaySwitch. Click to switch off." : "Off: hidden from RelaySwitch. Click to switch on.",
+          testid: "row-toggle",
+          dataset: r.enabled ? {} : { off: "1" },
+          onclick: async () => {
+            await post("/relayswitch/proxies/actions", { ids: [r.id], action: r.enabled ? "disable" : "enable" });
+            toast(`${r.name} switched ${r.enabled ? "off" : "on"}.`, "ok");
+            load(true);
+          },
+        }, el("span", { class: "knob" }), r.enabled ? "On" : "Off"),
+      },
       { label: "Name", render: (r) => el("div", null, el("strong", null, r.name), r.usernameTemplate ? el("div", { class: "mono hint nowrap" }, r.usernameTemplate) : null) },
       { label: "Server", render: (r) => el("div", null, el("span", { class: "mono nowrap" }, `${r.host}:${r.port}`),
         el("div", { class: "hint" }, [String(r.scheme || "").toUpperCase(), [r.country, r.city].filter(Boolean).join(" / ").toUpperCase()].filter(Boolean).join(" · "))) },
@@ -250,6 +340,7 @@ export default async function proxiesPage() {
         el(
           "span",
           null,
+          el("button", { type: "button", class: "btn small", testid: "row-check", title: "Check this proxy from the server now", onclick: () => checkNow([r.id]) }, "Check"),
           el("button", { type: "button", class: "btn small", testid: "row-history", onclick: () => showHistory(r) }, "History"),
           el("button", { type: "button", class: "btn small", testid: "row-edit", onclick: () => openEditor(r, load) }, "Edit"),
           el("button", {
@@ -270,7 +361,9 @@ export default async function proxiesPage() {
     return cols;
   };
 
-  function load() {
+  /** keepSelection: after an action on the selection; any new search / filter / sort starts empty. */
+  function load(keepSelection = false) {
+    if (keepSelection !== true) selected.clear();
     listBox.textContent = "";
     if (!summary.childElementCount) summary.append(...skeletonTiles(6));
     countLine.textContent = "";
@@ -280,30 +373,34 @@ export default async function proxiesPage() {
       empty: term || filter.value ? "No proxy matches the search or filter." : "No proxies yet. Add one or paste a list.",
       fetchPage: async (offset = 0) => {
         const r = await get("/relayswitch/proxies" + qs({ owner: ownerParam(), q: term, filter: filter.value, sort: sortSel.value, limit: PAGE, offset }));
-        if (offset === 0) renderSummary(r.summary);
+        if (offset === 0) { renderSummary(r.summary); loadedRows = []; }
+        loadedRows.push(...(r.items || []));
+        total = r.total;
+        queueMicrotask(syncChecks);
         return { items: r.items || [], next: r.nextOffset, total: r.total };
       },
       onPage: ({ loaded, total }) => {
-        countLine.textContent = `Showing ${loaded} of ${total}${total !== undefined && (term || filter.value) ? " matching" : ""} proxies. Checks run in the RelaySwitch extension (Test / Test all on its options page, and while a proxy is in use); this page shows their results.`;
+        countLine.textContent = `Showing ${loaded} of ${total}${total !== undefined && (term || filter.value) ? " matching" : ""} proxies. Scores come from checks in RelaySwitch (Test / Test all, and while a proxy is in use) and from Check now here, which tests from the server. Switched-off proxies are hidden from RelaySwitch.`;
       },
     });
     listBox.append(list);
   }
 
   let searchTimer = 0;
-  search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(load, 250); });
-  filter.addEventListener("change", load);
-  sortSel.addEventListener("change", load);
+  search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => load(), 250); });
+  filter.addEventListener("change", () => load());
+  sortSel.addEventListener("change", () => load());
   root.append(
     pageHead(
       "RelaySwitch proxies",
-      ownerSelect(load, { created: true }),
-      el("button", { type: "button", class: "btn", testid: "proxy-refresh", onclick: () => load() }, "Refresh"),
+      ownerSelect(() => load(), { created: true }),
+      el("button", { type: "button", class: "btn", testid: "proxy-refresh", onclick: () => load(true) }, "Refresh"),
       el("button", { type: "button", class: "btn", testid: "proxy-bulk", onclick: () => openBulk(load) }, "Bulk add"),
       el("button", { type: "button", class: "btn primary", testid: "proxy-add", onclick: () => openEditor(null, load) }, "Add proxy"),
     ),
     summary,
     el("div", { class: "toolbar" }, search, filter, sortSel),
+    bar,
     listBox,
     countLine,
   );

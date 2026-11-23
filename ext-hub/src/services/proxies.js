@@ -8,6 +8,7 @@ const { E } = require('../lib/errors');
 const { str, clampInt } = require('../lib/util');
 const { scopeSql, createdSql, assertCanTouch, ownerForCreate, ownerForUpdate } = require('./ownership');
 const { scoreOf, scoreBand, SCORE_WINDOW } = require('../lib/score');
+const { checkProxy: defaultCheckProxy, renderUsername } = require('../lib/proxyCheck');
 
 const SCHEMES = ['http', 'https', 'socks4', 'socks5'];
 const MAX_BULK = 1000;
@@ -41,7 +42,7 @@ function normalizeProxy(raw) {
     return { value: v, fields };
 }
 
-function createProxies({ db, clock, cipher, users }) {
+function createProxies({ db, clock, cipher, users, checkProxy = defaultCheckProxy }) {
     const sel = 'SELECT x.*, u.username AS owner_name, cb.username AS created_by_name FROM proxies x JOIN users u ON u.id = x.owner_id LEFT JOIN users cb ON cb.id = x.created_by';
 
     function shape(r) {
@@ -59,6 +60,7 @@ function createProxies({ db, clock, cipher, users }) {
             sessionEnd: r.session_end,
             ownerId: r.owner_id,
             ownerName: r.owner_name ?? null,
+            enabled: r.enabled === undefined || r.enabled === null ? true : !!r.enabled,
             createdBy: r.created_by ?? null,
             createdByName: r.created_by_name ?? null,
             createdAt: r.created_at,
@@ -68,10 +70,12 @@ function createProxies({ db, clock, cipher, users }) {
 
     const get = (id) => (isId(id) ? db.prepare(`${sel} WHERE x.id = ?`).get(id) || null : null);
 
-    function list(scope) {
+    /** enabledOnly: what RelaySwitch gets – switched-off proxies stay in the panel only. */
+    function list(scope, { enabledOnly = false } = {}) {
         const s = scopeSql(scope, 'x');
         const c = createdSql(scope, 'x');
-        return db.prepare(`${sel} WHERE ${s.where}${c.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params, ...c.params).map(shape);
+        const on = enabledOnly ? ' AND x.enabled = 1' : '';
+        return db.prepare(`${sel} WHERE ${s.where}${c.where}${on} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params, ...c.params).map(shape);
     }
 
     function insert(ownerId, v, actor) {
@@ -138,7 +142,7 @@ function createProxies({ db, clock, cipher, users }) {
 
     // ------------------------------------------------------------- checks ----
     /** Stores check results; proxies the caller may not touch are skipped. */
-    function addChecks(actor, items) {
+    function addChecks(actor, items, { fromServer = false } = {}) {
         if (!Array.isArray(items)) throw E.badRequest('items must be an array');
         if (items.length > MAX_POST) throw E.badRequest(`At most ${MAX_POST} items per request.`);
         const owners = new Map();
@@ -168,7 +172,7 @@ function createProxies({ db, clock, cipher, users }) {
                     Number.isFinite(Number(it.ms)) && it.ms !== null && it.ms !== undefined ? Math.max(0, Math.round(Number(it.ms))) : null,
                     str(it.ip, 64) || null,
                     str(it.error, 500) || null,
-                    it.source === 'use' ? 'use' : 'test',
+                    fromServer ? 'server' : it.source === 'use' ? 'use' : 'test',
                     now
                 ).changes;
             }
@@ -210,7 +214,7 @@ function createProxies({ db, clock, cipher, users }) {
      *   sort    score (default) | speed | recent | name
      * -> { items: [proxy + { score, recent }], total, offset, nextOffset, summary }
      */
-    function page(scope, { q = '', filter = '', sort = 'score', limit, offset } = {}) {
+    function page(scope, { q = '', filter = '', sort = 'score', limit, offset, idsOnly = false } = {}) {
         const n = clampInt(limit, 1, 200, 50);
         const start = clampInt(offset, 0, 1e9, 0);
         const s = scopeSql(scope, 'x');
@@ -230,6 +234,7 @@ function createProxies({ db, clock, cipher, users }) {
         for (const x of all) bands[scoreBand(x.sc.value)]++;
         const summary = {
             total: all.length,
+            disabled: all.filter((x) => !x.r.enabled).length,
             checked: checked.length,
             neverChecked: all.length - checked.length,
             ...bands,
@@ -243,6 +248,8 @@ function createProxies({ db, clock, cipher, users }) {
         let list = all.filter(({ r, sc }) => {
             if (term && ![r.name, r.host, r.username_template, r.country, r.city, r.owner_name, sc.lastIp].some((v) => String(v || '').toLowerCase().includes(term))) return false;
             if (!filter) return true;
+            if (filter === 'disabled') return !r.enabled;
+            if (filter === 'enabled') return !!r.enabled;
             if (filter === 'failing') return sc.lastOk === false;
             return scoreBand(sc.value) === filter;
         });
@@ -255,6 +262,8 @@ function createProxies({ db, clock, cipher, users }) {
             score: (a, b) => nullsLast(a.sc.value, b.sc.value, (x, y) => y - x) || byName(a, b)
         };
         list = list.sort(sorters[sort] || sorters.score);
+        // "Select all N" in the panel: every matching id, no rows.
+        if (idsOnly) return { ids: list.map((x) => x.r.id), total: list.length };
         const slice = list.slice(start, start + n);
         return {
             // `recent` feeds the small bars only: time, result, speed (full rows: GET /checks?proxyId=).
@@ -264,6 +273,62 @@ function createProxies({ db, clock, cipher, users }) {
             nextOffset: start + slice.length < list.length ? start + slice.length : null,
             summary
         };
+    }
+
+    /** Rows the actor may change, by id (others are skipped, like unknown ids). */
+    function touchable(actor, ids) {
+        if (!Array.isArray(ids)) throw E.badRequest('ids must be an array');
+        if (ids.length > MAX_BULK) throw E.badRequest(`At most ${MAX_BULK} proxies at once.`);
+        const rows = [];
+        for (const id of new Set(ids.map(String))) {
+            const r = isId(id) ? db.prepare('SELECT * FROM proxies WHERE id = ?').get(id) : null;
+            if (r && (r.owner_id === actor.id || actor.role === 'admin')) rows.push(r);
+        }
+        return rows;
+    }
+
+    /** Bulk on / off / delete -> { changed } */
+    function bulkAction(actor, ids, action) {
+        if (!['enable', 'disable', 'delete'].includes(action)) throw E.validation({ action: 'Use enable, disable or delete.' });
+        const rows = touchable(actor, ids);
+        const t = clock.now();
+        const upd = db.prepare('UPDATE proxies SET enabled = ?, updated_at = ?, updated_by = ? WHERE id = ?');
+        const del = db.prepare('DELETE FROM proxies WHERE id = ?');
+        let changed = 0;
+        db.transaction(() => {
+            for (const r of rows) changed += action === 'delete' ? del.run(r.id).changes : upd.run(action === 'enable' ? 1 : 0, t, actor.id, r.id).changes;
+        })();
+        return { changed };
+    }
+
+    /**
+     * Checks proxies from the server (8 at a time) and stores the results as checks with
+     * source "server". -> [{ id, name, ok, ms, ip, error }]
+     */
+    async function serverCheck(actor, ids, { concurrency = 8 } = {}) {
+        const rows = touchable(actor, ids);
+        if (rows.length > 100) throw E.badRequest('At most 100 proxies per check.');
+        const results = new Array(rows.length);
+        let next = 0;
+        const worker = async () => {
+            while (next < rows.length) {
+                const i = next++;
+                const r = rows[i];
+                let res;
+                try {
+                    const lo = Math.min(r.session_start, r.session_end), hi = Math.max(r.session_start, r.session_end);
+                    const session = lo + Math.floor(Math.random() * (hi - lo + 1));
+                    const username = r.username_template ? renderUsername(r.username_template, { session, country: r.country, city: r.city }) : '';
+                    res = await checkProxy({ scheme: r.scheme, host: r.host, port: r.port, username, password: cipher.decrypt(r.password_enc) ?? '' });
+                } catch (err) {
+                    res = { ok: false, error: String((err && err.message) || err) };
+                }
+                results[i] = { id: r.id, name: r.name, t: clock.now(), ...res };
+            }
+        };
+        await Promise.all(Array.from({ length: Math.min(concurrency, rows.length) }, worker));
+        addChecks(actor, results.map((x) => ({ proxyId: x.id, t: x.t, ok: x.ok, ms: x.ms, ip: x.ip, error: x.error })), { fromServer: true });
+        return results;
     }
 
     // --------------------------------------------------------------- logs ----
@@ -317,7 +382,7 @@ function createProxies({ db, clock, cipher, users }) {
         return db.prepare('DELETE FROM rs_logs WHERE owner_id = ?').run(actor.id).changes;
     }
 
-    return { list, page, get, create, bulkCreate, update, remove, count, addChecks, stats, addLogs, listLogs, clearLogs };
+    return { list, page, get, create, bulkCreate, update, remove, count, addChecks, stats, bulkAction, serverCheck, addLogs, listLogs, clearLogs };
 }
 
 module.exports = { createProxies, normalizeProxy, SCHEMES };

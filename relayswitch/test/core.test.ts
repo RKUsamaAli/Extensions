@@ -143,3 +143,12 @@ describe("test PAC", () => {
     expect(testIdFromUrl("http://a/")).toBeNull();
   });
 });
+
+import { byBestScore as _byBest } from "../src/core/score";
+describe("byBestScore", () => {
+  it("puts the best score first, never-checked last, ties by name", () => {
+    const list = [{ id: "a", n: "B" }, { id: "b", n: "A" }, { id: "c", n: "C" }, { id: "d", n: "D" }];
+    const scores = { a: 70, b: 70, c: null, d: 95 };
+    expect(list.sort(_byBest(scores, (p) => p.n)).map((p) => p.id)).toEqual(["d", "b", "a", "c"]);
+  });
+});
