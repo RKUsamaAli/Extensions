@@ -64,15 +64,40 @@ disabling a user, removing a device, signing out everywhere or an access expiry 
 on the very next call. Extension calls also check the extension is switched on and the
 `X-Client` version is not below the minimum.
 
-## Deploy (Ubuntu, same pattern as the old portal)
+## Deploy (Ubuntu 22.04 / 24.04)
 
-1. Node 20+, nginx, PM2 (`npm i -g pm2`), certbot.
-2. Copy the folder, `npm ci --omit=dev`, `cp .env.example .env`, fill `APP_SECRET`
-   (`openssl rand -hex 32`), `PUBLIC_URL`, and `ALLOWED_EXTENSION_IDS` with the store ids.
-3. `npm run migrate && npm run cli -- create-admin <you>`
-4. `pm2 start ecosystem.config.js && pm2 save && pm2 startup`
-5. nginx: `deploy/nginx.conf.example`, then `certbot --nginx -d api.example.com`.
-6. Back up `data/ext-hub.db` (e.g. `sqlite3 data/ext-hub.db ".backup backup.db"` nightly)
-   and keep `APP_SECRET` / `DATA_KEY` safe: encrypted data cannot be read without them.
-7. Set the extensions' default server address (`icp-autofill/config.js`,
-   `relayswitch/src/shared/config.ts`) to `PUBLIC_URL` before publishing them.
+Scripts in [`deploy/`](deploy/), same pattern as the web-proxy-portal kit: every deploy is a
+new folder under `/opt/ext-hub/releases/`, `current` is switched atomically, tests run before
+anything goes live, the database is backed up first, and if `/healthz` doesn't report the new
+release the previous one is put back automatically.
+
+First time, on the server:
+
+```sh
+sudo apt-get update && sudo apt-get install -y git
+git clone https://github.com/RKUsamaAli/Extensions.git ~/Extensions
+sudo ~/Extensions/ext-hub/deploy/setup-server.sh            # no domain: http://<server ip>
+# or, with a domain pointing at the server:
+# sudo ~/Extensions/ext-hub/deploy/setup-server.sh --domain api.example.com --email you@example.com
+sudo exthub-deploy
+sudo exthub-cli create-admin admin                          # prints the password
+```
+
+Then open `<address>/app`. The extensions, with this server set as their default address,
+are at `<address>/downloads/` (rebuilt on every deploy).
+
+| Command | What |
+|---|---|
+| `sudo exthub-deploy [--ref <branch/tag/sha>]` | deploy (default: latest `main`) |
+| `sudo exthub-rollback [--list \| --to <release>] [--restore-db]` | back to an earlier release |
+| `sudo exthub-status` | release, health, process, zips, certificate, disk |
+| `sudo exthub-logs [errors\|nginx\|deploys]` | follow logs |
+| `sudo exthub-cli <command>` | admin CLI (`create-admin`, `grant`, `users`, ...) |
+| `sudo exthub-backup` | DB + `.env` archive (also daily at 03:23) |
+| `sudo exthub-restart` | after editing `/opt/ext-hub/shared/.env` |
+| `sudo exthub-setup [--domain D --email E \| --ssl-only \| --nginx-only]` | re-run setup / add HTTPS later |
+
+Settings: `/etc/ext-hub/deploy.env` (deploy) and `/opt/ext-hub/shared/.env` (app). Keep
+`APP_SECRET` / `DATA_KEY` safe and copy `shared/backups/` off the server: encrypted data
+cannot be read without them. On AWS, open TCP 80 and 443 in the instance's Security Group.
+Set `ALLOWED_EXTENSION_IDS` in the app `.env` once the extensions have store ids.
