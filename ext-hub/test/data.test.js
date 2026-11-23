@@ -396,3 +396,31 @@ test('proxies: server check renders the username, runs the checker and stores "s
     s.proxies.addChecks(ali, [{ proxyId: good.id, ok: true, source: 'server' }]);
     assert.equal(s.proxies.stats(scopeFor(ali))[good.id].results[1].source, 'test', 'clients cannot claim "server"');
 });
+
+test('entries: appointment status, bulk change, CitaMate sees active ones, results move them along', () => {
+    const { s, ali, sara } = setup();
+    const a = s.profiles.create(ali, entry('A'));
+    const b = s.profiles.create(ali, entry('B', { status: 'on_hold' }));
+    const c = s.profiles.create(ali, entry('C'));
+    const theirs = s.profiles.create(sara, entry('X'));
+    assert.equal(a.status, 'pending');
+    assert.equal(b.status, 'on_hold');
+    assert.ok(a.statusAt);
+    assert.deepEqual(s.profiles.list(scopeFor(ali), { activeOnly: true }).map((e) => e.label), ['A', 'C'], 'on hold is not offered in CitaMate');
+    assert.deepEqual(s.profiles.statusCounts(scopeFor(ali)), { pending: 2, in_progress: 0, on_hold: 1, booked: 0, done: 0, cancelled: 0 });
+    assert.deepEqual(s.profiles.bulkAction(ali, [c.id, theirs.id], 'status', 'cancelled'), { changed: 1 }, 'own rows only');
+    assert.throws(() => s.profiles.bulkAction(ali, [a.id], 'status', 'lost'), (e) => e.code === 'validation_error');
+    assert.equal(s.profiles.update(ali, b.id, { ...entry('B'), status: 'pending' }).status, 'pending');
+
+    // CitaMate results: first booking step -> in progress; confirmation -> booked. Office checks don't count.
+    s.activity.addLogs(ali, [{ id: 'k1', entryId: a.id, status: 'ok', kind: 'check' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'pending');
+    s.activity.addLogs(ali, [{ id: 'l1', entryId: a.id, status: 'ok' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'in_progress');
+    s.activity.addLogs(ali, [{ id: 'l2', entryId: a.id, status: 'done' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'A').status, 'booked');
+    s.activity.addLogs(ali, [{ id: 'l3', entryId: c.id, status: 'done' }]);
+    assert.equal(s.profiles.list(scopeFor(ali)).find((e) => e.label === 'C').status, 'cancelled', 'never overrides a status the user set');
+    s.activity.addLogs(sara, [{ id: 'l4', entryId: a.id, status: 'ok' }]);
+    assert.deepEqual(s.profiles.bulkAction(ali, [a.id, b.id], 'delete'), { changed: 2 });
+});

@@ -387,3 +387,15 @@ td.pick input, th input[data-select-page] { width: 1rem; height: 1rem; accent-co
 .switch-btn.is-busy .knob { opacity: 0.5; }
 .switch-btn .spinner { display: none; }
 tr:has(.switch-btn[data-off]) td:not(.actions):not(.pick):not(:nth-child(2)) { opacity: 0.55; }
+/* ---------- entry statuses ---------- */
+.stat-btn { text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.stat-btn:hover { border-color: var(--border-strong); }
+.stat-btn.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+b.status-pending, .status-select.status-pending { color: var(--accent); }
+b.status-in_progress, .status-select.status-in_progress { color: var(--warn); }
+b.status-booked, b.status-done, .status-select.status-booked, .status-select.status-done { color: var(--ok); }
+b.status-cancelled, .status-select.status-cancelled { color: var(--danger); }
+b.status-on_hold, .status-select.status-on_hold { color: var(--muted); }
+.status-select { width: auto; min-width: 8.5rem; font-weight: 600; min-height: 1.875rem; padding-top: 0.125rem; padding-bottom: 0.125rem; }
+.status-select option { color: var(--text); font-weight: 400; }
+.bulkbar select { width: auto; min-width: 10rem; }

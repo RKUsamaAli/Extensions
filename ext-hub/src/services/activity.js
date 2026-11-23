@@ -11,7 +11,7 @@ const { scopeSql } = require('./ownership');
 const MAX_POST = 500;
 const MAX_CONTEXT = 32 * 1024;
 
-function createActivity({ db, clock }) {
+function createActivity({ db, clock, onLog = null }) {
     /**
      * Page snapshot of a failed step, stored as JSON (max 32 KB). Too big: the long lists
      * (fields, buttons, options) are shortened first, so the summary always survives.
@@ -76,6 +76,7 @@ function createActivity({ db, clock }) {
                     contextJson(it.context),
                     now
                 ).changes;
+                if (onLog && it.entryId) onLog(actor.id, str(it.entryId, 100), str(it.status, 20), it.kind === 'check' ? 'check' : 'booking');
             }
         })();
         return saved;

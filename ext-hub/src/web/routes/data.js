@@ -34,7 +34,15 @@ function dataRoutes(services) {
     // ------------------------------------------------------------- citamate ----
     const cm = express.Router();
     cm.use(requireExt(services, 'citamate'));
-    cm.get('/profiles', (req, res) => res.json({ items: profiles.list(scopeOf(req)) }));
+    cm.get('/profiles', (req, res) => {
+        // CitaMate gets the active entries only (pending / in progress); the panel gets all + counts.
+        if (req.auth.session.kind === 'extension') return res.json({ items: profiles.list(scopeOf(req), { activeOnly: true }) });
+        res.json({ items: profiles.list(scopeOf(req)), counts: profiles.statusCounts(scopeOf(req)) });
+    });
+    cm.post('/profiles/actions', entriesPanelOnly, (req, res) => {
+        const b = req.body || {};
+        res.json(profiles.bulkAction(req.actor, b.ids, b.action, b.status));
+    });
     cm.post('/profiles', entriesPanelOnly, (req, res) => res.status(201).json({ item: profiles.create(req.actor, req.body || {}) }));
     cm.post('/profiles/bulk', entriesPanelOnly, (req, res) => res.status(201).json({ items: profiles.bulkCreate(req.actor, items(req), req.body && req.body.ownerId) }));
     cm.put('/profiles/:id', entriesPanelOnly, (req, res) => res.json({ item: profiles.update(req.actor, req.params.id, req.body || {}) }));

@@ -26,7 +26,8 @@ function createServices({ db, config, clock = systemClock, checkProxy }) {
     const auth = createAuth({ db, clock, config, jwt, users, settings, audit });
     const profiles = createProfiles({ db, clock, cipher, users });
     const proxies = createProxies({ db, clock, cipher, users, ...(checkProxy ? { checkProxy } : {}) });
-    const activity = createActivity({ db, clock });
+    // CitaMate results move entries along (pending -> in progress -> booked).
+    const activity = createActivity({ db, clock, onLog: profiles.noteActivity });
     const configStore = createConfigStore({ db, clock, audit });
     const devices = createDevices({ db, clock, audit });
 

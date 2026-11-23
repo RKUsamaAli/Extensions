@@ -70,6 +70,13 @@ test('extension journey: login, bootstrap, CRUD, logs, refresh, logout', () =>
         assert.equal((await call('POST', '/api/v1/citamate/profiles/bulk', { token: P.accessToken, body: { items: [{ label: 'B', docNumber: '1', fullName: 'b' }] } })).status, 201);
         const list = await call('GET', '/api/v1/citamate/profiles', { token: L.accessToken, headers: H });
         assert.deepEqual(list.json.items.map((p) => p.label), ['Ali 2', 'B'], 'the extension reads what the panel saved');
+        // Status: the panel sets it; CitaMate only gets active (pending / in progress) entries.
+        const all = await call('GET', '/api/v1/citamate/profiles', { token: P.accessToken });
+        assert.equal(all.json.counts.pending, 2);
+        const bId = all.json.items.find((x) => x.label === 'B').id;
+        assert.equal((await call('POST', '/api/v1/citamate/profiles/actions', { token: P.accessToken, body: { ids: [bId], action: 'status', status: 'booked' } })).json.changed, 1);
+        assert.deepEqual((await call('GET', '/api/v1/citamate/profiles', { token: L.accessToken, headers: H })).json.items.map((p) => p.label), ['Ali 2']);
+        assert.equal((await call('POST', '/api/v1/citamate/profiles/actions', { token: L.accessToken, headers: H, body: { ids: [bId], action: 'status', status: 'pending' } })).json.code, 'panel_only');
 
         const lg = await call('POST', '/api/v1/citamate/logs', { token: L.accessToken, headers: H, body: { items: [{ id: 'l1', t: 1, status: 'ok', entryId: id }] } });
         assert.equal(lg.json.saved, 1);

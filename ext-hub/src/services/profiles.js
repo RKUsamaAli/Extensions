@@ -32,6 +32,10 @@ function normalizeProfile(raw) {
     return { value: v, fields };
 }
 
+/** Appointment statuses. Only ACTIVE ones are sent to CitaMate. */
+const STATUSES = ['pending', 'in_progress', 'on_hold', 'booked', 'done', 'cancelled'];
+const ACTIVE_STATUSES = ['pending', 'in_progress'];
+
 function createProfiles({ db, clock, cipher, users }) {
     const byId = db.prepare('SELECT * FROM profiles WHERE id = ?');
 
@@ -41,6 +45,8 @@ function createProfiles({ db, clock, cipher, users }) {
         for (const f of DATA_FIELDS) out[f] = data[f] ?? '';
         out.ownerId = row.owner_id;
         out.ownerName = ownerName ?? row.owner_name ?? null;
+        out.status = row.status || 'pending';
+        out.statusAt = row.status_at ?? null;
         out.createdBy = row.created_by ?? null;
         out.createdByName = row.created_by_name ?? null;
         out.createdAt = row.created_at;
@@ -50,12 +56,14 @@ function createProfiles({ db, clock, cipher, users }) {
 
     const SEL = 'SELECT p.*, u.username AS owner_name, cb.username AS created_by_name FROM profiles p JOIN users u ON u.id = p.owner_id LEFT JOIN users cb ON cb.id = p.created_by';
 
-    function list(scope) {
+    /** activeOnly: what CitaMate gets (pending / in progress); the panel lists every status. */
+    function list(scope, { activeOnly = false } = {}) {
         const s = scopeSql(scope, 'p');
         const c = createdSql(scope, 'p');
+        const act = activeOnly ? ` AND p.status IN (${ACTIVE_STATUSES.map(() => '?').join(', ')})` : '';
         return db
-            .prepare(`${SEL} WHERE ${s.where}${c.where} ORDER BY p.label COLLATE NOCASE, p.id`)
-            .all(...s.params, ...c.params)
+            .prepare(`${SEL} WHERE ${s.where}${c.where}${act} ORDER BY p.label COLLATE NOCASE, p.id`)
+            .all(...s.params, ...c.params, ...(activeOnly ? ACTIVE_STATUSES : []))
             .map((r) => shape(r));
     }
 
@@ -70,14 +78,23 @@ function createProfiles({ db, clock, cipher, users }) {
         return cipher.encryptJson(data);
     }
 
-    function insert(ownerId, v, actor) {
+    function statusOf(raw, fallback) {
+        if (raw === undefined || raw === null || raw === '') return fallback;
+        const v = String(raw);
+        if (!STATUSES.includes(v)) throw E.validation({ status: 'Unknown status.' });
+        return v;
+    }
+
+    function insert(ownerId, v, actor, status = 'pending') {
         const t = clock.now();
         const id = newId();
-        db.prepare('INSERT INTO profiles (id, owner_id, label, data_enc, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+        db.prepare('INSERT INTO profiles (id, owner_id, label, data_enc, status, status_at, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
             id,
             ownerId,
             v.label,
             encode(v),
+            status,
+            t,
             t,
             actor.id,
             t,
@@ -90,7 +107,7 @@ function createProfiles({ db, clock, cipher, users }) {
         const ownerId = ownerForCreate(actor, body && body.ownerId, users);
         const { value, fields } = normalizeProfile(body);
         if (Object.keys(fields).length) throw E.validation(fields);
-        return shape(get(insert(ownerId, value, actor)));
+        return shape(get(insert(ownerId, value, actor, statusOf(body && body.status, 'pending'))));
     }
 
     function bulkCreate(actor, items, ownerIdInput) {
@@ -114,8 +131,11 @@ function createProfiles({ db, clock, cipher, users }) {
         const { value, fields } = normalizeProfile(body);
         if (Object.keys(fields).length) throw E.validation(fields);
         const newOwner = ownerForUpdate(actor, row, body && body.ownerId, users);
+        const status = statusOf(body && body.status, row.status || 'pending');
         const t = clock.now();
-        db.prepare('UPDATE profiles SET label = ?, data_enc = ?, owner_id = COALESCE(?, owner_id), updated_at = ?, updated_by = ? WHERE id = ?').run(value.label, encode(value), newOwner, t, actor.id, id);
+        db.prepare(
+            'UPDATE profiles SET label = ?, data_enc = ?, owner_id = COALESCE(?, owner_id), status = ?, status_at = CASE WHEN status = ? THEN status_at ELSE ? END, updated_at = ?, updated_by = ? WHERE id = ?'
+        ).run(value.label, encode(value), newOwner, status, status, t, t, actor.id, id);
         return shape(get(id));
     }
 
@@ -125,12 +145,54 @@ function createProfiles({ db, clock, cipher, users }) {
         db.prepare('DELETE FROM profiles WHERE id = ?').run(id);
     }
 
+    /** Bulk: { action: 'status', status } or { action: 'delete' } on the rows the actor may change. -> { changed } */
+    function bulkAction(actor, ids, action, status) {
+        if (!Array.isArray(ids)) throw E.badRequest('ids must be an array');
+        if (ids.length > MAX_BULK) throw E.badRequest(`At most ${MAX_BULK} entries at once.`);
+        if (action !== 'status' && action !== 'delete') throw E.validation({ action: 'Use status or delete.' });
+        const next = action === 'status' ? statusOf(status, null) : null;
+        if (action === 'status' && !next) throw E.validation({ status: 'Pick a status.' });
+        const t = clock.now();
+        let changed = 0;
+        db.transaction(() => {
+            for (const id of new Set(ids.map(String))) {
+                const r = isId(id) ? db.prepare('SELECT owner_id, status FROM profiles WHERE id = ?').get(id) : null;
+                if (!r || (r.owner_id !== actor.id && actor.role !== 'admin')) continue;
+                if (action === 'delete') changed += db.prepare('DELETE FROM profiles WHERE id = ?').run(id).changes;
+                else if (r.status !== next) changed += db.prepare('UPDATE profiles SET status = ?, status_at = ?, updated_at = ?, updated_by = ? WHERE id = ?').run(next, t, t, actor.id, id).changes;
+            }
+        })();
+        return { changed };
+    }
+
+    /**
+     * CitaMate results move an entry along on their own: the first booking step makes a
+     * pending entry "in progress", a confirmation page makes it "booked". Never moves an
+     * entry the user set to on hold / done / cancelled.
+     */
+    function noteActivity(ownerId, entryId, logStatus, kind) {
+        if (!entryId || kind === 'check') return;
+        const row = isId(entryId) ? db.prepare('SELECT owner_id, status FROM profiles WHERE id = ?').get(entryId) : null;
+        if (!row || row.owner_id !== ownerId) return;
+        const next = logStatus === 'done' && ACTIVE_STATUSES.includes(row.status) ? 'booked' : row.status === 'pending' && logStatus ? 'in_progress' : null;
+        if (next) db.prepare('UPDATE profiles SET status = ?, status_at = ? WHERE id = ?').run(next, clock.now(), entryId);
+    }
+
+    /** Count per status for the panel tiles (whole list, not the filtered rows). */
+    function statusCounts(scope) {
+        const s = scopeSql(scope, 'p');
+        const c = createdSql(scope, 'p');
+        const out = Object.fromEntries(STATUSES.map((x) => [x, 0]));
+        for (const r of db.prepare(`SELECT p.status, COUNT(*) AS n FROM profiles p WHERE ${s.where}${c.where} GROUP BY p.status`).all(...s.params, ...c.params)) out[r.status] = r.n;
+        return out;
+    }
+
     function count(scope) {
         const s = scopeSql(scope, 'p');
         return db.prepare(`SELECT COUNT(*) FROM profiles p WHERE ${s.where}`).pluck().get(...s.params);
     }
 
-    return { list, get: (id) => byId.get(id), create, bulkCreate, update, remove, count };
+    return { list, get: (id) => byId.get(id), create, bulkCreate, update, remove, count, bulkAction, noteActivity, statusCounts };
 }
 
-module.exports = { createProfiles, normalizeProfile, DATA_FIELDS };
+module.exports = { createProfiles, normalizeProfile, DATA_FIELDS, STATUSES, ACTIVE_STATUSES };

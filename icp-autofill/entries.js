@@ -46,6 +46,7 @@ window.CM.ready.then(() => {
         el("div", { class: "avatar", text: initials(e.label) }),
         el("div", { class: "ecard-title" }, el("b", { text: e.label, title: e.label }), el("span", { text: e.fullName })),
         el("span", { class: "doc", text: doc + " " + e.docNumber }),
+        e.status === "in_progress" ? el("span", { class: "pill warn", text: "In progress", title: "Status set in the web panel" }) : null,
       ),
       el(
         "dl",
