@@ -22,7 +22,7 @@ server {
     listen [::]:80 default_server;
     server_name {{SERVER_NAME}};
     gzip on; gzip_vary on; gzip_proxied any; gzip_min_length 1024;
-    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml;
     client_max_body_size 6m;
     access_log /var/log/nginx/ext-hub.access.log exthub_main;
     error_log  /var/log/nginx/ext-hub.error.log warn;

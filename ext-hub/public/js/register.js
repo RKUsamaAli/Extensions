@@ -1,4 +1,5 @@
 import { register } from "./api.js";
+import { setBusy } from "./ui.js";
 
 const $ = (id) => document.getElementById(id);
 const form = $("registerForm");
@@ -18,7 +19,8 @@ form.addEventListener("submit", async (e) => {
     return;
   }
   const btn = form.querySelector("button[type=submit]");
-  btn.disabled = true;
+  if (btn.dataset.busy) return;
+  setBusy(btn, true, "Creating…");
   try {
     await register(String(f.username).trim(), f.password, String(f.email || "").trim());
     form.hidden = true;
@@ -31,6 +33,6 @@ form.addEventListener("submit", async (e) => {
       : ex.message;
     err.hidden = false;
   } finally {
-    btn.disabled = false;
+    setBusy(btn, false);
   }
 });

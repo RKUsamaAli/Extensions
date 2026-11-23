@@ -30,6 +30,16 @@ function setAccess(data) {
   renewTimer = setTimeout(() => refresh().catch(() => {}), wait);
 }
 
+/** Role from the current access token (its payload is not secret; the server checks it on every call). */
+export function tokenRole() {
+  try {
+    const part = accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(part)).role || null;
+  } catch (_) {
+    return null;
+  }
+}
+
 function clearAccess() {
   accessToken = null;
   accessExpiresAt = 0;

@@ -1,5 +1,5 @@
 import { get, put } from "../api.js";
-import { el, field, toast, showFormError } from "../ui.js";
+import { el, field, toast, showFormError, busySubmit } from "../ui.js";
 import { EXTS, pageHead } from "../state.js";
 
 export default async function settingsPage() {
@@ -38,8 +38,7 @@ export default async function settingsPage() {
     el("div", { class: "card" }, el("h2", null, "Data"), el("div", { class: "stack" }, field("Keep logs for (days)", retention, { hint: "Older log records and office sightings are deleted every night." }))),
     el("div", { class: "toolbar" }, el("button", { type: "submit", class: "btn primary", testid: "settings-save" }, "Save settings")),
   );
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  form.addEventListener("submit", busySubmit(form, async () => {
     err.hidden = true;
     try {
       for (const p of perExt) {
@@ -57,6 +56,6 @@ export default async function settingsPage() {
     } catch (ex) {
       showFormError(form, err, ex);
     }
-  });
+  }, "Saving…"));
   return el("div", null, pageHead("Settings"), form);
 }

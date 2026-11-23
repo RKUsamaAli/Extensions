@@ -325,6 +325,16 @@ test('errors, limits, headers, pages', () =>
             assert.equal(r.headers.get('x-frame-options'), 'DENY');
         }
         assert.equal((await call('GET', '/nope.html')).status, 404);
+        // Versioned assets: immutable for the current version, preloaded by the page.
+        const html = (await call('GET', '/app')).text;
+        const ver = /\/v\/([^/]+)\/js\/app\.js/.exec(html);
+        assert.ok(ver, 'app.html references versioned assets');
+        assert.match(html, new RegExp(`<link rel="modulepreload" href="/v/${ver[1]}/js/ui\\.js">`));
+        const asset = await call('GET', `/v/${ver[1]}/js/ui.js`);
+        assert.equal(asset.status, 200);
+        assert.match(asset.headers.get('cache-control'), /immutable/);
+        assert.equal((await call('GET', '/v/old-version/js/ui.js')).headers.get('cache-control'), 'no-cache');
+        assert.equal((await call('GET', '/js/ui.js')).headers.get('cache-control'), 'no-cache');
         assert.ok(app.base);
     }));
 

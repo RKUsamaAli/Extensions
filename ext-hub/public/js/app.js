@@ -1,6 +1,6 @@
 // Panel shell: session restore, role-based nav, hash router, owner filter.
-import { get, refresh, logout, goLogin } from "./api.js";
-import { el, toastError } from "./ui.js";
+import { get, refresh, logout, goLogin, tokenRole } from "./api.js";
+import { el, toastError, skeletonPage } from "./ui.js";
 import { state } from "./state.js";
 import dashboard from "./pages/dashboard.js";
 import entries from "./pages/entries.js";
@@ -28,6 +28,8 @@ async function boot() {
     goLogin(false);
     return;
   }
+  // In parallel: who am I, and (admins) the user list for the Owner filters.
+  const usersReq = tokenRole() === "admin" ? get("/admin/users").then((r) => r.items || [], () => []) : Promise.resolve([]);
   try {
     const me = await get("/auth/me");
     state.user = me.user;
@@ -39,13 +41,7 @@ async function boot() {
   const isAdmin = state.user.role === "admin";
   document.querySelectorAll(".admin-only").forEach((n) => (n.hidden = !isAdmin));
   document.getElementById("whoami").textContent = `${state.user.username} · ${isAdmin ? "Admin" : "User"}`;
-  if (isAdmin) {
-    try {
-      state.users = (await get("/admin/users")).items || [];
-    } catch (_) {
-      state.users = [];
-    }
-  }
+  state.users = isAdmin ? await usersReq : [];
   window.addEventListener("hashchange", render);
   render();
 }
@@ -61,7 +57,7 @@ export async function render() {
   sidebar.classList.remove("open");
   document.getElementById("menuBtn").setAttribute("aria-expanded", "false");
   main.textContent = "";
-  main.append(el("div", { class: "loading" }, "Loading…"));
+  main.append(skeletonPage());
   try {
     const node = await ROUTES[name]();
     if (seq !== renderSeq) return; // user navigated away meanwhile

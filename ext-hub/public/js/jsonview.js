@@ -43,11 +43,23 @@ function sizeLabel(v) {
   return `${n} field${n === 1 ? "" : "s"}`;
 }
 
+const NAME_KEYS = ["text", "name", "label", "title", "username", "description"];
+/** "usernameTemplate" -> "Username template", "text" -> "Text" (keys stay as they are elsewhere). */
+const humanize = (k) => { const t = String(k).replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); };
+
 /** One-line summary shown next to a closed node. */
 function preview(v, labelOf) {
   if (Array.isArray(v)) {
     const parts = v.slice(0, 3).map((x) => (isScalar(x) ? String(x) : isObj(x) && "text" in x ? String(x.text) : isObj(x) ? Object.keys(x).join(", ") : "[…]"));
     return clip(parts.join(" · ") + (v.length > 3 ? " …" : ""));
+  }
+  // Objects: lead with a name-like field, then the other simple values ("A Coruña · value: /icp…").
+  const entries = Object.entries(v);
+  const lead = entries.find(([k, x]) => NAME_KEYS.includes(k) && isScalar(x) && x !== null && x !== "");
+  const simple = entries.filter(([k, x]) => isScalar(x) && (!lead || k !== lead[0]));
+  if (lead || simple.length === entries.length) {
+    const parts = (lead ? [String(lead[1])] : []).concat(simple.slice(0, lead ? 2 : 3).map(([k, x]) => `${k}: ${x === null ? "null" : x}`));
+    return clip(parts.join(" · "));
   }
   const keys = Object.keys(v).map((k) => (labelOf && labelOf(k)) || k);
   return clip(keys.slice(0, 5).join(", ") + (keys.length > 5 ? ", …" : ""));
@@ -287,8 +299,8 @@ export function jsonTable(value, { testid = "json-table", fileName = "data", ...
       null,
       current.columns.map((c) =>
         el("th", { scope: "col", "aria-sort": sort.col === c ? (sort.dir > 0 ? "ascending" : "descending") : null },
-          el("button", { type: "button", class: "jv-sort", onclick: () => { sort = { col: c, dir: sort.col === c ? -sort.dir : 1 }; draw(); } },
-            c, el("span", { class: "jv-sort-mark", "aria-hidden": "true" }, sort.col === c ? (sort.dir > 0 ? " ▲" : " ▼") : "")),
+          el("button", { type: "button", class: "jv-sort", title: c, onclick: () => { sort = { col: c, dir: sort.col === c ? -sort.dir : 1 }; draw(); } },
+            humanize(c), el("span", { class: "jv-sort-mark", "aria-hidden": "true" }, sort.col === c ? (sort.dir > 0 ? " ▲" : " ▼") : "")),
         ),
       ),
     );

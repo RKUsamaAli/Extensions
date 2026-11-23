@@ -248,7 +248,8 @@ function createProxies({ db, clock, cipher, users }) {
         list = list.sort(sorters[sort] || sorters.score);
         const slice = list.slice(start, start + n);
         return {
-            items: slice.map(({ r, recent, sc }) => ({ ...shape(r), score: sc, recent })),
+            // `recent` feeds the small bars only: time, result, speed (full rows: GET /checks?proxyId=).
+            items: slice.map(({ r, recent, sc }) => ({ ...shape(r), score: sc, recent: recent.map((c) => (c.ms === undefined ? { t: c.t, ok: c.ok } : { t: c.t, ok: c.ok, ms: c.ms })) })),
             total: list.length,
             offset: start,
             nextOffset: start + slice.length < list.length ? start + slice.length : null,
