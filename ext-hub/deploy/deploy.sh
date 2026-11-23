@@ -162,9 +162,12 @@ step "2/9 Installing dependencies"
 npm_ci_cached "$RELEASE_DIR" prod
 if [[ "$BUILD_EXTENSIONS" == "true" || "$RUN_TESTS" == "true" ]]; then
     BUILD_DIR="$SHARED_DIR/cache/build-$NEW_RELEASE"
-    extract "$CITAMATE_SUBDIR" "$BUILD_DIR/citamate"
-    extract "$RELAYSWITCH_SUBDIR" "$BUILD_DIR/relayswitch"
-    npm_ci_cached "$BUILD_DIR/relayswitch" dev
+    # Same layout as the repository: the extensions' tests read ../ext-hub/seeds.
+    extract "$CITAMATE_SUBDIR" "$BUILD_DIR/$CITAMATE_SUBDIR"
+    extract "$RELAYSWITCH_SUBDIR" "$BUILD_DIR/$RELAYSWITCH_SUBDIR"
+    as_app mkdir -p "$(dirname "$BUILD_DIR/$APP_SUBDIR")"
+    as_app ln -sfn "$RELEASE_DIR" "$BUILD_DIR/$APP_SUBDIR"
+    npm_ci_cached "$BUILD_DIR/$RELAYSWITCH_SUBDIR" dev
 fi
 
 # ------------------------------------------------------------ 3. test ---
@@ -181,8 +184,8 @@ if [[ "$RUN_TESTS" == "true" ]]; then
         ok "$name: $(grep -hoE '^# pass [0-9]+|Tests +[0-9]+ passed' "$out" | head -n1 | sed 's/^# //')"
     }
     run_suite ext-hub "$RELEASE_DIR" npm test --silent
-    run_suite citamate "$BUILD_DIR/citamate" node --test
-    run_suite relayswitch "$BUILD_DIR/relayswitch" npx vitest run
+    run_suite citamate "$BUILD_DIR/$CITAMATE_SUBDIR" node --test
+    run_suite relayswitch "$BUILD_DIR/$RELAYSWITCH_SUBDIR" npx vitest run
 else
     warn "Tests skipped"
 fi
@@ -193,14 +196,14 @@ if [[ "$BUILD_EXTENSIONS" == "true" ]]; then
     DL="$RELEASE_DIR/downloads"
     as_app mkdir -p "$DL"
     # CitaMate: no build step; set the default server and zip the folder.
-    CM="$BUILD_DIR/citamate"
+    CM="$BUILD_DIR/$CITAMATE_SUBDIR"
     as_app sed -i -E "s|^(  API_BASE: )\"[^\"]*\"|\1\"${PUBLIC_URL}\"|" "$CM/config.js"
     grep -qF "API_BASE: \"${PUBLIC_URL}\"" "$CM/config.js" || die "Could not set API_BASE in $CITAMATE_SUBDIR/config.js"
     CM_VER="$(jq -r .version "$CM/manifest.json")"
     (cd "$CM" && as_app zip -qr "$DL/citamate-${CM_VER}.zip" . -x 'test/*' 'package*.json' 'node_modules/*' '*.log')
     ok "citamate-${CM_VER}.zip"
     # RelaySwitch: set the default server, build, zip dist/.
-    RS="$BUILD_DIR/relayswitch"
+    RS="$BUILD_DIR/$RELAYSWITCH_SUBDIR"
     as_app sed -i -E "s|^(export const DEFAULT_API_BASE = )\"[^\"]*\";|\1\"${PUBLIC_URL}\";|" "$RS/src/shared/config.ts"
     grep -qF "DEFAULT_API_BASE = \"${PUBLIC_URL}\";" "$RS/src/shared/config.ts" || die "Could not set DEFAULT_API_BASE in $RELAYSWITCH_SUBDIR/src/shared/config.ts"
     (cd "$RS" && as_app npm run build --silent >/dev/null)
