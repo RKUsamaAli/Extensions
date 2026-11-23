@@ -52,6 +52,10 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
     api.use('/auth', anonLimit, authRoutes(services));
 
     const limit = mw.userRateLimit(config);
+    // Extension packages of this release (any signed-in user; the zips themselves are public).
+    api.get('/downloads', mw.requireAuth(services), limit, (_req, res) => {
+        res.json({ publicUrl: config.publicUrl, items: listDownloads(config.downloadsDir) });
+    });
     api.use('/admin', mw.requireAuth(services), limit, mw.requireAdmin, adminRoutes(services));
     api.use(mw.requireAuth(services), limit, dataRoutes(services));
     api.use(mw.notFoundApi);
@@ -66,6 +70,9 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
         res.sendFile(p);
     };
     app.get('/', (_req, res) => res.redirect(302, '/app'));
+    // People type /downloads or /download: send them to the folder nginx serves (with the slash).
+    app.get(['/downloads', '/download', '/download/'], (_req, res) => res.redirect(301, '/downloads/'));
+    app.use('/downloads', express.static(config.downloadsDir, { index: false, maxAge: 0 }));
     app.get('/login', page('login.html'));
     app.get('/register', page('register.html'));
     app.get('/app', page('app.html'));
@@ -76,4 +83,28 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
     return app;
 }
 
-module.exports = { createApp };
+/** Zips named <ext>-<version>.zip in dir -> [{ ext, version, file, size, builtAt }], newest version first. */
+function listDownloads(dir) {
+    let names = [];
+    try {
+        names = fs.readdirSync(dir);
+    } catch (_) {
+        return [];
+    }
+    const items = [];
+    for (const file of names) {
+        const m = /^(citamate|relayswitch)-(\d+(?:\.\d+)*)\.zip$/.exec(file);
+        if (!m) continue;
+        const st = fs.statSync(path.join(dir, file));
+        items.push({ ext: m[1], version: m[2], file, url: '/downloads/' + file, size: st.size, builtAt: st.mtimeMs });
+    }
+    const num = (v) => v.split('.').map(Number);
+    const cmp = (a, b) => {
+        const x = num(a), y = num(b);
+        for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (y[i] || 0) - (x[i] || 0);
+        return 0;
+    };
+    return items.sort((a, b) => a.ext.localeCompare(b.ext) || cmp(a.version, b.version));
+}
+
+module.exports = { createApp, listDownloads };

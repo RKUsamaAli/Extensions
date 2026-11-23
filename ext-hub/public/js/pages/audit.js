@@ -1,6 +1,7 @@
 import { get, qs } from "../api.js";
 import { el, table, toastError, fmtTime } from "../ui.js";
 import { pageHead } from "../state.js";
+import { jsonInline } from "../jsonview.js";
 
 const PAGE = 100;
 
@@ -20,7 +21,7 @@ export default async function auditPage() {
           { label: "Who", render: (r) => r.actorName || "system" },
           { label: "Action", render: (r) => el("span", { class: "mono" }, r.action) },
           { label: "Target", render: (r) => r.target, class: "wrap" },
-          { label: "Detail", render: (r) => (r.detail && typeof r.detail === "object" ? JSON.stringify(r.detail) : r.detail), class: "wrap" },
+          { label: "Detail", render: (r) => jsonInline(r.detail), class: "wrap" },
           { label: "IP", render: (r) => r.ip },
         ],
         items,

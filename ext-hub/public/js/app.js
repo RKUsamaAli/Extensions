@@ -12,8 +12,9 @@ import users from "./pages/users.js";
 import settings from "./pages/settings.js";
 import config from "./pages/config.js";
 import audit from "./pages/audit.js";
+import downloads from "./pages/downloads.js";
 
-const ROUTES = { dashboard, entries, proxies, activity, devices, account, users, settings, config, audit };
+const ROUTES = { dashboard, downloads, entries, proxies, activity, devices, account, users, settings, config, audit };
 const ADMIN_ROUTES = new Set(["users", "settings", "config", "audit"]);
 
 const main = document.getElementById("main");

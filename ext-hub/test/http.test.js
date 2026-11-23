@@ -302,6 +302,18 @@ test('errors, limits, headers, pages', () =>
 
         const health = await call('GET', '/healthz');
         assert.equal(health.json.ok, true);
+        for (const p of ['/downloads', '/download']) {
+            const r = await call('GET', p);
+            assert.equal(r.status, 301, p);
+            assert.equal(r.headers.get('location'), '/downloads/');
+        }
+        assert.equal((await call('GET', '/api/v1/downloads')).status, 401, 'download list needs sign-in');
+        const dl = await call('GET', '/api/v1/downloads', { token: P.accessToken });
+        assert.equal(dl.status, 200);
+        assert.equal(dl.json.publicUrl, 'http://hub.test');
+        assert.deepEqual(dl.json.items.map((i) => i.file), ['citamate-1.6.0.zip', 'relayswitch-0.10.0.zip', 'relayswitch-0.9.1.zip']);
+        assert.equal(dl.json.items[0].url, '/downloads/citamate-1.6.0.zip');
+        assert.equal((await call('GET', '/downloads/citamate-1.6.0.zip')).status, 200);
         const root = await call('GET', '/');
         assert.equal(root.status, 302);
         assert.equal(root.headers.get('location'), '/app');

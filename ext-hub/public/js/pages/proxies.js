@@ -1,6 +1,7 @@
 // RelaySwitch proxies.
 import { get, post, put, del, qs } from "../api.js";
-import { el, table, drawer, confirmDialog, toast, toastError, field, input, select, formValues, fmtTime, badge } from "../ui.js";
+import { el, table, drawer, confirmDialog, toast, toastError, field, input, select, formValues, fmtTime, badge, ago } from "../ui.js";
+import { scoreOf, scoreBand, SCORE_WINDOW } from "../proxyScore.js";
 import { ownerParam, ownerSelect, pageHead, showOwner } from "../state.js";
 import { parseProxyList } from "../proxyParse.js";
 
@@ -107,45 +108,161 @@ function openBulk(onDone) {
   });
 }
 
+const BAND = { good: ["Good", "ok"], fair: ["Fair", "warn"], poor: ["Poor", "bad"], none: ["Not checked", ""] };
+const pct = (x) => Math.round(x * 100) + "%";
+
+function scoreBadge(sc) {
+  const band = scoreBand(sc.value);
+  if (band === "none") return badge("Not checked");
+  return badge(`${sc.value} · ${BAND[band][0]}`, BAND[band][1]);
+}
+
+/** Bars for the recent checks: height = speed, colour = result (newest on the right). */
+function sparkline(results) {
+  const bars = el("span", { class: "spark", "aria-hidden": "true" });
+  for (const r of results.slice(-SCORE_WINDOW)) {
+    const b = el("span", { class: "spark-bar " + (r.ok ? "ok" : "bad") });
+    const h = r.ok && typeof r.ms === "number" ? Math.max(20, Math.min(100, 100 - (r.ms / 3000) * 80)) : 100;
+    b.style.height = h + "%"; // CSSOM, allowed by the panel's CSP
+    b.title = `${fmtTime(r.t)} · ${r.ok ? (r.ms ?? "?") + " ms" : "failed" + (r.error ? ": " + r.error : "")}`;
+    bars.append(b);
+  }
+  return bars;
+}
+
+function openHistory(p, results) {
+  const sc = scoreOf(results);
+  const rows = results.slice().reverse();
+  const stat = (label, value, testid) => el("div", { class: "stat-mini", testid }, el("span", { class: "hint" }, label), el("b", null, value));
+  drawer({
+    title: `Check history · ${p.name}`,
+    saveLabel: "Done",
+    wide: true,
+    testid: "proxy-history",
+    body: el(
+      "div",
+      { class: "stack wide-stack" },
+      el(
+        "div",
+        { class: "stat-row" },
+        stat("Score", sc.value === null ? "—" : `${sc.value} / 100`, "history-score"),
+        stat(`Success (last ${sc.samples})`, sc.samples ? `${sc.okCount}/${sc.samples} · ${pct(sc.reliability)}` : "—", "history-success"),
+        stat("Median speed", sc.medianMs === null ? "—" : sc.medianMs + " ms", "history-speed"),
+        stat("Exit IP", sc.lastIp || "—", "history-ip"),
+      ),
+      results.length ? sparkline(results) : null,
+      el("p", { class: "hint" }, `Score: ${SCORE_WINDOW} latest checks — 70 points for how often it works, 30 for speed (0.3 s or faster = full, 3 s or slower = none), minus 15 if the latest check failed. The server keeps the last 50 checks.`),
+      table(
+        [
+          { label: "Time", render: (r) => fmtTime(r.t) },
+          { label: "Result", render: (r) => (r.ok ? badge("OK", "ok") : badge("Failed", "bad")) },
+          { label: "Response", render: (r) => (typeof r.ms === "number" ? r.ms + " ms" : "") },
+          { label: "Exit IP", render: (r) => (r.ip ? el("span", { class: "mono" }, r.ip) : "") },
+          { label: "Error", render: (r) => r.error, class: "wrap" },
+          { label: "Source", render: (r) => r.source },
+        ],
+        rows,
+        { testid: "history-table", empty: "No checks yet. Run Test in the RelaySwitch extension." },
+      ),
+    ),
+    onSave: () => {},
+  });
+}
+
+const FILTERS = [
+  ["", "All"],
+  ["good", "Good (80+)"],
+  ["fair", "Fair (50–79)"],
+  ["poor", "Poor (<50)"],
+  ["failing", "Latest check failed"],
+  ["none", "Not checked"],
+];
+const SORTS = [
+  ["score", "Best score"],
+  ["speed", "Fastest"],
+  ["recent", "Recently checked"],
+  ["name", "Name"],
+];
+
 export default async function proxiesPage() {
   const root = el("div");
   let items = [];
   let stats = {};
-  const search = el("input", { type: "search", placeholder: "Search name, host, country…", "aria-label": "Search proxies", testid: "proxies-search" });
+  const search = el("input", { type: "search", placeholder: "Search name, host, username, IP…", "aria-label": "Search proxies", testid: "proxies-search" });
+  const filter = el("select", { "aria-label": "Show", testid: "proxies-filter" }, FILTERS.map(([v, t]) => el("option", { value: v }, t)));
+  const sortSel = el("select", { "aria-label": "Sort by", testid: "proxies-sort" }, SORTS.map(([v, t]) => el("option", { value: v }, "Sort: " + t)));
+  const summary = el("div", { class: "grid summary-grid", testid: "proxies-summary" });
   const listBox = el("div");
 
-  function lastCheck(id) {
-    const r = stats[id] && stats[id].results;
-    return r && r.length ? r[r.length - 1] : null;
+  const resultsOf = (id) => (stats[id] && stats[id].results) || [];
+
+  function renderSummary(scored) {
+    const checked = scored.filter((x) => x.sc.samples);
+    const good = checked.filter((x) => scoreBand(x.sc.value) === "good").length;
+    const failing = checked.filter((x) => x.sc.lastOk === false).length;
+    const totalOk = checked.reduce((n, x) => n + x.sc.okCount, 0);
+    const totalSamples = checked.reduce((n, x) => n + x.sc.samples, 0);
+    const speeds = checked.map((x) => x.sc.medianMs).filter((v) => v !== null).sort((a, b) => a - b);
+    const tile = (n, label, note, testid, kind) => el("div", { class: "card stat" + (kind ? " " + kind : ""), testid }, el("b", null, n), el("span", null, label), el("small", null, note || "\u00a0"));
+    const never = items.length - checked.length;
+    summary.textContent = "";
+    summary.append(
+      tile(String(items.length), "Proxies", "in this list", "sum-total"),
+      tile(String(checked.length), "Checked", never ? `${never} not checked yet` : "all checked", "sum-checked"),
+      tile(String(good), "Healthy", "score 80 or more", "sum-good", good ? "good" : ""),
+      tile(String(failing), "Failing", "latest check failed", "sum-failing", failing ? "bad" : ""),
+      tile(totalSamples ? pct(totalOk / totalSamples) : "—", "Success rate", totalSamples ? `${totalOk} of ${totalSamples} checks` : "no checks yet", "sum-success"),
+      tile(speeds.length ? speeds[Math.floor(speeds.length / 2)] + " ms" : "—", "Response time", "median, OK checks", "sum-speed"),
+    );
   }
 
   function renderList() {
     const term = search.value.trim().toLowerCase();
-    const rows = items.filter((r) => !term || [r.name, r.host, r.country, r.city, r.ownerName].some((v) => String(v || "").toLowerCase().includes(term)));
+    const scored = items.map((r) => ({ r, sc: scoreOf(resultsOf(r.id)) }));
+    renderSummary(scored);
+    const f = filter.value;
+    let rows = scored.filter(({ r, sc }) => {
+      if (term && ![r.name, r.host, r.usernameTemplate, r.country, r.city, r.ownerName, sc.lastIp].some((v) => String(v || "").toLowerCase().includes(term))) return false;
+      if (!f) return true;
+      if (f === "failing") return sc.lastOk === false;
+      return scoreBand(sc.value) === f;
+    });
+    const by = sortSel.value;
+    const nullsLast = (a, b, fn) => (a === null) - (b === null) || (a === null ? 0 : fn(a, b));
+    rows = rows.slice().sort((a, b) => {
+      if (by === "name") return a.r.name.localeCompare(b.r.name, undefined, { numeric: true });
+      if (by === "speed") return nullsLast(a.sc.medianMs, b.sc.medianMs, (x, y) => x - y);
+      if (by === "recent") return nullsLast(a.sc.lastChecked, b.sc.lastChecked, (x, y) => y - x);
+      return nullsLast(a.sc.value, b.sc.value, (x, y) => y - x) || a.r.name.localeCompare(b.r.name, undefined, { numeric: true });
+    });
     const cols = [
-      { label: "Name", render: (r) => el("strong", null, r.name) },
-      { label: "Type", render: (r) => String(r.scheme || "").toUpperCase() },
-      { label: "Server", render: (r) => el("span", { class: "mono" }, `${r.host}:${r.port}`) },
-      { label: "Username", render: (r) => (r.usernameTemplate ? el("span", { class: "mono" }, r.usernameTemplate) : "") },
-      { label: "Location", render: (r) => [r.country, r.city].filter(Boolean).join(" / ").toUpperCase() },
+      { label: "Name", render: ({ r }) => el("div", null, el("strong", null, r.name), r.usernameTemplate ? el("div", { class: "mono hint nowrap" }, r.usernameTemplate) : null) },
+      { label: "Server", render: ({ r }) => el("div", null, el("span", { class: "mono nowrap" }, `${r.host}:${r.port}`),
+        el("div", { class: "hint" }, [String(r.scheme || "").toUpperCase(), [r.country, r.city].filter(Boolean).join(" / ").toUpperCase()].filter(Boolean).join(" · "))) },
+      { label: "Score", render: ({ sc }) => scoreBadge(sc) },
+      { label: "Success", class: "nowrap", render: ({ sc }) => (sc.samples ? el("span", { title: `${sc.okCount} of the last ${sc.samples} checks worked` }, pct(sc.reliability), el("div", { class: "hint" }, `${sc.okCount}/${sc.samples} OK`)) : "") },
+      { label: "Speed", class: "nowrap", render: ({ sc }) => (sc.medianMs === null ? "" : sc.medianMs + " ms") },
+      { label: "Recent", render: ({ r }) => (resultsOf(r.id).length ? sparkline(resultsOf(r.id)) : "") },
       {
         label: "Last check",
-        render: (r) => {
-          const c = lastCheck(r.id);
-          if (!c) return badge("Not checked");
-          return c.ok ? badge(`OK${c.ms ? " " + c.ms + " ms" : ""}`, "ok") : badge(c.error ? "Failed: " + c.error : "Failed", "bad");
+        class: "nowrap",
+        render: ({ sc }) => {
+          if (!sc.samples) return badge("Not checked");
+          return el("span", null, sc.lastOk ? badge("OK", "ok") : badge("Failed", "bad"), " ", el("span", { class: "hint", title: fmtTime(sc.lastChecked) }, ago(sc.lastChecked)),
+            !sc.lastOk && sc.lastError ? el("div", { class: "hint" }, sc.lastError) : null,
+            sc.lastIp ? el("div", { class: "mono hint", title: "Exit IP of the last working check" }, sc.lastIp) : null);
         },
       },
     ];
-    if (showOwner()) cols.push({ label: "Owner", render: (r) => r.ownerName });
-    cols.push({ label: "Updated", render: (r) => fmtTime(r.updatedAt) });
+    if (showOwner()) cols.push({ label: "Owner", render: ({ r }) => r.ownerName });
     cols.push({
       label: "",
       class: "actions",
-      render: (r) =>
+      render: ({ r }) =>
         el(
           "span",
           null,
+          el("button", { type: "button", class: "btn small", testid: "row-history", onclick: () => openHistory(r, resultsOf(r.id)) }, "History"),
           el("button", { type: "button", class: "btn small", testid: "row-edit", onclick: () => openEditor(r, load) }, "Edit"),
           el("button", {
             type: "button",
@@ -164,8 +281,8 @@ export default async function proxiesPage() {
     });
     listBox.textContent = "";
     listBox.append(
-      table(cols, rows, { testid: "proxies-table", empty: items.length ? "No proxy matches the search." : "No proxies yet. Add one or paste a list." }),
-      el("p", { class: "hint" }, `${rows.length} of ${items.length} proxies`),
+      table(cols, rows, { testid: "proxies-table", empty: items.length ? "No proxy matches the search or filter." : "No proxies yet. Add one or paste a list." }),
+      el("p", { class: "hint" }, `${rows.length} of ${items.length} proxies. Checks run in the RelaySwitch extension (Test / Test all on its options page, and while a proxy is in use); this page shows their results.`),
     );
   }
 
@@ -182,15 +299,20 @@ export default async function proxiesPage() {
     renderList();
   }
 
-  search.addEventListener("input", renderList);
+  let searchTimer = 0;
+  search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderList, 150); });
+  filter.addEventListener("change", renderList);
+  sortSel.addEventListener("change", renderList);
   root.append(
     pageHead(
       "RelaySwitch proxies",
       ownerSelect(load),
+      el("button", { type: "button", class: "btn", testid: "proxy-refresh", onclick: () => load() }, "Refresh"),
       el("button", { type: "button", class: "btn", testid: "proxy-bulk", onclick: () => openBulk(load) }, "Bulk add"),
       el("button", { type: "button", class: "btn primary", testid: "proxy-add", onclick: () => openEditor(null, load) }, "Add proxy"),
     ),
-    el("div", { class: "toolbar" }, search),
+    summary,
+    el("div", { class: "toolbar" }, search, filter, sortSel),
     listBox,
   );
   await load();
