@@ -16,6 +16,14 @@ export interface FabPos {
   top: number;
 }
 
+export interface SupportInfo {
+  canProxy: boolean;
+  missing: string[];
+  limited: string[];
+  /** proxy.settings exists but never answers (e.g. Orion on iOS). */
+  unresponsive: boolean;
+}
+
 export interface Settings {
   floatingButton: boolean;
 }
@@ -34,7 +42,8 @@ export type Message =
   | { type: "setSettings"; settings: Partial<Settings> }
   | { type: "bulkAdd"; profiles: ProxyProfile[] }
   | { type: "testProxies"; ids?: string[] }
-  | { type: "cancelTests" };
+  | { type: "cancelTests" }
+  | { type: "browserCheck" };
 
 /** The only messages accepted from the on-page button (a content script). */
 export type PageMessage =
@@ -53,11 +62,39 @@ export type Reply =
       scores: Record<string, number | null>;
       /** Set when bulkAdd ran. */
       added?: number;
+      /** What this browser supports; canProxy false = RelaySwitch can't work here. */
+      support: SupportInfo;
+      /** Set when browserCheck ran. */
+      check?: { name: string; ok: boolean; ms: number; detail: string }[];
     }
   | { ok: false; error: string };
 
 export type MenuReply = { ok: true; menu: MenuState } | { ok: false; error: string };
 
+/** Long actions (connect + IP check, bulk add) finish well within this. */
+const REPLY_TIMEOUT_MS = 30_000;
+
 export async function send(msg: Message): Promise<Reply> {
-  return (await chrome.runtime.sendMessage(msg)) as Reply;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<Reply>((resolve) => {
+    timer = setTimeout(
+      () =>
+        resolve({
+          ok: false,
+          error:
+            "RelaySwitch's background didn't answer. Reload the extension. If it keeps happening, this browser may not support RelaySwitch.",
+        }),
+      msg.type === "getState" || msg.type === "listProfiles" ? 8_000 : REPLY_TIMEOUT_MS,
+    );
+  });
+  try {
+    const reply = Promise.resolve(chrome.runtime.sendMessage(msg) as Promise<Reply | undefined>).then(
+      (r): Reply => r ?? { ok: false, error: "No answer from RelaySwitch. Reload the extension." },
+    );
+    return await Promise.race([reply, timeout]);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    clearTimeout(timer);
+  }
 }

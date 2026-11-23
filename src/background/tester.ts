@@ -3,7 +3,7 @@ import { formatDuration } from "../core/format";
 import type { ProxyProfile } from "../core/types";
 import { IP_CHECK_TIMEOUT_MS, TEST_URL } from "../shared/config";
 import { activeProfile, getLocal, getSession, log, recordResult, setSession, who } from "../shared/storage";
-import { applyProxy, clearProxy, forgetProxyLogin } from "./proxy";
+import { applyProxy, clearProxy, forgetProxyLogin, setProxySettings } from "./proxy";
 
 /**
  * Tests proxies one at a time without changing what the user browses through.
@@ -29,10 +29,7 @@ export async function runTests(ids: string[] | undefined): Promise<void> {
   await log({ level: "info", event: "test_start", detail: `${targets.length} prox${targets.length === 1 ? "y" : "ies"}` });
 
   try {
-    await chrome.proxy.settings.set({
-      scope: "regular",
-      value: { mode: "pac_script", pacScript: { data: buildTestPac(profiles, fallback), mandatory: true } },
-    });
+    await setProxySettings({ mode: "pac_script", pacScript: { data: buildTestPac(profiles, fallback), mandatory: true } });
 
     for (let i = 0; i < targets.length; i++) {
       const p = targets[i]!;

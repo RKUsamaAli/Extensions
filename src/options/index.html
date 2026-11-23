@@ -15,6 +15,8 @@
       <button id="newBtn" class="primary">Add proxy</button>
     </header>
 
+    <p id="unsupported" class="error card" hidden></p>
+    <p id="limited" class="warn card" hidden></p>
     <p id="pageError" class="error card" hidden></p>
 
     <!-- Bulk add -->
@@ -132,6 +134,17 @@
         </span>
         <span class="switch"><input id="fabToggle" type="checkbox" role="switch"><span></span></span>
       </label>
+      <div class="setting check-row">
+        <span class="grow">
+          <strong>Browser check</strong><br>
+          <span class="muted">Tests each browser feature RelaySwitch uses. Useful in browsers other than Chrome, such as Orion.</span>
+        </span>
+        <button id="checkBtn" type="button"><span id="checkSpin" class="spinner" hidden></span> <span id="checkText">Run check</span></button>
+      </div>
+      <div id="checkResult" hidden>
+        <ul id="checkList" class="check-list"></ul>
+        <button id="copyCheck" type="button">Copy results</button>
+      </div>
     </section>
 
     <!-- Activity -->

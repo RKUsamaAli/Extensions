@@ -12,7 +12,7 @@
   },
   "permissions": ["proxy", "storage", "webRequest", "webRequestAuthProvider", "scripting", "browsingData"],
   "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "background/index.js", "type": "module" },
+  "background": { "service_worker": "background/index.js" },
   "action": {
     "default_title": "RelaySwitch",
     "default_popup": "popup/index.html",

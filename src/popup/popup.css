@@ -1,5 +1,9 @@
 body { width: 300px; padding: 12px; }
 header { margin-bottom: 12px; }
+.notice p { margin: 0; }
+.notice .help { margin-top: 8px; color: var(--text); font-size: 12px; }
+.notice button { margin-top: 8px; width: 100%; }
+.notice { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--bad); color: var(--bad); background: color-mix(in srgb, var(--bad) 8%, transparent); }
 section { display: grid; gap: 8px; }
 select[size] { padding: 4px; }
 .status { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }

@@ -1,5 +1,6 @@
 import type { CheckResult, LogEntry, ProxyProfile, ProxyStats, RuntimeState } from "../core/types";
 import { displayName } from "../core/profile";
+import { callApi } from "./api";
 import { LOG_LIMIT } from "./config";
 
 // local: survives restarts. session: cleared when the browser closes.
@@ -27,6 +28,9 @@ interface SessionData {
   testRun: TestRun | null;
   /** Login challenges seen for the proxy under test. */
   testAuthTries: number;
+  /** The browser has proxy.settings but it never answers (e.g. Orion on iOS).
+   * Remembered until the browser restarts so we don't wait again each time. */
+  proxyUnresponsive: boolean;
 }
 
 export interface TestRun {
@@ -58,24 +62,42 @@ const SESSION_DEFAULTS: SessionData = {
   latencyMs: null,
   testRun: null,
   testAuthTries: 0,
+  proxyUnresponsive: false,
 };
 
 export async function getLocal(): Promise<LocalData> {
-  const data = await chrome.storage.local.get(LOCAL_DEFAULTS);
-  return data as LocalData;
+  const data = await callApi<Record<string, unknown>>("storage.local.get", (cb) => chrome.storage.local.get(LOCAL_DEFAULTS as unknown as Record<string, unknown>, cb));
+  return { ...LOCAL_DEFAULTS, ...(data ?? {}) } as LocalData;
 }
 
 export async function setLocal(patch: Partial<LocalData>): Promise<void> {
-  await chrome.storage.local.set(patch);
+  await callApi("storage.local.set", (cb) => chrome.storage.local.set(patch, () => cb()));
 }
 
+// Some browsers have no storage.session; fall back to memory there.
+const memorySession: Partial<SessionData> = {};
+const hasSessionStorage = () => {
+  try {
+    return typeof chrome.storage?.session?.get === "function";
+  } catch {
+    return false;
+  }
+};
+
 export async function getSession(): Promise<SessionData> {
-  const data = await chrome.storage.session.get(SESSION_DEFAULTS);
-  return data as SessionData;
+  if (!hasSessionStorage()) return { ...SESSION_DEFAULTS, ...memorySession };
+  const data = await callApi<Record<string, unknown>>("storage.session.get", (cb) =>
+    chrome.storage.session.get(SESSION_DEFAULTS as unknown as Record<string, unknown>, cb),
+  );
+  return { ...SESSION_DEFAULTS, ...(data ?? {}) } as SessionData;
 }
 
 export async function setSession(patch: Partial<SessionData>): Promise<void> {
-  await chrome.storage.session.set(patch);
+  if (!hasSessionStorage()) {
+    Object.assign(memorySession, patch);
+    return;
+  }
+  await callApi("storage.session.set", (cb) => chrome.storage.session.set(patch, () => cb()));
 }
 
 export async function activeProfile(): Promise<ProxyProfile | null> {

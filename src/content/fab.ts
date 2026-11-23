@@ -45,8 +45,8 @@ function mount(): void {
 
   const place = () => {
     host.style.top = `${pos.top}%`;
-    host.style.left = pos.side === "left" ? "12px" : "";
-    host.style.right = pos.side === "right" ? "12px" : "";
+    host.style.left = pos.side === "left" ? "14px" : "";
+    host.style.right = pos.side === "right" ? "14px" : "";
     host.classList.toggle("left", pos.side === "left");
     menu.classList.toggle("left", pos.side === "left");
     menu.classList.toggle("up", pos.top > 50);
@@ -237,23 +237,23 @@ const CSS = `
 * { box-sizing: border-box; }
 .menu, .menu * { font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1b1f24; }
 .fab {
-  position: relative; width: 46px; height: 46px; border-radius: 13px; border: 0; padding: 0;
+  position: relative; width: 50px; height: 50px; border-radius: 15px; border: 0; padding: 0;
   display: block; cursor: pointer; touch-action: none; background: none;
   filter: drop-shadow(0 4px 10px rgba(20, 17, 43, .35)); opacity: .9; transition: opacity .15s, transform .15s;
 }
 .fab svg { display: block; width: 100%; height: 100%; }
-.fab:hover, .fab:focus-visible, .fab[aria-expanded="true"] { opacity: 1; transform: scale(1.05); }
-.fab:focus-visible { outline: 2px solid #00C2A8; outline-offset: 2px; }
-.dot { position: absolute; right: -2px; top: -2px; width: 12px; height: 12px; border-radius: 50%;
+.fab:hover, .fab:focus-visible, .fab[aria-expanded="true"] { opacity: 1; transform: scale(1.06); }
+.fab:focus-visible { outline: 2px solid #00C2A8; outline-offset: 3px; }
+.dot { position: absolute; right: -3px; top: -3px; width: 14px; height: 14px; border-radius: 50%;
   background: #9aa5b3; border: 2px solid #fff; }
 .dot.ok { background: #2e7d32; } .dot.warn { background: #f9a825; } .dot.bad { background: #c62828; }
 .menu {
-  position: absolute; right: 0; top: 52px; width: 240px; max-height: 320px; overflow: auto;
+  position: absolute; right: 0; top: 58px; width: 240px; max-height: 320px; overflow: auto;
   background: #fff; border: 1px solid #dfe2e7; border-radius: 12px; padding: 6px;
   box-shadow: 0 10px 30px rgba(20, 17, 43, .25);
 }
 .menu.left { right: auto; left: 0; }
-.menu.up { top: auto; bottom: 52px; }
+.menu.up { top: auto; bottom: 58px; }
 .menu.busy .items { opacity: .55; pointer-events: none; }
 .menu .search {
   display: block; width: 100%; margin: 2px 0 6px; padding: 7px 9px; border-radius: 8px;

@@ -16,6 +16,14 @@
     </label>
   </header>
 
+  <div id="unsupported" class="notice" hidden>
+    <p id="unsupportedText"></p>
+    <div id="deviceHelp" hidden>
+      <p class="help">On iPhone/iPad: Settings › Wi-Fi › ⓘ next to your network › Configure Proxy › Manual. Enter the server, port and login below. Works on that Wi-Fi only, not mobile data.</p>
+      <button id="copyDetails" type="button">Copy proxy details</button>
+    </div>
+  </div>
+
   <section id="empty" hidden>
     <p class="muted">No proxy yet. Add one to get started.</p>
     <button id="addFirst" class="primary">Add a proxy</button>

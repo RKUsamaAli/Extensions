@@ -48,6 +48,15 @@ async function run(msg: Message): Promise<boolean> {
     return false;
   }
   $("pageError").hidden = true;
+  const { canProxy, missing, limited } = reply.support;
+  $("unsupported").hidden = canProxy;
+  $("unsupported").textContent = canProxy
+    ? ""
+    : `This browser can't run RelaySwitch: it has no ${missing.join(" or ") || "proxy support"}. ` +
+      "You can still add and edit proxies here, but turning a proxy on and testing need Chrome, Edge, Brave, Opera or Arc.";
+  $("limited").hidden = !canProxy || limited.length === 0;
+  $("limited").textContent = limited.length ? `Not available in this browser: ${limited.join(", ")}.` : "";
+  $<HTMLButtonElement>("testAllBtn").dataset.unsupported = String(!canProxy);
   profiles = reply.profiles;
   activeId = reply.state.activeProfileId;
   enabled = reply.state.enabled;
@@ -92,7 +101,8 @@ function renderList(): void {
   $("loadingList").hidden = true;
   $("noProfiles").hidden = profiles.length > 0;
   $("count").textContent = profiles.length ? `(${profiles.length})` : "";
-  $<HTMLButtonElement>("testAllBtn").disabled = testing || profiles.length === 0;
+  const noProxy = $<HTMLButtonElement>("testAllBtn").dataset.unsupported === "true";
+  $<HTMLButtonElement>("testAllBtn").disabled = testing || profiles.length === 0 || noProxy;
 
   const search = $<HTMLInputElement>("search");
   search.hidden = profiles.length <= SEARCH_MIN;
@@ -161,7 +171,7 @@ function row(p: ProxyProfile): HTMLLIElement {
 
   const actions = el("div", "actions");
   const test = el("button", "", "Test");
-  test.disabled = testing;
+  test.disabled = testing || $<HTMLButtonElement>("testAllBtn").dataset.unsupported === "true";
   test.addEventListener("click", () => void startTest([p.id]));
   const logs = el("button", "", "Logs");
   logs.addEventListener("click", () => showLogsFor(p.id));
@@ -475,6 +485,35 @@ $("deleteBtn").addEventListener("click", () => {
 $<HTMLInputElement>("fabToggle").addEventListener("change", (e) => {
   const on = (e.target as HTMLInputElement).checked;
   void run({ type: "setSettings", settings: { floatingButton: on } });
+});
+
+let lastCheck = "";
+$("checkBtn").addEventListener("click", async () => {
+  $<HTMLButtonElement>("checkBtn").disabled = true;
+  $("checkSpin").hidden = false;
+  $("checkText").textContent = "Checking…";
+  const reply = await send({ type: "browserCheck" });
+  $<HTMLButtonElement>("checkBtn").disabled = false;
+  $("checkSpin").hidden = true;
+  $("checkText").textContent = "Run again";
+  const steps = reply.ok ? (reply.check ?? []) : [{ name: "Background", ok: false, ms: 0, detail: reply.error }];
+  $("checkList").replaceChildren(
+    ...steps.map((s) => {
+      const li = el("li");
+      li.append(
+        el("span", s.ok ? "ok" : "bad", s.ok ? "✓" : "✕"),
+        el("strong", "mono", s.name),
+        el("span", "detail muted", s.detail),
+        el("span", "ms muted mono", s.ms ? formatDuration(s.ms) : ""),
+      );
+      return li;
+    }),
+  );
+  lastCheck = steps.map((s) => `${s.ok ? "OK  " : "FAIL"} ${s.name}: ${s.detail}${s.ms ? ` (${formatDuration(s.ms)})` : ""}`).join("\n");
+  $("checkResult").hidden = false;
+});
+$("copyCheck").addEventListener("click", () => {
+  void navigator.clipboard.writeText(lastCheck).then(() => ($("copyCheck").textContent = "Copied"));
 });
 
 $("clearLogs").addEventListener("click", () => {

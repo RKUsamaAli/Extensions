@@ -16,7 +16,6 @@ function copyStatic() {
 
 const options = {
   entryPoints: {
-    "background/index": "src/background/index.ts",
     "popup/popup": "src/popup/popup.ts",
     "options/options": "src/options/options.ts",
   },
@@ -30,9 +29,10 @@ const options = {
   plugins: [{ name: "static", setup(b) { b.onEnd(copyStatic); } }],
 };
 
-// Content scripts can't be ES modules, so the on-page button is a separate IIFE build.
+// Content scripts can't be ES modules, and some browsers (WebKit-based ones
+// such as Orion) don't accept module service workers, so both are IIFE builds.
 const contentOptions = {
-  entryPoints: { "content/fab": "src/content/fab.ts" },
+  entryPoints: { "content/fab": "src/content/fab.ts", "background/index": "src/background/index.ts" },
   loader: { ".svg": "text" },
   outdir: out,
   bundle: true,

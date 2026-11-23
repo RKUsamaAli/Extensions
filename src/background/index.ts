@@ -5,7 +5,7 @@ import { scoreOf } from "../core/score";
 import type { ProxyProfile } from "../core/types";
 import { nextSession, renderUsername, usesSession } from "../core/username";
 import { MAX_AUTH_FAILURES } from "../shared/config";
-import type { MenuReply, Message, PageMessage, Reply, Settings } from "../shared/messages";
+import type { MenuReply, Message, PageMessage, Reply, Settings, SupportInfo } from "../shared/messages";
 import {
   activeProfile,
   clearLogs,
@@ -23,42 +23,79 @@ import { cancelTests, runTests } from "./tester";
 import { checkExitIp } from "./ipcheck";
 import { syncFloatingButton } from "./fab";
 import { applyProxy, clearProxy, controlProblem } from "./proxy";
+import { runBrowserCheck, type CheckStep } from "./diagnose";
+import { detectSupport, safeListen } from "./support";
 
 // ---- Listeners: all registered synchronously at top level (MV3 rule). ----
+// Messaging first, so the popup and options page always get an answer, even
+// in a browser that lacks some of the APIs below.
 
-chrome.webRequest.onAuthRequired.addListener(
-  (details, callback) => {
-    void answerAuth(details).then((resp) => callback?.(resp));
-  },
-  { urls: ["<all_urls>"] },
-  ["asyncBlocking"],
-);
-
-chrome.webRequest.onErrorOccurred.addListener(
-  (details) => void onRequestError(details),
-  { urls: ["<all_urls>"], types: ["main_frame"] },
-);
-
-chrome.webRequest.onCompleted.addListener(
-  () => void resetAuthFailures(),
-  { urls: ["<all_urls>"], types: ["main_frame"] },
-);
-
-chrome.runtime.onStartup.addListener(() => void restore());
-chrome.runtime.onInstalled.addListener(() => void restore());
+const support = detectSupport();
+const failedListeners: string[] = [];
+const missingListener = (name: string) => failedListeners.push(name);
 
 chrome.runtime.onMessage.addListener((msg: unknown, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id) return false;
-  // Our own pages (popup, options, even when options is open in a tab) have
-  // our extension URL. Anything else is the on-page button running inside a
-  // website, which gets the restricted handler: names and status only.
-  const fromOwnPage = (sender.url ?? "").startsWith(chrome.runtime.getURL(""));
+  // Content scripts always run in a tab with a web page URL. Our own pages
+  // (popup, options, even when options is open in a tab) have our extension
+  // URL; some browsers leave url empty for the popup, so no tab counts too.
+  // The on-page button gets the restricted handler: names and status only.
+  const fromOwnPage = (sender.url ?? "").startsWith(chrome.runtime.getURL("")) || !sender.tab;
   const work = fromOwnPage ? handle(msg as Message) : handlePage(msg as PageMessage);
   work
     .then(sendResponse)
     .catch((err: unknown) => sendResponse({ ok: false, error: errorText(err) }));
   return true; // async response
 });
+
+safeListen("webRequest.onAuthRequired", () =>
+  chrome.webRequest.onAuthRequired.addListener(
+    (details, callback) => {
+      void answerAuth(details).then((resp) => callback?.(resp));
+    },
+    { urls: ["<all_urls>"] },
+    ["asyncBlocking"],
+  ), missingListener);
+
+safeListen("webRequest.onErrorOccurred", () =>
+  chrome.webRequest.onErrorOccurred.addListener(
+    (details) => void onRequestError(details),
+    { urls: ["<all_urls>"], types: ["main_frame"] },
+  ), missingListener);
+
+safeListen("webRequest.onCompleted", () =>
+  chrome.webRequest.onCompleted.addListener(
+    () => void resetAuthFailures(),
+    { urls: ["<all_urls>"], types: ["main_frame"] },
+  ), missingListener);
+
+safeListen("runtime.onStartup", () => chrome.runtime.onStartup.addListener(() => void restore()), missingListener);
+safeListen("runtime.onInstalled", () => chrome.runtime.onInstalled.addListener(() => void restore()), missingListener);
+
+const UNRESPONSIVE_MSG =
+  "This browser has a proxy setting for extensions, but it doesn't respond, so RelaySwitch can't change the proxy here. " +
+  "This happens in Orion on iPhone and iPad. Set the proxy in the device settings instead (Copy proxy details in the popup), " +
+  "or use RelaySwitch in Chrome, Edge, Brave, Opera or Arc on a computer.";
+
+/** True when an error means proxy.settings exists but never answered. */
+const isUnresponsive = (err: unknown) => /didn't answer proxy\.settings/.test(errorText(err));
+
+async function markUnresponsive(): Promise<never> {
+  await setSession({ proxyUnresponsive: true, status: "error", statusDetail: "Proxy setting doesn't respond" });
+  await log({ level: "error", event: "proxy_unresponsive", detail: "proxy.settings did not answer" });
+  await updateBadge();
+  throw new Error(UNRESPONSIVE_MSG);
+}
+
+/** Thrown when the browser can't do proxies at all. */
+async function assertCanProxy(): Promise<void> {
+  if ((await getSession()).proxyUnresponsive) throw new Error(UNRESPONSIVE_MSG);
+  if (support.canProxy && !failedListeners.includes("webRequest.onAuthRequired")) return;
+  throw new Error(
+    `This browser doesn't support what RelaySwitch needs: ${support.missing.join(", ") || "proxy login events"}. ` +
+      "Use Chrome, Edge, Brave, Opera or Arc.",
+  );
+}
 
 // ---- Auth ----
 
@@ -155,10 +192,17 @@ async function onRequestError(details: chrome.webRequest.WebResponseErrorDetails
 // ---- On / off ----
 
 async function turnOn(): Promise<void> {
+  await assertCanProxy();
   const profile = await activeProfile();
   if (!profile) throw new Error("Add a proxy in Options first");
 
-  const problem = await controlProblem();
+  let problem: string | null;
+  try {
+    problem = await controlProblem();
+  } catch (err) {
+    if (isUnresponsive(err)) return markUnresponsive();
+    throw err;
+  }
   if (problem) {
     await setSession({ status: "conflict", statusDetail: problem });
     await log({ level: "warn", event: "conflict", detail: problem });
@@ -186,7 +230,12 @@ async function turnOn(): Promise<void> {
 }
 
 async function turnOff(status: "off" | "auth_failed" | "error" = "off", detail = ""): Promise<void> {
-  await clearProxy();
+  if (!(await getSession()).proxyUnresponsive) {
+    await clearProxy().catch(async (err: unknown) => {
+      if (!isUnresponsive(err)) throw err;
+      await setSession({ proxyUnresponsive: true });
+    });
+  }
   await setLocal({ enabled: false });
   await setSession({ status, statusDetail: detail, exitIp: null, latencyMs: null, checkedAt: null });
   await log({ level: status === "off" ? "info" : "error", event: "disconnect", detail });
@@ -252,6 +301,10 @@ async function runIpCheck(): Promise<void> {
 }
 
 async function restore(): Promise<void> {
+  if (!support.canProxy) {
+    await setSession({ status: "error", statusDetail: "Browser not supported" }).catch(() => {});
+    return;
+  }
   const { enabled, floatingButton } = await getLocal();
   await syncFloatingButton(floatingButton).catch((err: unknown) =>
     log({ level: "warn", event: "fab_sync_failed", detail: errorText(err) }),
@@ -327,6 +380,7 @@ async function scores(): Promise<Record<string, number | null>> {
 async function handle(msg: Message): Promise<Reply> {
   await assertNotTesting(msg.type);
   let added: number | undefined;
+  let check: CheckStep[] | undefined;
   switch (msg.type) {
     case "getState":
     case "listProfiles":
@@ -357,13 +411,20 @@ async function handle(msg: Message): Promise<Reply> {
       added = await bulkAdd(msg.profiles);
       break;
     case "testProxies":
+      await assertCanProxy();
       // Runs in the background; the options page follows progress in storage.
       void runTests(msg.ids).catch((err: unknown) => log({ level: "error", event: "test_error", detail: errorText(err) }));
       break;
     case "cancelTests":
       await cancelTests();
       break;
+    case "browserCheck":
+      check = await runBrowserCheck(failedListeners);
+      break;
     case "setSettings":
+      if (msg.settings.floatingButton && !chrome.scripting?.registerContentScripts) {
+        throw new Error("This browser doesn't support the floating button (scripting API).");
+      }
       if (typeof msg.settings.floatingButton === "boolean") {
         await syncFloatingButton(msg.settings.floatingButton);
         await setLocal({ floatingButton: msg.settings.floatingButton });
@@ -372,7 +433,23 @@ async function handle(msg: Message): Promise<Reply> {
   }
   const { profiles, floatingButton } = await getLocal();
   const settings: Settings = { floatingButton };
-  return { ok: true, state: await runtimeState(), profiles, settings, scores: await scores(), added };
+  return {
+    ok: true,
+    state: await runtimeState(),
+    profiles,
+    settings,
+    scores: await scores(),
+    added,
+    check,
+    support: await supportReply(),
+  };
+}
+
+async function supportReply(): Promise<SupportInfo> {
+  const { proxyUnresponsive } = await getSession();
+  const canProxy = support.canProxy && !failedListeners.includes("webRequest.onAuthRequired") && !proxyUnresponsive;
+  const missing = proxyUnresponsive ? ["a working proxy setting (proxy.settings doesn't respond)"] : support.missing;
+  return { canProxy, missing, limited: support.limited, unresponsive: proxyUnresponsive };
 }
 
 async function handlePage(msg: PageMessage): Promise<MenuReply> {

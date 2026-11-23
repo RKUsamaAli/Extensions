@@ -1,7 +1,7 @@
 import type { ProxyProfile, RuntimeState } from "../core/types";
 import { formatAgo, formatDuration } from "../core/format";
 import { displayName } from "../core/profile";
-import { usesSession } from "../core/username";
+import { renderUsername, usesSession } from "../core/username";
 import { send, type Message } from "../shared/messages";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -15,6 +15,7 @@ const SEARCH_MIN = 5; // search shows only when there are more proxies than this
 let lastProfiles: ProxyProfile[] = [];
 let lastState: RuntimeState | null = null;
 let lastScores: Record<string, number | null> = {};
+let unsupported = false;
 
 const LABELS: Record<RuntimeState["status"], string> = {
   off: "Off",
@@ -40,6 +41,14 @@ async function run(msg: Message): Promise<void> {
     errorEl.hidden = true;
     fabToggle.checked = reply.settings.floatingButton;
     lastScores = reply.scores;
+    unsupported = !reply.support.canProxy;
+    $("unsupported").hidden = !unsupported;
+    $("unsupportedText").textContent = !unsupported
+      ? ""
+      : reply.support.unresponsive
+        ? "This browser's proxy setting for extensions doesn't respond (this happens in Orion on iPhone/iPad), so RelaySwitch can't switch proxies here."
+        : `This browser can't run RelaySwitch: it has no ${reply.support.missing.join(" or ") || "proxy support"}. Use Chrome, Edge, Brave, Opera or Arc.`;
+    $("deviceHelp").hidden = !(unsupported && reply.profiles.length > 0);
     render(reply.state, reply.profiles);
   } catch (err) {
     errorEl.textContent = err instanceof Error ? err.message : String(err);
@@ -48,6 +57,9 @@ async function run(msg: Message): Promise<void> {
     if (fresh.ok) render(fresh.state, fresh.profiles);
   } finally {
     setBusy(false);
+    // Nothing to switch on in a browser without proxy support.
+    toggle.disabled = unsupported;
+    for (const id of ["check", "newSession"]) $<HTMLButtonElement>(id).disabled = unsupported;
   }
 }
 
@@ -119,6 +131,32 @@ search.addEventListener("keydown", (e) => {
     search.value = "";
     void run({ type: "setActive", id: first.value });
   }
+});
+
+/** Server, port and login of the selected proxy, for the device's own proxy settings. */
+function proxyDetails(): string {
+  const p = lastProfiles.find((x) => x.id === lastState?.activeProfileId) ?? lastProfiles[0];
+  if (!p) return "";
+  let username = p.usernameTemplate;
+  try {
+    username = renderUsername(p.usernameTemplate, {
+      session: usesSession(p.usernameTemplate) ? (lastState?.sessionId ?? p.sessionStart) : null,
+      country: p.country,
+      city: p.city,
+    });
+  } catch {
+    // keep the template as typed
+  }
+  return [`Server: ${p.host}`, `Port: ${p.port}`, username ? `Username: ${username}` : "", p.password ? `Password: ${p.password}` : ""]
+    .filter(Boolean)
+    .join("\n");
+}
+
+$("copyDetails").addEventListener("click", () => {
+  void navigator.clipboard.writeText(proxyDetails()).then(
+    () => ($("copyDetails").textContent = "Copied: server, port, username, password"),
+    () => ($("copyDetails").textContent = "Couldn't copy. See Options for the details."),
+  );
 });
 
 fabToggle.addEventListener("change", () =>
