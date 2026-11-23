@@ -115,4 +115,6 @@ test('config: production needs a strong secret, lists parse', () => {
     assert.equal(c.publicUrl, 'https://x.y');
     assert.equal(c.trustProxy, 1);
     assert.equal(loadConfig({}).port, 4000);
+    assert.equal(loadConfig({}).release, '');
+    assert.equal(loadConfig({ APP_RELEASE: '20261123120000_abc1234' }).release, '20261123120000_abc1234');
 });

@@ -29,7 +29,8 @@ function createApp(services, { logger = createLogger(services.config.logLevel) }
 
     app.get('/healthz', (_req, res) => {
         services.db.prepare('SELECT 1').get();
-        res.json({ ok: true, time: services.clock.now() });
+        // `release` lets deploy/deploy.sh confirm the NEW release is the one answering.
+        res.json({ ok: true, time: services.clock.now(), ...(config.release ? { release: config.release } : {}) });
     });
 
     // ------------------------------------------------------------------ API ----

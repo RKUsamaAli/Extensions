@@ -45,7 +45,9 @@ function loadConfig(env = process.env) {
         loginMaxFailures: int(env.LOGIN_MAX_FAILURES, 10),
         loginWindowMin: int(env.LOGIN_WINDOW_MINUTES, 15),
         apiRateLimitRpm: int(env.API_RATE_LIMIT_RPM, 600),
-        logLevel: env.LOG_LEVEL || (env.NODE_ENV === 'test' ? 'silent' : 'info')
+        logLevel: env.LOG_LEVEL || (env.NODE_ENV === 'test' ? 'silent' : 'info'),
+        /** Release folder name, set by ecosystem.config.js on a server deployed with deploy/deploy.sh. */
+        release: env.APP_RELEASE || ''
     };
 }
 
