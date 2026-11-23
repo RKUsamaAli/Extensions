@@ -1,6 +1,6 @@
 // Activity: CitaMate logs, office sightings, RelaySwitch logs.
 import { get, del, qs } from "../api.js";
-import { el, table, toast, toastError, confirmDialog, fmtTime, badge } from "../ui.js";
+import { el, table, toast, toastError, confirmDialog, fmtTime, badge, skeletonRows } from "../ui.js";
 import { ownerParam, ownerSelect, pageHead, showOwner } from "../state.js";
 
 const STATUS = { done: ["Done", "ok"], ok: ["OK", "ok"], fail: ["Failed", "bad"], stuck: ["Stuck", "warn"], wait: ["Waiting", "warn"], info: ["Info", "info"], run: ["Running", "info"] };
@@ -88,7 +88,7 @@ export default async function activityPage() {
   async function load() {
     const tab = TABS.find((t) => t.id === currentTab);
     body.textContent = "";
-    body.append(el("div", { class: "loading" }, "Loading…"));
+    body.append(el("div", { class: "table-wrap" }, el("table", null, el("tbody", null, skeletonRows(6, 8)))));
     let items = [];
     try {
       items = (await get(tab.path + qs({ owner: ownerParam(), limit: 5000 }))).items || [];

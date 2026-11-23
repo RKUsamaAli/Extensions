@@ -1,4 +1,5 @@
 import { login, refresh } from "./api.js";
+import { setBusy } from "./ui.js";
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -33,7 +34,7 @@ $("loginForm").addEventListener("submit", async (e) => {
     err.hidden = false;
     return;
   }
-  $("submit").disabled = true;
+  setBusy($("submit"), true, "Signing in…");
   try {
     await login(username, password);
     location.replace(safeNext());
@@ -48,6 +49,6 @@ $("loginForm").addEventListener("submit", async (e) => {
     err.hidden = false;
     $("password").select();
   } finally {
-    $("submit").disabled = false;
+    setBusy($("submit"), false);
   }
 });

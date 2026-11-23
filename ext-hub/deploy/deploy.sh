@@ -273,8 +273,15 @@ set +e
 # --------------------------------------------------------- 9. cleanup ---
 step "9/9 Cleanup"
 if [[ -d "$RELEASE_DIR/.deploy" ]]; then
+    NGINX_CHANGED=0
+    diff -rq "$RELEASE_DIR/.deploy/templates" "$SCRIPTS_DIR/templates" >/dev/null 2>&1 || NGINX_CHANGED=1
     rsync -a --delete "$RELEASE_DIR/.deploy/" "$SCRIPTS_DIR/"
     chmod +x "$SCRIPTS_DIR"/*.sh "$SCRIPTS_DIR"/tools/*.sh 2>/dev/null || true
+    # New nginx templates in this commit: apply them now (nginx -t is checked first).
+    if (( NGINX_CHANGED )); then
+        if "$SCRIPTS_DIR/setup-server.sh" --nginx-only >/dev/null 2>&1; then ok "nginx config updated from this release's templates"
+        else warn "Could not apply the new nginx templates - run: sudo exthub-setup --nginx-only"; fi
+    fi
 fi
 mapfile -t ALL < <(ls -1 "$RELEASES_DIR" | sort)
 REMOVE_COUNT=$(( ${#ALL[@]} - KEEP_RELEASES ))

@@ -7,6 +7,7 @@ const { newId, isId } = require('../lib/ids');
 const { E } = require('../lib/errors');
 const { str, clampInt } = require('../lib/util');
 const { scopeSql, assertCanTouch, ownerForCreate } = require('./ownership');
+const { scoreOf, scoreBand, SCORE_WINDOW } = require('../lib/score');
 
 const SCHEMES = ['http', 'https', 'socks4', 'socks5'];
 const MAX_BULK = 1000;
@@ -167,15 +168,19 @@ function createProxies({ db, clock, cipher, users }) {
         return saved;
     }
 
-    /** -> { [proxyId]: { results: [...] } }, last 50 per proxy, oldest -> newest. */
-    function stats(scope) {
+    /** -> { [proxyId]: { results: [...] } }, last `perProxy` per proxy (default 50), oldest -> newest. */
+    function stats(scope, { proxyId, perProxy = CHECKS_PER_PROXY } = {}) {
         const s = scopeSql(scope, 'c');
+        if (proxyId) {
+            s.where += ' AND c.proxy_id = ?';
+            s.params = [...s.params, String(proxyId)];
+        }
         const rows = db
             .prepare(
                 `SELECT * FROM (
                      SELECT c.*, ROW_NUMBER() OVER (PARTITION BY c.proxy_id ORDER BY c.t DESC, c.id DESC) AS rn
                      FROM proxy_checks c WHERE ${s.where}
-                 ) WHERE rn <= ${CHECKS_PER_PROXY} ORDER BY proxy_id, t, id`
+                 ) WHERE rn <= ${clampInt(perProxy, 1, CHECKS_PER_PROXY, CHECKS_PER_PROXY)} ORDER BY proxy_id, t, id`
             )
             .all(...s.params);
         const out = {};
@@ -187,6 +192,69 @@ function createProxies({ db, clock, cipher, users }) {
             (out[r.proxy_id] ||= { results: [] }).results.push(res);
         }
         return out;
+    }
+
+    /**
+     * One page of proxies for the panel, scored, filtered and sorted on the server, plus a
+     * summary over ALL proxies in scope (not only the page).
+     *   q       search in name, host, username, country, city, owner, exit IP
+     *   filter  good | fair | poor | none | failing
+     *   sort    score (default) | speed | recent | name
+     * -> { items: [proxy + { score, recent }], total, offset, nextOffset, summary }
+     */
+    function page(scope, { q = '', filter = '', sort = 'score', limit, offset } = {}) {
+        const n = clampInt(limit, 1, 200, 50);
+        const start = clampInt(offset, 0, 1e9, 0);
+        const s = scopeSql(scope, 'x');
+        const rows = db.prepare(`${sel} WHERE ${s.where} ORDER BY x.name COLLATE NOCASE, x.host, x.id`).all(...s.params);
+        const checks = stats(scope, { perProxy: SCORE_WINDOW });
+        const all = rows.map((r) => {
+            const recent = (checks[r.id] && checks[r.id].results) || [];
+            return { r, recent, sc: scoreOf(recent) };
+        });
+
+        const checked = all.filter((x) => x.sc.samples);
+        const okSum = checked.reduce((a, x) => a + x.sc.okCount, 0);
+        const sampleSum = checked.reduce((a, x) => a + x.sc.samples, 0);
+        const speeds = checked.map((x) => x.sc.medianMs).filter((v) => v !== null).sort((a, b) => a - b);
+        const bands = { good: 0, fair: 0, poor: 0, none: 0 };
+        for (const x of all) bands[scoreBand(x.sc.value)]++;
+        const summary = {
+            total: all.length,
+            checked: checked.length,
+            neverChecked: all.length - checked.length,
+            ...bands,
+            failing: checked.filter((x) => x.sc.lastOk === false).length,
+            successRatio: sampleSum ? okSum / sampleSum : null,
+            medianMs: speeds.length ? speeds[Math.floor(speeds.length / 2)] : null,
+            lastChecked: checked.reduce((m, x) => Math.max(m, x.sc.lastChecked || 0), 0) || null
+        };
+
+        const term = str(q, 200).toLowerCase();
+        let list = all.filter(({ r, sc }) => {
+            if (term && ![r.name, r.host, r.username_template, r.country, r.city, r.owner_name, sc.lastIp].some((v) => String(v || '').toLowerCase().includes(term))) return false;
+            if (!filter) return true;
+            if (filter === 'failing') return sc.lastOk === false;
+            return scoreBand(sc.value) === filter;
+        });
+        const byName = (a, b) => String(a.r.name).localeCompare(String(b.r.name), undefined, { numeric: true, sensitivity: 'base' }) || (a.r.id < b.r.id ? -1 : 1);
+        const nullsLast = (x, y, fn) => (x === null) - (y === null) || (x === null ? 0 : fn(x, y));
+        const sorters = {
+            name: byName,
+            speed: (a, b) => nullsLast(a.sc.medianMs, b.sc.medianMs, (x, y) => x - y) || byName(a, b),
+            recent: (a, b) => nullsLast(a.sc.lastChecked, b.sc.lastChecked, (x, y) => y - x) || byName(a, b),
+            score: (a, b) => nullsLast(a.sc.value, b.sc.value, (x, y) => y - x) || byName(a, b)
+        };
+        list = list.sort(sorters[sort] || sorters.score);
+        const slice = list.slice(start, start + n);
+        return {
+            // `recent` feeds the small bars only: time, result, speed (full rows: GET /checks?proxyId=).
+            items: slice.map(({ r, recent, sc }) => ({ ...shape(r), score: sc, recent: recent.map((c) => (c.ms === undefined ? { t: c.t, ok: c.ok } : { t: c.t, ok: c.ok, ms: c.ms })) })),
+            total: list.length,
+            offset: start,
+            nextOffset: start + slice.length < list.length ? start + slice.length : null,
+            summary
+        };
     }
 
     // --------------------------------------------------------------- logs ----
@@ -240,7 +308,7 @@ function createProxies({ db, clock, cipher, users }) {
         return db.prepare('DELETE FROM rs_logs WHERE owner_id = ?').run(actor.id).changes;
     }
 
-    return { list, get, create, bulkCreate, update, remove, count, addChecks, stats, addLogs, listLogs, clearLogs };
+    return { list, page, get, create, bulkCreate, update, remove, count, addChecks, stats, addLogs, listLogs, clearLogs };
 }
 
 module.exports = { createProxies, normalizeProxy, SCHEMES };

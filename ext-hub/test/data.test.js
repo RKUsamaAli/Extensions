@@ -267,3 +267,52 @@ test('dashboard counts are scoped', () => {
     assert.equal(all.counts.users, 3);
     assert.equal(s.dashboard(admin, scopeFor(admin, ali.id)).entitlements.length, 0, 'entitlements of the selected owner');
 });
+
+test('proxies page: server-side score, filter, sort, paging and a summary of all proxies', () => {
+    const { s, ali, sara } = setup();
+    const mk = (name) => s.proxies.create(ali, { name, host: 'h', port: 80 });
+    const fast = mk('fast'), slow = mk('slow'), broken = mk('broken'), never = mk('never');
+    s.proxies.create(sara, { name: 'not mine', host: 'h', port: 1 });
+    const t = s.clock.now();
+    const checks = [];
+    for (let i = 0; i < 20; i++) {
+        checks.push({ proxyId: fast.id, t: t + i, ok: true, ms: 200, ip: '1.1.1.1' });
+        checks.push({ proxyId: slow.id, t: t + i, ok: i % 4 !== 0, ms: 2000 });
+        checks.push({ proxyId: broken.id, t: t + i, ok: i < 10, ms: 300, error: i < 10 ? null : 'timeout' });
+    }
+    s.proxies.addChecks(ali, checks);
+    const scope = scopeFor(ali);
+
+    const all = s.proxies.page(scope, { limit: 2 });
+    assert.deepEqual(all.items.map((p) => p.name), ['fast', 'slow'], 'best score first');
+    assert.equal(all.items[0].score.value, 100);
+    assert.equal(all.items[0].score.lastIp, '1.1.1.1');
+    assert.equal(all.items[0].recent.length, 20);
+    assert.equal(all.total, 4);
+    assert.equal(all.nextOffset, 2);
+    assert.deepEqual(
+        { ...all.summary, lastChecked: undefined },
+        { total: 4, checked: 3, neverChecked: 1, good: 1, fair: 2, poor: 0, none: 1, failing: 1, successRatio: (20 + 15 + 10) / 60, medianMs: 300, lastChecked: undefined }
+    );
+    const rest = s.proxies.page(scope, { limit: 2, offset: 2 });
+    assert.deepEqual(rest.items.map((p) => p.name), ['broken', 'never'], 'never-checked last');
+    assert.equal(rest.nextOffset, null);
+
+    const failing = s.proxies.page(scope, { limit: 50, filter: 'failing' });
+    assert.deepEqual(failing.items.map((p) => p.name), ['broken']);
+    assert.equal(failing.summary.total, 4, 'summary always covers every proxy');
+    assert.deepEqual(s.proxies.page(scope, { limit: 50, filter: 'none' }).items.map((p) => p.name), ['never']);
+    assert.deepEqual(s.proxies.page(scope, { limit: 50, q: '1.1.1' }).items.map((p) => p.name), ['fast'], 'search includes exit IP');
+    assert.deepEqual(s.proxies.page(scope, { limit: 50, sort: 'name' }).items.map((p) => p.name), ['broken', 'fast', 'never', 'slow']);
+    assert.deepEqual(s.proxies.page(scope, { limit: 50, sort: 'speed' }).items.map((p) => p.name), ['fast', 'broken', 'slow', 'never']);
+    assert.equal(s.proxies.page(scopeFor(sara), { limit: 50 }).total, 1);
+    assert.equal(s.proxies.stats(scope, { proxyId: fast.id })[slow.id], undefined, 'checks?proxyId= returns one proxy');
+});
+
+test('score formula matches RelaySwitch', () => {
+    const { scoreOf } = require('../src/lib/score');
+    assert.equal(scoreOf([]).value, null);
+    assert.equal(scoreOf([{ t: 1, ok: true, ms: 250, ip: 'a' }, { t: 2, ok: false }]).value, 50);
+    assert.equal(scoreOf([{ t: 1, ok: true, ms: 3000 }]).value, 70);
+    assert.equal(scoreOf(Array.from({ length: 30 }, (_, i) => ({ t: i, ok: i >= 10, ms: 300 }))).value, 100, 'only the last 20 count');
+});

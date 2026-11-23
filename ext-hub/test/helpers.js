@@ -13,6 +13,7 @@ function testConfig(overrides = {}) {
         ...loadConfig({ NODE_ENV: 'test', APP_SECRET: 'test-secret-test-secret-test-secret-1234', PUBLIC_URL: 'http://hub.test', LOG_LEVEL: 'silent' }),
         dbFile: ':memory:',
         seedsDir: path.join(__dirname, 'fixtures'),
+        downloadsDir: path.join(__dirname, 'fixtures', 'downloads'),
         ...overrides
     };
 }

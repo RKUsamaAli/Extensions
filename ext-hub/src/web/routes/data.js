@@ -59,6 +59,11 @@ function dataRoutes(services) {
     rs.use(requireExt(services, 'relayswitch'));
     rs.get('/proxies', (req, res) => {
         res.setHeader('Cache-Control', 'no-store');
+        // With `limit`: one scored, filtered, sorted page + summary of all (panel). Without: everything (extension).
+        if (req.query.limit !== undefined) {
+            const { q, filter, sort, limit, offset } = req.query;
+            return res.json(proxies.page(scopeOf(req), { q, filter, sort, limit, offset }));
+        }
         res.json({ items: proxies.list(scopeOf(req)) });
     });
     rs.post('/proxies', (req, res) => res.status(201).json({ item: proxies.create(req.actor, req.body || {}) }));
@@ -68,7 +73,7 @@ function dataRoutes(services) {
         proxies.remove(req.actor, req.params.id);
         res.json({ ok: true });
     });
-    rs.get('/checks', (req, res) => res.json({ stats: proxies.stats(scopeOf(req)) }));
+    rs.get('/checks', (req, res) => res.json({ stats: proxies.stats(scopeOf(req), { proxyId: req.query.proxyId }) }));
     rs.post('/checks', (req, res) => res.json({ saved: proxies.addChecks(req.actor, items(req)) }));
     rs.get('/logs', (req, res) => res.json({ items: proxies.listLogs(scopeOf(req), { limit: req.query.limit }) }));
     rs.post('/logs', (req, res) => res.json({ saved: proxies.addLogs(req.actor, items(req)) }));

@@ -36,6 +36,8 @@ function loadConfig(env = process.env) {
         dbFile: env.DB_FILE || path.join(ROOT, 'data', 'ext-hub.db'),
         seedsDir: env.SEEDS_DIR || path.join(ROOT, 'seeds'),
         publicDir: path.join(ROOT, 'public'),
+        /** Extension zips built by deploy/deploy.sh (served by nginx at /downloads/). */
+        downloadsDir: env.DOWNLOADS_DIR || path.join(ROOT, 'downloads'),
         trustProxy: int(env.TRUST_PROXY, production ? 1 : 0),
         accessTtlMin: int(env.ACCESS_TOKEN_TTL_MINUTES, 10),
         refreshTtlDaysExtension: int(env.REFRESH_TTL_DAYS_EXTENSION, 30),

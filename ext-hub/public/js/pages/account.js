@@ -1,5 +1,5 @@
 import { post, logout } from "../api.js";
-import { el, field, input, toast, showFormError, entitlementBadge, table } from "../ui.js";
+import { el, field, input, toast, showFormError, entitlementBadge, table, busySubmit } from "../ui.js";
 import { state, pageHead, extName } from "../state.js";
 
 export default async function accountPage() {
@@ -13,8 +13,7 @@ export default async function accountPage() {
     field("Repeat new password", input("next2", "", { type: "password", autocomplete: "new-password", testid: "password-next2" })),
     el("div", null, el("button", { type: "submit", class: "btn primary", testid: "password-save" }, "Change password")),
   );
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  form.addEventListener("submit", busySubmit(form, async () => {
     err.hidden = true;
     const v = Object.fromEntries(new FormData(form));
     try {
@@ -26,7 +25,7 @@ export default async function accountPage() {
     } catch (ex) {
       showFormError(form, err, ex.code === "invalid_credentials" ? new Error("The current password is wrong.") : ex);
     }
-  });
+  }, "Changing…"));
 
   const u = state.user;
   return el(
