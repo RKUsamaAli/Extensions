@@ -48,6 +48,12 @@ export default async function officesPage() {
   const box = el("div");
   let items = [];
 
+  let tick = 0; // one timer for every countdown on the page
+  const left = (t) => {
+    const s = Math.max(0, Math.ceil((t - Date.now()) / 1000));
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  };
+
   async function load() {
     try {
       items = (await get("/citamate/check-queue")).items || [];
@@ -93,6 +99,9 @@ export default async function officesPage() {
         render: (r) => {
           if (r.claim && !r.claim.mine) return el("span", { class: "hint", testid: "row-claimed" }, `Being checked by ${r.claim.by}…`);
           if (!r.checkEntryId) return el("span", { class: "hint", title: "The cita site asks for a client's NIE and name: a check needs one of your own entries with this province and trámite." }, "No entry of yours");
+          if (r.nextCheckAt && r.nextCheckAt > Date.now()) {
+            return el("button", { type: "button", class: "btn small", disabled: true, testid: "row-check-wait", "data-until": String(r.nextCheckAt), title: "Checked less than a minute ago – one check a minute per province and trámite spares the site." }, `Check in ${left(r.nextCheckAt)}`);
+          }
           return el("button", { type: "button", class: "btn small primary", testid: "row-check", onclick: () => check(r) }, r.claim && r.claim.mine ? "Check again" : "Check");
         },
       },
@@ -103,11 +112,24 @@ export default async function officesPage() {
     );
   }
 
+  // Countdowns: update every second; when one reaches 0, reload so the row gets its Check button.
+  tick = setInterval(() => {
+    if (!root.isConnected) return cleanup();
+    let done = false;
+    root.querySelectorAll("[data-testid=row-check-wait]").forEach((b) => {
+      const until = Number(b.dataset.until);
+      if (until <= Date.now()) done = true;
+      else b.textContent = `Check in ${left(until)}`;
+    });
+    if (done) load();
+  }, 1000);
+
   const onAlert = () => load();
   window.addEventListener("eh:alert", onAlert);
   const timer = setInterval(() => (root.isConnected ? load() : cleanup()), 30_000);
   function cleanup() {
     clearInterval(timer);
+    clearInterval(tick);
     window.removeEventListener("eh:alert", onAlert);
   }
 

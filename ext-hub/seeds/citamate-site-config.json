@@ -61,5 +61,6 @@
     { "pattern": { "source": "CAPTCHA (INCORRECTO|NO VALIDO)|VERIFICACION.*INCORRECTA", "flags": "" }, "label": "Captcha rejected" },
     { "pattern": { "source": "YA TIENE UNA CITA|DOCUMENTO YA TIENE CITA", "flags": "" }, "label": "This document already has an appointment" },
     { "pattern": { "source": "(NIE|DNI|PASAPORTE|DOCUMENTO).{0,30}(NO (ES )?VALIDO|INCORRECTO|ERRONEO)", "flags": "" }, "label": "Document number rejected" }
-  ]
+  ],
+  "timing": { "autoStepMs": 3000, "note": "Office check: pause before each automatic step, in ms (1000–15000). Longer is gentler on the site." }
 }

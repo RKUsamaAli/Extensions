@@ -423,7 +423,8 @@
   // (an image captcha: they type it and press Alt+Enter). Any error or "stuck" stops it.
   const AUTO_KEY = "citamate:auto";
   const AUTO_MAX = 10; // pages per check: the flow has 5–6, more means something loops
-  const AUTO_DELAY = 1200;
+  // Pause before each automatic step: site config timing.autoStepMs (admin, Config page), 1–15 s.
+  const autoDelay = () => Math.min(15000, Math.max(1000, Number(C && C.timing && C.timing.autoStepMs) || 3000));
   const AUTO_PAGES = ["Province", "Trámite", "Access", "Personal data", "Request"];
   let autoTimer = 0;
   let captchaTimer = 0;
@@ -465,7 +466,7 @@
         autoCount(autoCount() + 1);
         setTimeout(() => doFillAndNext(e), 500);
       }, 700);
-    }, AUTO_DELAY);
+    }, autoDelay());
   }
 
   // ---------- office availability ----------
