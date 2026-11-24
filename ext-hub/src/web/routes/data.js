@@ -7,7 +7,7 @@ const { requireExt, scopeOf, panelOnly } = require('../middleware');
 
 function dataRoutes(services) {
     const r = express.Router();
-    const { users, profiles, proxies, activity, configStore, devices, settings } = services;
+    const { users, profiles, proxies, activity, availability, configStore, devices, settings } = services;
     const items = (req) => (req.body && req.body.items) || null;
     const entriesPanelOnly = panelOnly(services.config, 'CitaMate entries');
     const proxiesPanelOnly = panelOnly(services.config, 'Proxies');
@@ -34,10 +34,49 @@ function dataRoutes(services) {
     // ------------------------------------------------------------- citamate ----
     const cm = express.Router();
     cm.use(requireExt(services, 'citamate'));
+    // Each entry carries officeOpen ({ since, offices }) while its office was seen open recently.
+    const withOpen = (items) => {
+        const latest = availability.latestByPair();
+        return items.map((e) => ({ ...e, officeOpen: profilesActive(e) ? availability.entryOpenState(e, latest) : null }));
+    };
+    const profilesActive = (e) => e.status === 'pending' || e.status === 'in_progress';
     cm.get('/profiles', (req, res) => {
         // CitaMate gets the active entries only (pending / in progress); the panel gets all + counts.
-        if (req.auth.session.kind === 'extension') return res.json({ items: profiles.list(scopeOf(req), { activeOnly: true }) });
-        res.json({ items: profiles.list(scopeOf(req)), counts: profiles.statusCounts(scopeOf(req)) });
+        if (req.auth.session.kind === 'extension') return res.json({ items: withOpen(profiles.list(scopeOf(req), { activeOnly: true })) });
+        res.json({ items: withOpen(profiles.list(scopeOf(req))), counts: profiles.statusCounts(scopeOf(req)) });
+    });
+
+    // ------------------------------------------- office availability (shared) ----
+    cm.get('/availability', (req, res) => res.json(availability.overview({ days: req.query.days })));
+    // One row per province + trámite of everyone's active entries; checks need one of your own entries.
+    cm.get('/check-queue', (req, res) => res.json({ items: availability.queue(req.actor, profiles.list({ ownerId: null }, { activeOnly: true })) }));
+    cm.post('/check-queue/claim', (req, res) => {
+        const b = req.body || {};
+        res.json(availability.claim(req.actor, b.province, b.tramite, b.entryId));
+    });
+    cm.get('/watches', (req, res) => res.json({ items: availability.watches(req.actor) }));
+    cm.post('/watches', (req, res) => {
+        const b = req.body || {};
+        res.json(availability.setWatch(req.actor, b.province, b.tramite, b.on !== false));
+    });
+    cm.get('/alerts', (req, res) => res.json(availability.alerts(req.actor, { since: req.query.since, limit: req.query.limit })));
+    cm.post('/alerts/seen', (req, res) => res.json(availability.markSeen(req.actor)));
+    /**
+     * Live alerts (Server-Sent Events). The panel reads it with fetch (so it can send the
+     * Bearer token) and reconnects; the server ends it every 9 minutes so a stream never
+     * outlives a sign-in that was ended or expired.
+     */
+    cm.get('/alerts/stream', (req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no' });
+        res.write('retry: 5000\n\n');
+        const off = availability.subscribe(req.actor.id, (a) => res.write(`event: alert\ndata: ${JSON.stringify(a)}\n\n`));
+        const ping = setInterval(() => res.write(': ping\n\n'), 25000);
+        const end = setTimeout(() => res.end(), 9 * 60 * 1000);
+        req.on('close', () => {
+            off();
+            clearInterval(ping);
+            clearTimeout(end);
+        });
     });
     cm.post('/profiles/actions', entriesPanelOnly, (req, res) => {
         const b = req.body || {};

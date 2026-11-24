@@ -11,7 +11,7 @@ const { scopeSql } = require('./ownership');
 const MAX_POST = 500;
 const MAX_CONTEXT = 32 * 1024;
 
-function createActivity({ db, clock, onLog = null }) {
+function createActivity({ db, clock, onLog = null, onSighting = null }) {
     /**
      * Page snapshot of a failed step, stored as JSON (max 32 KB). Too big: the long lists
      * (fields, buttons, options) are shortened first, so the summary always survives.
@@ -117,8 +117,8 @@ function createActivity({ db, clock, onLog = null }) {
     function addSightings(actor, items) {
         checkItems(items);
         const ins = db.prepare(
-            `INSERT OR IGNORE INTO cm_sightings (id, owner_id, client_id, t, entry, entry_id, province, tramite, kind, offices_json, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT OR IGNORE INTO cm_sightings (id, owner_id, client_id, t, entry, entry_id, province, tramite, kind, offices_json, page, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         );
         const now = clock.now();
         let saved = 0;
@@ -130,19 +130,24 @@ function createActivity({ db, clock, onLog = null }) {
                     .filter((o) => o && typeof o === 'object')
                     .map((o) => ({ value: str(o.value, 100), text: str(o.text, 500) }));
                 const id = newId();
-                saved += ins.run(
+                const row = { id, t: time(it.t, now), province: str(it.province, 200), tramite: str(it.tramite, 500), page: str(it.page, 40) || null, offices };
+                const changed = ins.run(
                     id,
                     actor.id,
                     str(it.id, 100) || id,
-                    time(it.t, now),
+                    row.t,
                     str(it.entry, 200),
                     str(it.entryId, 100),
-                    str(it.province, 200),
-                    str(it.tramite, 500),
+                    row.province,
+                    row.tramite,
                     it.kind === 'check' ? 'check' : 'booking',
                     JSON.stringify(offices),
+                    row.page,
                     now
                 ).changes;
+                saved += changed;
+                // Shared availability: "open since", alerts (see services/availability.js).
+                if (changed && onSighting) onSighting(row);
             }
         })();
         return saved;

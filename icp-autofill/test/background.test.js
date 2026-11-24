@@ -263,3 +263,18 @@ test("server unreachable → network error, nothing cached", async () => {
   assert.equal(bg2.local._dump()["cm.refresh"], "RT", "network trouble doesn't sign out");
   assert.ok(orig);
 });
+
+test("log records queued while a batch is being sent are not lost", async () => {
+  const s = fakeServer();
+  const real = s.fetch;
+  // Slow server: each log upload takes a while, so new records arrive mid-flush.
+  const slow = { ...s, fetch: async (url, opts) => { if (String(url).includes("/citamate/logs")) await new Promise((r) => setTimeout(r, 40)); return real(url, opts); } };
+  const bg = loadBackground(slow);
+  await bg.send({ type: "CM_LOGIN", username: "ali", password: "pw" });
+  await bg.send({ type: "CM_ADD_LOGS", items: [{ id: "R0", t: 0, action: "Fill & Next", status: "ok" }] }, bg.SITE);
+  await new Promise((r) => setTimeout(r, 5)); // the first upload is now in flight
+  await Promise.all([1, 2, 3, 4, 5].map((i) => bg.send({ type: "CM_ADD_LOGS", items: [{ id: "R" + i, t: i, action: "Fill & Next", status: "ok" }] }, bg.SITE)));
+  for (let i = 0; i < 40 && s.db.logs.length < 6; i++) await new Promise((r) => setTimeout(r, 25));
+  assert.deepEqual(s.db.logs.map((l) => l.id).sort(), ["R0", "R1", "R2", "R3", "R4", "R5"]);
+  assert.deepEqual(bg.session._dump()["cm.outbox"].logs, []);
+});

@@ -119,9 +119,9 @@ let flushing = null;
 async function queue(kind, items) {
   const clean = (Array.isArray(items) ? items : []).filter((x) => x && typeof x === "object").slice(0, 500);
   if (!clean.length) return 0;
-  const box = (await sget("cm.outbox")) || { logs: [], sightings: [] };
-  box[kind] = (box[kind] || []).concat(clean).slice(-LOG_LIMIT);
-  await sset("cm.outbox", box);
+  await withOutbox((box) => {
+    box[kind] = (box[kind] || []).concat(clean).slice(-LOG_LIMIT);
+  });
   await updateCache(kind === "logs" ? "cm.logs" : "cm.sightings", (old) => {
     const seen = new Set(old.map((x) => x.id));
     return old.concat(clean.filter((x) => !seen.has(x.id))).slice(-LOG_LIMIT);
@@ -130,22 +130,42 @@ async function queue(kind, items) {
   return clean.length;
 }
 
+// Every read-modify-write of cm.outbox goes through this lock: without it, a record queued
+// while a batch was being sent could be overwritten by the flush ("sent" removal) and lost.
+let outboxLock = Promise.resolve();
+function withOutbox(fn) {
+  const run = outboxLock.then(async () => {
+    const box = (await sget("cm.outbox")) || { logs: [], sightings: [] };
+    const out = await fn(box);
+    await sset("cm.outbox", box);
+    return out;
+  });
+  outboxLock = run.catch(() => {});
+  return run;
+}
+
+let flushAgain = false;
 function flushOutbox() {
-  if (flushing) return flushing;
+  if (flushing) {
+    flushAgain = true; // records came in during this flush: send them right after it
+    return flushing;
+  }
   flushing = (async () => {
     if (!(await api.signedIn())) return;
-    for (const [kind, path] of [["logs", "/citamate/logs"], ["sightings", "/citamate/office-sightings"]]) {
-      for (;;) {
-        const box = (await sget("cm.outbox")) || { logs: [], sightings: [] };
-        const batch = (box[kind] || []).slice(0, 500);
-        if (!batch.length) break;
-        await api.request("POST", path, { items: batch });
-        const after = (await sget("cm.outbox")) || { logs: [], sightings: [] };
-        const sent = new Set(batch.map((x) => x.id));
-        after[kind] = (after[kind] || []).filter((x) => !sent.has(x.id));
-        await sset("cm.outbox", after);
+    do {
+      flushAgain = false;
+      for (const [kind, path] of [["logs", "/citamate/logs"], ["sightings", "/citamate/office-sightings"]]) {
+        for (;;) {
+          const batch = await withOutbox((box) => (box[kind] || []).slice(0, 500));
+          if (!batch.length) break;
+          await api.request("POST", path, { items: batch });
+          const sent = new Set(batch.map((x) => x.id));
+          await withOutbox((box) => {
+            box[kind] = (box[kind] || []).filter((x) => !sent.has(x.id));
+          });
+        }
       }
-    }
+    } while (flushAgain);
   })().finally(() => {
     flushing = null;
   });
@@ -159,9 +179,9 @@ async function clearKind(kind) {
   await flushOutbox().catch(() => {});
   const path = kind === "logs" ? "/citamate/logs" : "/citamate/office-sightings";
   const r = await api.request("DELETE", path);
-  const box = (await sget("cm.outbox")) || { logs: [], sightings: [] };
-  box[kind] = [];
-  await sset("cm.outbox", box);
+  await withOutbox((box) => {
+    box[kind] = [];
+  });
   await sset(kind === "logs" ? "cm.logs" : "cm.sightings", { t: Date.now(), items: [] });
   return r.removed || 0;
 }

@@ -13,8 +13,11 @@ import settings from "./pages/settings.js";
 import config from "./pages/config.js";
 import audit from "./pages/audit.js";
 import downloads from "./pages/downloads.js";
+import offices from "./pages/offices.js";
+import availability from "./pages/availability.js";
+import { startAlerts } from "./alerts.js";
 
-const ROUTES = { dashboard, downloads, entries, proxies, activity, devices, account, users, settings, config, audit };
+const ROUTES = { dashboard, downloads, entries, offices, availability, proxies, activity, devices, account, users, settings, config, audit };
 const ADMIN_ROUTES = new Set(["users", "settings", "config", "audit"]);
 
 const main = document.getElementById("main");
@@ -44,6 +47,8 @@ async function boot() {
   state.users = isAdmin ? await usersReq : [];
   window.addEventListener("hashchange", render);
   render();
+  // Office alerts: bell in the sidebar + live stream (only with CitaMate access).
+  startAlerts(document.getElementById("alertsSlot"));
 }
 
 export async function render() {
