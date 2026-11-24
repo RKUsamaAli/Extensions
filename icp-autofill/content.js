@@ -500,8 +500,34 @@
     } catch (_) {}
   }
 
+  // "En este momento no hay citas disponibles" after Solicitar Cita: the site's way of saying
+  // no office has appointments. For an office check that is a result (closed), not an error.
+  const NO_CITAS = /NO HAY CITAS DISPONIBLES/;
+  const noCitasPage = () => !!C && !q(C.selectors.office) && ((C.patterns.noCitas || NO_CITAS).test(norm(bodyText())));
+
+  function recordNoCitas() {
+    const e = current();
+    if (!e || !e.provinceText || !e.tramiteText) return;
+    const checking = ui.mode === "check";
+    const key = "citamate:nocitas:" + location.pathname;
+    try {
+      if (!checking && sessionStorage.getItem(key)) return; // a reload of the same page: once
+      sessionStorage.setItem(key, "1");
+    } catch (_) {}
+    outbox.sightings.push({
+      id: newId(), t: Date.now(), page: "Office", entry: e.label, entryId: e.id,
+      province: e.provinceText, tramite: e.tramiteText, kind: checking ? "check" : "booking", offices: [],
+    });
+    scheduleFlush();
+    if (!checking) return;
+    setMode("checkDone");
+    addLog({ entry: e.label, action: "Office check", status: "info", page: "Office", detail: "No offices open – the site says no appointments are available right now." });
+    show("info", "No offices open right now (the site has no appointments). Office check finished – you can close this tab.");
+  }
+
   async function recordOffices() {
-    if (locked || !q(C.selectors.office)) return;
+    if (locked) return;
+    if (!q(C.selectors.office)) return noCitasPage() ? recordNoCitas() : undefined;
     // The list can be filled in by the site a moment after load: wait up to 5s.
     let offices = readOffices();
     for (let i = 0; i < 25 && offices && !offices.length; i++) {
@@ -584,7 +610,7 @@
         addLog({ entry: p.entry, action: "Result", status: "done", page, detail: "Appointment booked (" + secs + "s)." });
         return show("done", p.entry + ": appointment booked.");
       }
-      if (sm.known) {
+      if (sm.known && !(ui.mode === "check" && noCitasPage())) {
         addLog({ entry: p.entry, action: "Result", status: "fail", page, detail: p.from + " → " + page + ": " + sm.text });
         return show("fail", p.entry + ": " + sm.text);
       }
@@ -605,7 +631,7 @@
       addLog({ entry: who, action: "Page", status: "done", page, detail: "Booking confirmation page shown." });
       return show("done", "Appointment booked.");
     }
-    if (sm.known) {
+    if (sm.known && !(ui.mode === "check" && noCitasPage())) {
       addLog({ entry: who, action: "Page", status: "fail", page, detail: sm.text });
       return show("fail", sm.text);
     }
