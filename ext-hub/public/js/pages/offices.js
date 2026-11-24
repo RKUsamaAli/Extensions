@@ -11,9 +11,20 @@ const short = (s) => String(s || "").split(",")[0].trim();
 
 export function statusBadge(r) {
   if (r.status === "open") return badge(`Open since ${hm(r.openSince)}`, "ok");
-  if (r.status === "closed") return badge("None open", "bad");
+  if (r.status === "closed") return badge("Closed", "bad");
   if (r.status === "stale") return badge(r.offices && r.offices.length ? "Was open (old)" : "Closed (old)", "warn");
   return badge("Never checked");
+}
+
+/** Badge + one line: still open at…, or closed since… / was open from–to. */
+export function statusBlock(r) {
+  let line = "";
+  if (r.status === "open") line = `✓ Still open at ${hm(r.stillOpenAt)}` + (r.confirmations > 1 ? ` · ${r.confirmations} checks` : "");
+  else if (r.status === "closed" || (r.status === "stale" && !(r.offices && r.offices.length))) {
+    line = r.closedSince ? `since ${hm(r.closedSince)}` : "no offices listed";
+    if (r.lastOpen) line += ` · was open ${hm(r.lastOpen.from)}–${hm(r.lastOpen.to)}`;
+  } else if (r.status === "stale") line = `still open at ${hm(r.stillOpenAt || r.lastChecked)} – check again`;
+  return el("div", { class: "status-block" }, statusBadge(r), line ? el("div", { class: "hint", testid: "status-line" }, line) : null);
 }
 
 export function watchButton(r, onChange) {
@@ -28,7 +39,7 @@ export function watchButton(r, onChange) {
       toast(r.watched ? "Alerts off for " + r.province : "You'll be alerted when offices open: " + r.province, "ok");
       onChange();
     },
-  }, r.watched ? "🔔 Watching" : "🔕 Watch");
+  }, el("span", { "aria-hidden": "true" }, r.watched ? "🔔" : "🔕"), el("span", { class: "watch-text" }, r.watched ? " Watching" : " Watch"));
 }
 
 export default async function officesPage() {
@@ -61,18 +72,17 @@ export default async function officesPage() {
   function draw() {
     box.textContent = "";
     const cols = [
-      { label: "Province", render: (r) => el("strong", null, r.province) },
-      { label: "Trámite", class: "wrap", render: (r) => r.tramite },
+      { label: "Province · trámite", class: "wrap", render: (r) => el("div", { class: "pair" }, el("strong", null, r.province), el("div", { class: "hint" }, r.tramite)) },
       { label: "Entries", class: "nowrap", render: (r) => el("div", null, String(r.entries), el("div", { class: "hint" }, r.wanted.join(", "))) },
       {
         label: "Last check",
         class: "nowrap",
-        render: (r) => el("div", null, statusBadge(r), el("div", { class: "hint", title: r.lastChecked ? fmtTime(r.lastChecked) : "" }, r.lastChecked ? ago(r.lastChecked) : "—")),
+        render: (r) => el("div", null, statusBlock(r), el("div", { class: "hint", title: r.lastChecked ? fmtTime(r.lastChecked) : "" }, r.lastChecked ? "checked " + ago(r.lastChecked) : "—")),
       },
       {
         label: "Offices open",
         class: "wrap",
-        render: (r) => (r.status === "open" || (r.status === "stale" && r.offices.length) ? el("div", { class: "office-chips" }, r.offices.map((o) => el("span", { class: "jv-chip", title: o.text }, `${short(o.text)} · ${hm(o.since)}`))) : ""),
+        render: (r) => (r.status === "open" || (r.status === "stale" && r.offices.length) ? el("div", { class: "office-chips" }, r.offices.map((o) => el("span", { class: "jv-chip", title: `${o.text}\nOpen since ${hm(o.since)}, still listed at ${hm(o.stillListedAt)}` }, `${short(o.text)} · since ${hm(o.since)}`))) : ""),
       },
       { label: "Alerts", render: (r) => watchButton(r, load) },
       {

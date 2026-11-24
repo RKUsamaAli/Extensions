@@ -43,14 +43,41 @@ function mount(): void {
   let pos: FabPos = { side: "right", top: 70 };
   let busy = false;
 
+  /**
+   * Shown position: the saved one, moved aside when CitaMate's button sits at the same
+   * spot (both default to the right edge) – display only, the saved position is unchanged.
+   */
+  const shownTop = (): string => {
+    const cm = document.querySelector<HTMLElement>('[data-testid="citamate-fab"]');
+    if (!cm) return `${pos.top}%`;
+    const r = cm.getBoundingClientRect();
+    const sameSide = pos.side === "right" ? r.left > window.innerWidth / 2 : r.right < window.innerWidth / 2;
+    const ours = (pos.top / 100) * window.innerHeight;
+    // CitaMate's button (50px) has its small quick-fill button under it (to ~95px): keep clear of both.
+    if (!sameSide || ours <= r.top - 60 || ours >= r.top + 104) return `${pos.top}%`;
+    const shift = r.top + 104 + 50 < window.innerHeight ? r.top + 104 : r.top - 64;
+    return `${Math.max(4, shift)}px`;
+  };
   const place = () => {
-    host.style.top = `${pos.top}%`;
+    host.style.top = shownTop();
     host.style.left = pos.side === "left" ? "14px" : "";
     host.style.right = pos.side === "right" ? "14px" : "";
     host.classList.toggle("left", pos.side === "left");
     menu.classList.toggle("left", pos.side === "left");
-    menu.classList.toggle("up", pos.top > 50);
+    fitMenu();
   };
+  /** Opens towards the side with more room and caps the height to it (scrolls inside). */
+  const fitMenu = () => {
+    const r = fab.getBoundingClientRect();
+    const below = window.innerHeight - r.bottom - 18;
+    const above = r.top - 18;
+    const up = above > below;
+    menu.classList.toggle("up", up);
+    menu.style.maxHeight = `${Math.max(140, Math.min(320, up ? above : below))}px`;
+  };
+  window.addEventListener("resize", () => place());
+  // CitaMate adds its button a moment after load: make way once it is there.
+  setTimeout(() => place(), 1500);
 
   async function call(msg: PageMessage): Promise<MenuState | null> {
     try {
@@ -166,6 +193,8 @@ function mount(): void {
 
   async function open(): Promise<void> {
     menu.hidden = false;
+    host.style.zIndex = "2147483647";
+    fitMenu();
     fab.setAttribute("aria-expanded", "true");
     if (!items.childElementCount) setLoading("Loading…");
     const m = await call({ type: "menu" });
@@ -178,6 +207,7 @@ function mount(): void {
 
   function close(): void {
     menu.hidden = true;
+    host.style.zIndex = "2147483646";
     fab.setAttribute("aria-expanded", "false");
   }
 

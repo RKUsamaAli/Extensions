@@ -497,3 +497,31 @@ test('office availability: open since, one alert per clock minute, watches, live
     assert.equal(ov.pairs.length, 1);
     assert.equal(ov.pairs[0].history.length, 6, 'office-page sightings only');
 });
+
+test('office availability: still open (confirmations), closed since and the last open window', () => {
+    const { s, ali } = setup();
+    const MIN = 60000;
+    const base = Math.floor(s.clock.now() / MIN) * MIN;
+    const sight = (id, dt, offices) => {
+        s.clock.set(base + dt);
+        s.activity.addSightings(ali, [{ id, t: base + dt, province: 'Barcelona', tramite: 'TIE', page: 'Office', offices }]);
+    };
+    const key = s.availability.pairKey('Barcelona', 'TIE');
+    const O = [{ value: '1', text: 'CNP Igualada' }];
+    sight('a', 0, O);
+    sight('b', 2 * MIN, O);
+    sight('c', 4 * MIN, O);
+    let st = s.availability.latestByPair().get(key);
+    assert.equal(st.openSince, base);
+    assert.equal(st.stillOpenAt, base + 4 * MIN, 'still open as of the latest check');
+    assert.equal(st.confirmations, 3);
+    assert.equal(st.offices[0].stillListedAt, base + 4 * MIN);
+    sight('d', 6 * MIN, []);
+    sight('e', 8 * MIN, []);
+    st = s.availability.latestByPair().get(key);
+    assert.equal(st.status, 'closed');
+    assert.equal(st.closedSince, base + 6 * MIN, 'closed since the first check that found none');
+    assert.deepEqual(st.lastOpen, { from: base, to: base + 4 * MIN });
+    const alerts = s.availability.alerts(ali);
+    assert.equal(alerts.items.length, 0, 'ali watches nothing');
+});

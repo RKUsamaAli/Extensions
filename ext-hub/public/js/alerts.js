@@ -10,7 +10,9 @@ let bell = null;
 const hm = (t) => (t ? new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "");
 const short = (s) => String(s || "").split(",")[0].trim();
 const title = (a) => `${a.province} · ${short(a.tramite).split("(")[0].trim()}`;
-const summary = (a) => `${a.offices.length} office${a.offices.length === 1 ? "" : "s"} open since ${hm(a.openSince)}: ${a.offices.map((o) => short(o.text)).join(", ")}`;
+const summary = (a) =>
+  (a.stillOpen ? `Still open (since ${hm(a.openSince)}, checked ${hm(a.t)})` : `Just opened at ${hm(a.t)}`) +
+  ` – ${a.offices.length} office${a.offices.length === 1 ? "" : "s"}: ${a.offices.map((o) => short(o.text)).join(", ")}`;
 
 function setUnread(n) {
   unread = Math.max(0, n);
@@ -40,7 +42,7 @@ function chime() {
 function desktopNotify(a) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   try {
-    const n = new Notification("Offices open · " + title(a), {
+    const n = new Notification((a.stillOpen ? "Still open · " : "Offices open · ") + title(a), {
       body: summary(a),
       tag: "office-" + a.province + "-" + a.tramite, // a newer alert for the same pair replaces the old one
       icon: "/img/citamate.svg",
@@ -96,7 +98,7 @@ function openList() {
     for (const a of r.items) {
       list.append(el("div", { class: "alert-item" + (a.t > r.seenAt ? " unread" : "") },
         el("div", { class: "row space" }, el("strong", null, title(a)), el("span", { class: "hint", title: fmtTime(a.t) }, ago(a.t))),
-        el("div", null, `Open since ${hm(a.openSince)} · checked ${hm(a.t)}`),
+        el("div", null, a.stillOpen ? `Still open · open since ${hm(a.openSince)} · checked ${hm(a.t)}` : `Just opened · checked ${hm(a.t)}`),
         el("ul", { class: "alert-offices" }, a.offices.map((o) => el("li", null, short(o.text), el("span", { class: "hint" }, ` since ${hm(o.since)}`), (a.newOffices || []).some((n) => n.value === o.value) ? el("span", { class: "badge info" }, "new") : null)))));
     }
   }).catch(() => (list.textContent = "Couldn't load the alerts."));

@@ -3,7 +3,7 @@
 import { get } from "../api.js";
 import { el, table, toastError, fmtTime, ago, badge } from "../ui.js";
 import { pageHead } from "../state.js";
-import { statusBadge, watchButton } from "./offices.js";
+import { statusBlock, watchButton } from "./offices.js";
 
 const hm = (t) => (t ? new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "");
 const short = (s) => String(s || "").split(",")[0].trim();
@@ -40,6 +40,16 @@ function heatmap(history) {
   return el("div", { class: "heatmap-wrap" }, grid, el("div", { class: "hm-legend hint" }, el("span", { class: "hm-c hm-none" }), " no checks ", el("span", { class: "hm-c" }), " checked, none open ", el("span", { class: "hm-c full" }), " offices open"));
 }
 
+/** Expandable list of the latest checks of a pair. */
+function history(p) {
+  const d = el("details", { class: "timeline" }, el("summary", null, `${p.history.length} checks`));
+  d.addEventListener("toggle", () => {
+    if (!d.open || d.querySelector("ol")) return;
+    d.append(el("ol", null, p.history.slice(-30).reverse().map(([t, n]) => el("li", null, el("span", { class: "mono" }, new Date(t).toLocaleString([], { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })), " ", n ? badge(`${n} open`, "ok") : badge("none", "bad")))));
+  });
+  return d;
+}
+
 export default async function availabilityPage() {
   const root = el("div");
   const tiles = el("div", { class: "grid summary-grid avail-tiles", testid: "availability-summary" });
@@ -74,14 +84,13 @@ export default async function availabilityPage() {
     );
     box.textContent = "";
     box.append(table([
-      { label: "Status", class: "nowrap", render: (p) => statusBadge(p) },
-      { label: "Province", render: (p) => el("strong", null, p.province) },
-      { label: "Trámite", class: "wrap", render: (p) => p.tramite },
+      { label: "Status", render: (p) => statusBlock(p) },
+      { label: "Province · trámite", class: "wrap", render: (p) => el("div", { class: "pair" }, el("strong", null, p.province), el("div", { class: "hint" }, p.tramite)) },
       {
         label: "Offices",
         class: "wrap",
         render: (p) => (p.offices.length
-          ? el("ul", { class: "office-list" }, p.offices.map((o) => el("li", null, el("strong", null, short(o.text)), el("span", { class: "hint" }, ` open since ${hm(o.since)}` + (p.status === "open" ? ` (${mins(Date.now() - o.since)})` : "")))))
+          ? el("ul", { class: "office-list" }, p.offices.map((o) => el("li", null, el("strong", null, short(o.text)), el("span", { class: "hint", title: `Still listed at ${hm(o.stillListedAt)}` }, ` since ${hm(o.since)}` + (p.status === "open" ? ` (${mins((o.stillListedAt || Date.now()) - o.since)})` : "")))))
           : el("span", { class: "hint" }, p.status === "never" ? "" : "None listed")),
       },
       {
@@ -90,18 +99,7 @@ export default async function availabilityPage() {
         render: (p) => el("div", null,
           el("div", { title: fmtTime(p.lastChecked) }, "Last " + ago(p.lastChecked)),
           el("div", { class: "hint" }, `Today ${p.open24h}/${p.checks24h} open`),
-          p.lastSeenOpen && p.status !== "open" ? el("div", { class: "hint", title: fmtTime(p.lastSeenOpen) }, "Last open " + ago(p.lastSeenOpen)) : null),
-      },
-      {
-        label: "History",
-        render: (p) => {
-          const d = el("details", { class: "timeline" }, el("summary", null, `${p.history.length} checks`));
-          d.addEventListener("toggle", () => {
-            if (!d.open || d.querySelector("ol")) return;
-            d.append(el("ol", null, p.history.slice(-30).reverse().map(([t, n]) => el("li", null, el("span", { class: "mono" }, new Date(t).toLocaleString([], { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })), " ", n ? badge(`${n} open`, "ok") : badge("none", "bad")))));
-          });
-          return d;
-        },
+          history(p)),
       },
       { label: "Alerts", render: (p) => watchButton(p, load) },
     ], pairs, { testid: "availability-table", empty: "No office checks yet. Run one from Offices to check." }));

@@ -69,7 +69,7 @@ const LOCAL_DEFAULTS: LocalData = {
   enabled: false,
   activeProfileId: null,
   floatingButton: false,
-  fabPos: { side: "right", top: 70 },
+  fabPos: { side: "right", top: 50 }, // CitaMate's button defaults to 70%: keep them apart
   apiBase: DEFAULT_API_BASE,
   deviceId: "",
   refreshToken: null,

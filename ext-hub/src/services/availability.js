@@ -79,7 +79,8 @@ function createAvailability({ db, clock }) {
             tramite,
             offices: withSince,
             newOffices: fresh,
-            openSince
+            openSince,
+            stillOpen: openSince < t // false = just opened in this check
         };
         const r = db
             .prepare(
@@ -104,20 +105,43 @@ function createAvailability({ db, clock }) {
             )
             .all(clock.now() - HISTORY_DAYS * 86400000);
         const out = new Map();
+        const countSince = db.prepare(
+            `SELECT COUNT(*) FROM cm_sightings WHERE province = ? AND tramite = ? AND t >= ? AND (page IS NULL OR page = 'Office') AND offices_json <> '[]'`
+        );
+        const lastOpen = db.prepare(
+            `SELECT t, open_since FROM cm_sightings WHERE province = ? AND tramite = ? AND t < ? AND (page IS NULL OR page = 'Office') AND offices_json <> '[]' ORDER BY t DESC LIMIT 1`
+        );
+        const firstClosed = db.prepare(
+            `SELECT MIN(t) FROM cm_sightings WHERE province = ? AND tramite = ? AND t > ? AND (page IS NULL OR page = 'Office') AND offices_json = '[]'`
+        );
         for (const r of rows) {
             const offices = parse(r.offices_json, []);
             const since = parse(r.since_json, {});
             const open = offices.length > 0;
             const fresh = clock.now() - r.t <= FRESH_MS;
-            out.set(pairKey(r.province, r.tramite), {
+            const state = {
                 province: r.province,
                 tramite: r.tramite,
                 lastChecked: r.t,
                 status: !fresh ? 'stale' : open ? 'open' : 'closed',
                 open,
                 openSince: open ? r.open_since || r.t : null,
-                offices: offices.map((o) => ({ value: o.value, text: o.text, since: since[o.value || o.text] || r.t }))
-            });
+                // Open: "still open" as of the latest check, confirmed by this many checks.
+                stillOpenAt: open ? r.t : null,
+                confirmations: open ? countSince.pluck().get(r.province, r.tramite, r.open_since || r.t) : 0,
+                // Closed: since when, and the last time it was open (from – to).
+                closedSince: null,
+                lastOpen: null,
+                offices: offices.map((o) => ({ value: o.value, text: o.text, since: since[o.value || o.text] || r.t, stillListedAt: r.t }))
+            };
+            if (!open) {
+                const lo = lastOpen.get(r.province, r.tramite, r.t);
+                if (lo) {
+                    state.lastOpen = { from: lo.open_since || lo.t, to: lo.t };
+                    state.closedSince = firstClosed.pluck().get(r.province, r.tramite, lo.t) || r.t;
+                }
+            }
+            out.set(pairKey(r.province, r.tramite), state);
         }
         return out;
     }
@@ -132,7 +156,7 @@ function createAvailability({ db, clock }) {
         if (!s || s.status !== 'open') return null;
         const wanted = entry.office ? s.offices.filter((o) => o.value === entry.office || norm(o.text) === norm(entry.officeText)) : s.offices;
         if (!wanted.length) return null;
-        return { since: entry.office ? Math.min(...wanted.map((o) => o.since)) : s.openSince, offices: wanted.map((o) => short(o.text)), checked: s.lastChecked };
+        return { since: entry.office ? Math.min(...wanted.map((o) => o.since)) : s.openSince, stillOpenAt: s.stillOpenAt, offices: wanted.map((o) => short(o.text)), checked: s.lastChecked };
     }
 
     // ---------------------------------------------------------------- queue ----
@@ -173,6 +197,10 @@ function createAvailability({ db, clock }) {
                     lastChecked: s ? s.lastChecked : null,
                     status: s ? s.status : 'never',
                     openSince: s ? s.openSince : null,
+                    stillOpenAt: s ? s.stillOpenAt : null,
+                    confirmations: s ? s.confirmations : 0,
+                    closedSince: s ? s.closedSince : null,
+                    lastOpen: s ? s.lastOpen : null,
                     offices: s ? s.offices : [],
                     watched: watched.has(r.key),
                     claim: claim ? { by: claim.username, mine: claim.user_id === actor.id, until: claim.until } : null,
@@ -247,7 +275,7 @@ function createAvailability({ db, clock }) {
     }
     const watchSql = 'EXISTS (SELECT 1 FROM cm_watches w WHERE w.user_id = ? AND w.province = a.province AND w.tramite = a.tramite)';
     function shapeAlert(r) {
-        return { id: r.id, t: r.t, province: r.province, tramite: r.tramite, offices: parse(r.offices_json, []), newOffices: parse(r.new_json, []), openSince: r.open_since };
+        return { id: r.id, t: r.t, province: r.province, tramite: r.tramite, offices: parse(r.offices_json, []), newOffices: parse(r.new_json, []), openSince: r.open_since, stillOpen: !!r.open_since && r.open_since < r.t };
     }
     /** Alerts for the actor's watches, newest first; unread = after alerts_seen_at. */
     function alerts(actor, { since, limit } = {}) {

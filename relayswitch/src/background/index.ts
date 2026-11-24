@@ -455,6 +455,7 @@ async function handle(msg: Message): Promise<Reply> {
     case "listProfiles":
       // Pages get fresh data from the server; a short cache avoids reloading on every click.
       if (await isSignedIn()) {
+        if (msg.type === "getState" && msg.cached && (await getSession()).loadedAt !== null) break;
         await loadAll(msg.type === "listProfiles").catch(async (err: unknown) => {
           if (!(err instanceof HubError && err.signsOut)) await setSession({ authError: errorText(err) });
         });
