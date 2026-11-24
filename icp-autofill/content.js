@@ -403,6 +403,58 @@
     }, STUCK_MS);
   }
 
+  // ---------- automatic office check ----------
+  // In office-check mode CitaMate presses Fill & Next by itself on every page up to the office
+  // list, one page at a time with a short pause. It never solves the captcha: on that page it
+  // fills the details and waits; once the person has ticked the reCAPTCHA it continues
+  // (an image captcha: they type it and press Alt+Enter). Any error or "stuck" stops it.
+  const AUTO_KEY = "citamate:auto";
+  const AUTO_MAX = 10; // pages per check: the flow has 5–6, more means something loops
+  const AUTO_DELAY = 1200;
+  const AUTO_PAGES = ["Province", "Trámite", "Access", "Personal data", "Request"];
+  let autoTimer = 0;
+  let captchaTimer = 0;
+  function autoCount(n) {
+    try {
+      if (n === undefined) return Number(sessionStorage.getItem(AUTO_KEY)) || 0;
+      sessionStorage.setItem(AUTO_KEY, String(n));
+    } catch (_) { /* storage blocked */ }
+    return 0;
+  }
+  function stopAuto() {
+    clearTimeout(autoTimer);
+    clearInterval(captchaTimer);
+    autoTimer = captchaTimer = 0;
+  }
+  function autoStep() {
+    stopAuto();
+    const e = current();
+    if (ui.mode !== "check" || locked || !e) return;
+    if (lastStatus === "fail" || lastStatus === "stuck") return; // a problem: the person decides
+    if (!AUTO_PAGES.includes(pageType())) return;
+    if (autoCount() >= AUTO_MAX) return show("info", "Office check paused after " + AUTO_MAX + " pages – press Alt+Enter to continue.");
+    show("run", "Office check: continuing by itself…");
+    autoTimer = setTimeout(() => {
+      autoTimer = 0;
+      if (ui.mode !== "check") return;
+      if (!captchaPending()) {
+        autoCount(autoCount() + 1);
+        return doFillAndNext(e);
+      }
+      doFillAndNext(e); // fills the details, then waits for the captcha
+      if (!q(C.selectors.captchaWidget)) return show("wait", "Type the captcha, then press Alt+Enter – CitaMate continues from there.");
+      beep();
+      show("wait", "Solve the captcha – CitaMate continues by itself when it's done.");
+      captchaTimer = setInterval(() => {
+        if (ui.mode !== "check") return stopAuto();
+        if (captchaPending()) return;
+        stopAuto();
+        autoCount(autoCount() + 1);
+        setTimeout(() => doFillAndNext(e), 500);
+      }, 700);
+    }, AUTO_DELAY);
+  }
+
   // ---------- office availability ----------
   // The office page only lists offices that currently have appointments.
   // CitaMate reads that list whenever you reach the page and keeps a history.
@@ -492,7 +544,7 @@
     }
     const note = e && e.office ? "Your office isn't listed. " : "";
     addLog({ entry: sighting.entry, action: act, status: "ok", page: "Office", detail: note + offices.length + " available: " + names });
-    show("info", note + offices.length + " offices available – see the list below." + tail);
+    show("info", note + offices.length + (offices.length === 1 ? " office" : " offices") + " available – see the list below." + tail);
   }
 
   function renderOffices(offices, e) {
@@ -624,7 +676,7 @@
 
       <div class="acts">
         <button class="btn primary" id="actNext" title="Fill this page and press its Aceptar / Siguiente / Entrar / Solicitar Cita (Alt+Enter)">${IC.check}<span>Fill &amp; Next</span><span class="k">Alt+Enter</span></button>
-        <button class="btn ghost" id="actCheck" title="Go through the pages up to the office list without booking, and share which offices are open (Alt+Enter on each page, you solve the captcha)">Check offices</button>
+        <button class="btn ghost" id="actCheck" title="Go through the pages up to the office list by itself, without booking, and share which offices are open (you solve the captcha)">Check offices</button>
       </div>
 
       <div class="status" id="foot"><i class="sdot"></i><span id="status">Pick an entry, then press Fill &amp; Next on each page.</span></div>
@@ -652,7 +704,9 @@
   const isMine = (l, e) => !!e && (l.entryId ? l.entryId === e.id : l.entry === e.label);
   const openPage = (hash) => chrome.runtime.sendMessage({ type: "OPEN_ENTRIES", hash });
 
+  let lastStatus = "";
   function show(status, text) {
+    lastStatus = status;
     $("foot").className = "status s-" + status;
     $("status").textContent = text;
     $("fabDot").className = "dot s-" + status;
@@ -694,7 +748,7 @@
     if (locked) $("fabDot").className = "dot";
     const checking = ui.mode === "check" || ui.mode === "checkDone";
     $("modebar").hidden = !checking;
-    $("modeText").textContent = ui.mode === "checkDone" ? "Office check finished – nothing was selected." : "Office check mode – stops at the office page.";
+    $("modeText").textContent = ui.mode === "checkDone" ? "Office check finished – nothing was selected." : "Office check – goes through the pages by itself, you solve the captcha.";
     $("log").hidden = !ui.showLog;
     $("logBtn").setAttribute("aria-expanded", String(!!ui.showLog));
     $("pageChip").textContent = pageType();
@@ -913,14 +967,18 @@
     fn(e);
   };
   $("actNext").addEventListener("click", withEntry((e) => {
+    stopAuto();
     if (ui.mode !== "check") setMode(null);
     doFillAndNext(e);
   }));
   $("actCheck").addEventListener("click", withEntry((e) => {
     setMode("check");
+    autoCount(0);
+    lastStatus = "";
     show("info", "Office check: " + [e.provinceText, (e.tramiteText || "").split("(")[0].trim()].filter(Boolean).join(" · ") +
-      ". Press Fill & Next (Alt+Enter) on each page and solve the captcha – it stops at the office list without booking.");
+      ". CitaMate goes through the pages by itself – you only solve the captcha. It stops at the office list without booking.");
     if (pageType() === "Office") recordOffices();
+    else autoStep();
   }));
   $("picker").addEventListener("click", () => toggleList());
   $("search").addEventListener("input", renderList);
@@ -932,6 +990,7 @@
   });
   $("closeBtn").addEventListener("click", closeMenu);
   $("modeCancel").addEventListener("click", () => {
+    stopAuto();
     setMode(null);
     show("info", "Back to normal mode.");
   });
@@ -956,6 +1015,7 @@
       if (!(ev.altKey && ev.key === "Enter")) return;
       ev.preventDefault();
       if (locked) return show("info", lockReason);
+      stopAuto();
       const e = current();
       if (e) doFillAndNext(e);
       else show("info", "Open " + APP + " and choose an entry first.");
@@ -983,7 +1043,10 @@
     renderLog();
     if (!locked && !loaded) {
       loaded = true;
-      checkOnLoad().then(recordOffices).then(() => ($("pageChip").textContent = pageType()));
+      checkOnLoad().then(recordOffices).then(() => {
+        $("pageChip").textContent = pageType();
+        autoStep();
+      });
     }
   }
 
@@ -1014,7 +1077,10 @@
     if (startCheck) {
       ui.lastId = startCheck[1];
       ui.mode = "check";
-      try { sessionStorage.setItem("citamate:mode", "check"); } catch (_) {}
+      try {
+        sessionStorage.setItem("citamate:mode", "check");
+        sessionStorage.setItem(AUTO_KEY, "0");
+      } catch (_) {}
       history.replaceState(null, "", location.pathname + location.search);
       saveUi();
     }
