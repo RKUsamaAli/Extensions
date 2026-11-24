@@ -77,6 +77,7 @@ async function run(msg: Message): Promise<void> {
     // Auth first: render() reads `signedIn` to decide whether the proxy list is shown.
     renderAuth(reply.auth);
     render(reply.state, reply.profiles);
+    $("loading").hidden = true;
   } catch (err) {
     errorEl.textContent = err instanceof Error ? err.message : String(err);
     errorEl.hidden = false;
@@ -86,6 +87,7 @@ async function run(msg: Message): Promise<void> {
       render(fresh.state, fresh.profiles);
     }
   } finally {
+    $("loading").hidden = true;
     setBusy(false);
     // Nothing to switch on in a browser without proxy support, or while signed out.
     toggle.disabled = unsupported || !signedIn;
@@ -211,6 +213,9 @@ for (const id of ["manage", "addFirst"]) {
   });
 }
 
-void run({ type: "getState" }).then(() => {
+// First paint from the cache (instant), then fresh data from the server.
+void run({ type: "getState", cached: true })
+  .then(() => run({ type: "getState" }))
+  .then(() => {
   if (!search.hidden) search.focus();
 });

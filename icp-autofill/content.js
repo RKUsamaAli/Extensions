@@ -300,7 +300,7 @@
     // won't continue without a real office, so "Any office" picks the first one listed.
     const office = q(C.selectors.office);
     if (office && e.office) track("Office", setSelect(office, e.office, e.officeText), true);
-    else if (office && office.getClientRects().length && !realOfficeSelected(office) && ui.mode !== "check" && ui.mode !== "checkDone") {
+    else if (office && shownSelect(office) && !realOfficeSelected(office) && ui.mode !== "check" && ui.mode !== "checkDone") {
       const first = (readOffices() || [])[0];
       if (first && setSelect(office, first.value, first.text)) done.push("Office (any → " + first.text.split(",")[0].trim() + ")");
       else missing.push("Office");
@@ -416,6 +416,14 @@
         return v && !C.officeExcludeValues.includes(v) && !C.patterns.officePlaceholder.test(t);
       })
       .map((o) => ({ value: o.value, text: String(o.text || "").replace(/\s+/g, " ").trim() }));
+  }
+
+  /** The site draws selects with bootstrap-select, which hides the real <select>: the
+   *  widget next to it being visible counts as visible too. */
+  function shownSelect(sel) {
+    if (sel.getClientRects().length) return true;
+    const widget = sel.closest(".bootstrap-select") || (sel.nextElementSibling && sel.nextElementSibling.matches(".bootstrap-select, .dropdown-toggle, button") ? sel.nextElementSibling : null);
+    return !!(widget && widget.getClientRects().length);
   }
 
   function realOfficeSelected(sel) {
@@ -668,6 +676,7 @@
       n.classList.toggle("left", ui.side === "left");
       n.classList.toggle("up", ui.top > 50);
     });
+    fitMenu();
   }
 
   // ✓ next to the button: one tap = Fill & Next with the selected entry.
@@ -693,6 +702,7 @@
   const saveUi = () => chrome.storage.local.set({ [UI_KEY]: ui });
 
   // ---------- entry dropdown ----------
+  const hhmm = (t) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   function renderPicker() {
     const e = current();
     $("pickAv").textContent = e ? initials(e.label) : "?";
@@ -701,7 +711,7 @@
     const open = e && e.officeOpen;
     $("pickSub").textContent = e
       ? open
-        ? "🟢 Office open since " + new Date(open.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " · " + open.offices.slice(0, 2).join(", ")
+        ? "🟢 Open since " + hhmm(open.since) + (open.stillOpenAt && open.stillOpenAt > open.since ? ", still at " + hhmm(open.stillOpenAt) : "") + " · " + open.offices.slice(0, 2).join(", ")
         : (e.docType + " " + e.docNumber + " · " + [e.provinceText, (e.officeText || "").split(",")[0]].filter(Boolean).join(" · ")).trim()
       : entries.length ? entries.length + " saved – click to choose" : "Add one in Manage entries";
     $("actNext").disabled = !e;
@@ -798,18 +808,45 @@
   }
 
   // ---------- open / close ----------
+  /**
+   * Opens the menu towards the side of the button with more room and caps its height to
+   * that room (it scrolls inside), so it never runs off the window. While open it sits
+   * above other floating buttons (e.g. RelaySwitch's).
+   */
+  function fitMenu() {
+    if (menu.hidden) return;
+    if (matchMedia("(max-width: 520px)").matches) {
+      menu.style.top = menu.style.bottom = menu.style.maxHeight = "";
+      return; // phones: bottom sheet from the CSS
+    }
+    const r = fab.getBoundingClientRect();
+    const gap = 8;
+    const margin = 10;
+    const below = window.innerHeight - r.bottom - gap - margin;
+    const above = r.top - gap - margin;
+    const up = above > below;
+    menu.classList.toggle("up", up);
+    menu.style.top = up ? "auto" : r.height + gap + "px";
+    menu.style.bottom = up ? r.height + gap + "px" : "auto";
+    menu.style.maxHeight = Math.max(160, Math.min(640, up ? above : below)) + "px";
+  }
+  addEventListener("resize", () => fitMenu());
+
   function openMenu() {
     menu.hidden = false;
     $("toast").hidden = true;
+    host.style.zIndex = "2147483647";
     syncQuick();
     fab.setAttribute("aria-expanded", "true");
     applyUi();
     renderList();
     renderLog();
     if (!locked && !current() && entries.length) toggleList(true);
+    fitMenu();
   }
   function closeMenu() {
     menu.hidden = true;
+    host.style.zIndex = "2147483646";
     toggleList(false);
     syncQuick();
     fab.setAttribute("aria-expanded", "false");

@@ -34,6 +34,7 @@ window.CM.ready.then(() => {
     return [el("dt", { text: label }), el("dd", { class: value ? null : "unset", text: value || "not set", title: value || null })];
   }
 
+  const t = (ms) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   function card(e) {
     const last = lastActivity(e);
     const doc = { NIE: "NIE", DNI: "DNI", PASAPORTE: "Passport" }[e.docType] || e.docType;
@@ -51,7 +52,7 @@ window.CM.ready.then(() => {
           ? el("span", {
               class: "pill ok",
               "data-testid": "entry-office-open",
-              text: "Office open · since " + new Date(e.officeOpen.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              text: "Office open · since " + t(e.officeOpen.since) + (e.officeOpen.stillOpenAt && e.officeOpen.stillOpenAt > e.officeOpen.since ? " · still open " + t(e.officeOpen.stillOpenAt) : ""),
               title: "Seen open: " + e.officeOpen.offices.join(", "),
             })
           : null,

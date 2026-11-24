@@ -109,6 +109,8 @@ async function openEditor(entry, onDone) {
 }
 
 /** Appointment statuses (same list as the server). CitaMate offers only the active ones. */
+const hhmm = (t) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 export const ENTRY_STATUSES = [
   { id: "pending", label: "Pending", kind: "info", active: true, hint: "Waiting to start" },
   { id: "in_progress", label: "In progress", kind: "warn", active: true, hint: "Trying to book" },
@@ -215,7 +217,7 @@ export default async function entriesPage() {
         label: "Label",
         render: (r) => el("div", null, el("strong", null, r.label),
           r.officeOpen ? el("div", { class: "office-open", testid: "entry-office-open", title: "Seen open: " + r.officeOpen.offices.join(", ") },
-            "🟢 Office open · since " + new Date(r.officeOpen.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })) : null),
+            "🟢 Office open · since " + hhmm(r.officeOpen.since) + (r.officeOpen.stillOpenAt && r.officeOpen.stillOpenAt > r.officeOpen.since ? " · still open " + hhmm(r.officeOpen.stillOpenAt) : "")) : null),
       },
       { label: "Document", render: (r) => `${r.docType || ""} ${r.docNumber || ""}`.trim() },
       { label: "Name", render: (r) => r.fullName },

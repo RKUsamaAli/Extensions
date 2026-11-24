@@ -51,7 +51,8 @@ export interface Settings {
 
 /** Messages any extension page may send. */
 export type Message =
-  | { type: "getState" }
+  /** cached: answer from the cache right away when there is one (popup first paint). */
+  | { type: "getState"; cached?: boolean }
   | { type: "setEnabled"; enabled: boolean }
   | { type: "checkIp" }
   | { type: "newSession" }

@@ -16,6 +16,13 @@
     </label>
   </header>
 
+  <!-- Shown until the first answer from the worker (no blank popup while it loads). -->
+  <section id="loading" class="loading-state" data-testid="popup-loading" aria-busy="true" aria-label="Loading">
+    <span class="sk sk-label"></span>
+    <span class="sk sk-select"></span>
+    <span class="sk sk-status"></span>
+    <p class="muted row"><span class="spinner"></span> Loading your proxies…</p>
+  </section>
   <section id="signin" hidden></section>
   <p id="serverError" class="error" data-testid="server-error" hidden></p>
 

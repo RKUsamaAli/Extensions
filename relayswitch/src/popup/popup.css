@@ -15,3 +15,13 @@ select[size] { padding: 4px; }
 .switch.small input:checked + span::before { transform: translateX(14px); }
 footer { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); }
 a { color: var(--accent); text-decoration: none; }
+
+/* Loading skeleton (first open after a restart / sign-in) */
+.loading-state { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 8px; }
+.loading-state .sk { display: block; border-radius: 8px; background: linear-gradient(90deg, rgba(127,127,127,.12) 25%, rgba(127,127,127,.22) 40%, rgba(127,127,127,.12) 60%); background-size: 300% 100%; animation: sk 1.2s ease-in-out infinite; }
+.loading-state .sk-label { width: 40%; height: 10px; }
+.loading-state .sk-select { height: 34px; }
+.loading-state .sk-status { height: 38px; }
+.loading-state p { gap: 6px; margin: 2px 0 0; }
+@keyframes sk { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .loading-state .sk { animation: none; } }
