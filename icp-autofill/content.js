@@ -161,9 +161,22 @@
   }
 
   // Returns { known: bool, text } for the most useful site message on screen.
+  // "No hay citas disponibles" is only the site's answer on a page of its own (after Solicitar
+  // Cita). Form pages can carry the same words in a notice – e.g. Barcelona's trámite page:
+  // "AVISO IMPORTANTE… En este momento no hay citas disponibles en esta sede" – which is not a
+  // result and must not stop anything.
+  const NO_CITAS = /NO HAY CITAS DISPONIBLES/;
+  const FORM_PAGES = ["Province", "Trámite", "Personal data", "Office", "Contact", "Slots", "Confirm"];
+  const onFormPage = () => FORM_PAGES.includes(pageType()) || !!document.querySelector("select:not([hidden])");
+  const noCitasPage = () => !!C && !onFormPage() && (C.patterns.noCitas || NO_CITAS).test(norm(bodyText()));
+
   function siteMessage() {
     const txt = norm(bodyText());
-    for (const m of C.knownMessages) if (m.pattern.test(txt)) return { known: true, text: m.label };
+    const form = onFormPage();
+    for (const m of C.knownMessages) {
+      if (form && NO_CITAS.test(m.pattern.source)) continue; // a notice, not the answer
+      if (m.pattern.test(txt)) return { known: true, text: m.label };
+    }
     const box = firstVisible(C.selectors.messageBoxes);
     const t = box ? String(box.innerText || box.textContent || "").replace(/\s+/g, " ").trim() : "";
     return { known: false, text: t.slice(0, 220) };
@@ -502,9 +515,6 @@
 
   // "En este momento no hay citas disponibles" after Solicitar Cita: the site's way of saying
   // no office has appointments. For an office check that is a result (closed), not an error.
-  const NO_CITAS = /NO HAY CITAS DISPONIBLES/;
-  const noCitasPage = () => !!C && !q(C.selectors.office) && ((C.patterns.noCitas || NO_CITAS).test(norm(bodyText())));
-
   function recordNoCitas() {
     const e = current();
     if (!e || !e.provinceText || !e.tramiteText) return;

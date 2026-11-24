@@ -1,6 +1,6 @@
 {
   "name": "citamate",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "private": true,
   "description": "CitaMate browser extension (loads unpacked from this folder). No runtime dependencies; package.json is only for the unit tests.",
   "scripts": {
