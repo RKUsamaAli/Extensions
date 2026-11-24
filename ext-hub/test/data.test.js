@@ -488,6 +488,12 @@ test('office availability: open since, one alert per clock minute, watches, live
     assert.equal(q[0].checkEntryId, null, 'admin has no entry for it');
     assert.ok(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].checkEntryId);
     assert.equal(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].checkPath, '/icpplus/citar?p=2&locale=es', 'direct link to the province');
+    // Checked less than a minute ago: no new check yet, the queue says when
+    const justNow = s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0];
+    assert.equal(justNow.nextCheckAt, s.clock.now() + 60000, 'Check button counts down to a minute after the last check');
+    assert.throws(() => s.availability.claim(ali, 'Albacete', 'Toma de huellas'), (e) => e.code === 'conflict' && /Already checked/.test(e.message));
+    s.clock.advance(60000);
+    assert.equal(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].nextCheckAt, null);
     s.availability.claim(ali, 'Albacete', 'Toma de huellas');
     assert.throws(() => s.availability.claim(sara, 'Albacete', 'Toma de huellas'), (e) => e.code === 'conflict');
     assert.equal(s.availability.queue(sara, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].claim.by, 'ali');

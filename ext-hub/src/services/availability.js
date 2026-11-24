@@ -22,6 +22,7 @@ const STREAK_GAP_MS = 30 * 60 * 1000; // sightings further apart start a new "op
 const FRESH_MS = 15 * 60 * 1000; // a result is "current" this long
 const ALERT_MAX_AGE_MS = 10 * 60 * 1000; // old sightings uploaded late don't alert
 const CLAIM_MS = 3 * 60 * 1000; // "being checked" lasts this long
+const RECHECK_MS = 60 * 1000; // a pair just checked can't be checked again for this long (spares the site)
 const HISTORY_DAYS = 30;
 
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -205,6 +206,8 @@ function createAvailability({ db, clock }) {
                     watched: watched.has(r.key),
                     claim: claim ? { by: claim.username, mine: claim.user_id === actor.id, until: claim.until } : null,
                     checkEntryId: pick ? pick.id : null,
+                    // Checked less than a minute ago: the Check button counts down to this.
+                    nextCheckAt: s && s.lastChecked + RECHECK_MS > clock.now() ? s.lastChecked + RECHECK_MS : null,
                     // The province option's value is the site's own direct link to that province
                     // (e.g. /icpplus/citar?p=2&locale=es): the check starts on the trámite page.
                     checkPath: pick && /^\/icp\w*\/citar\?p=\d+(&locale=\w+)?$/.test(String(pick.province || '')) ? pick.province : null
@@ -222,6 +225,9 @@ function createAvailability({ db, clock }) {
         if (cur && cur.until > clock.now() && cur.user_id !== actor.id) {
             throw E.conflict(`${cur.username} is checking this right now.`);
         }
+        const last = latestByPair().get(pairKey(province, tramite));
+        const wait = last ? last.lastChecked + RECHECK_MS - clock.now() : 0;
+        if (wait > 0) throw E.conflict(`Already checked ${Math.round((clock.now() - last.lastChecked) / 1000)} s ago – you can check again in ${Math.ceil(wait / 1000)} s.`);
         const until = clock.now() + CLAIM_MS;
         db.prepare('INSERT OR REPLACE INTO cm_check_claims (province, tramite, user_id, entry_id, until) VALUES (?, ?, ?, ?, ?)').run(province, tramite, actor.id, str(entryId, 100) || null, until);
         return { until };
