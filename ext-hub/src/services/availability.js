@@ -204,7 +204,10 @@ function createAvailability({ db, clock }) {
                     offices: s ? s.offices : [],
                     watched: watched.has(r.key),
                     claim: claim ? { by: claim.username, mine: claim.user_id === actor.id, until: claim.until } : null,
-                    checkEntryId: pick ? pick.id : null
+                    checkEntryId: pick ? pick.id : null,
+                    // The province option's value is the site's own direct link to that province
+                    // (e.g. /icpplus/citar?p=2&locale=es): the check starts on the trámite page.
+                    checkPath: pick && /^\/icp\w*\/citar\?p=\d+(&locale=\w+)?$/.test(String(pick.province || '')) ? pick.province : null
                 };
             })
             .sort((a, b) => (a.lastChecked || 0) - (b.lastChecked || 0) || a.province.localeCompare(b.province));

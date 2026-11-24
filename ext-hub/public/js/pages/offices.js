@@ -5,7 +5,8 @@ import { get, post } from "../api.js";
 import { el, table, toast, toastError, badge, fmtTime, ago } from "../ui.js";
 import { pageHead } from "../state.js";
 
-export const CITA_START = "https://icp.administracionelectronica.gob.es/icpplus/index.html";
+export const CITA_ORIGIN = "https://icp.administracionelectronica.gob.es";
+export const CITA_START = CITA_ORIGIN + "/icpplus/index.html";
 const hm = (t) => (t ? new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "");
 const short = (s) => String(s || "").split(",")[0].trim();
 
@@ -64,8 +65,9 @@ export default async function officesPage() {
       toastError(e);
       return load();
     }
-    window.open(`${CITA_START}#citamate-check=${encodeURIComponent(r.checkEntryId)}`, "_blank", "noopener");
-    toast("Cita site opened in a new tab: press Alt+Enter on each page and solve the captcha. CitaMate stops at the office list.", "ok");
+    const start = r.checkPath ? CITA_ORIGIN + r.checkPath : CITA_START; // straight to the province when known
+    window.open(`${start}#citamate-check=${encodeURIComponent(r.checkEntryId)}`, "_blank", "noopener");
+    toast("Cita site opened in a new tab: CitaMate goes through the pages by itself – you only solve the captcha. It stops at the office list.", "ok");
     load();
   }
 
@@ -113,7 +115,7 @@ export default async function officesPage() {
     pageHead("Offices to check", el("button", { type: "button", class: "btn", testid: "offices-refresh", onclick: () => load() }, "Refresh")),
     el("div", { class: "card how" },
       el("strong", null, "How a check works: "),
-      "click Check → the cita site opens with CitaMate in office-check mode → press Alt+Enter on each page and solve the captcha → CitaMate stops at the office list without booking. Everyone watching gets an alert, and matching entries show “Office open”."),
+      "click Check → the cita site opens at the province with CitaMate in office-check mode → CitaMate fills and continues each page by itself → you solve the captcha → it stops at the office list without booking. Everyone watching gets an alert, and matching entries show “Office open”."),
     box,
   );
   await load();

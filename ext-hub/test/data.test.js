@@ -478,7 +478,7 @@ test('office availability: open since, one alert per clock minute, watches, live
     assert.equal(s.availability.latestByPair().get(s.availability.pairKey('Albacete', 'Toma de huellas')).status, 'closed');
 
     // Queue: one row per pair from everyone's active entries; claims; a check needs your own entry
-    s.profiles.create(ali, entry('E1', { provinceText: 'Albacete', tramiteText: 'Toma de huellas', office: '1', officeText: 'CNP Albacete' }));
+    s.profiles.create(ali, entry('E1', { province: '/icpplus/citar?p=2&locale=es', provinceText: 'Albacete', tramiteText: 'Toma de huellas', office: '1', officeText: 'CNP Albacete' }));
     s.profiles.create(sara, entry('E2', { provinceText: 'Albacete', tramiteText: 'Toma de huellas' }));
     s.profiles.create(sara, entry('E3', { provinceText: 'Madrid', tramiteText: 'Recogida', status: 'booked' }));
     const q = s.availability.queue(admin, s.profiles.list({ ownerId: null }, { activeOnly: true }));
@@ -487,6 +487,7 @@ test('office availability: open since, one alert per clock minute, watches, live
     assert.deepEqual(q[0].wanted.sort(), ['Any office', 'CNP Albacete']);
     assert.equal(q[0].checkEntryId, null, 'admin has no entry for it');
     assert.ok(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].checkEntryId);
+    assert.equal(s.availability.queue(ali, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].checkPath, '/icpplus/citar?p=2&locale=es', 'direct link to the province');
     s.availability.claim(ali, 'Albacete', 'Toma de huellas');
     assert.throws(() => s.availability.claim(sara, 'Albacete', 'Toma de huellas'), (e) => e.code === 'conflict');
     assert.equal(s.availability.queue(sara, s.profiles.list({ ownerId: null }, { activeOnly: true }))[0].claim.by, 'ali');
